@@ -1,5 +1,5 @@
 export const checkLayoutBeforeInit = () => {
-	console.log("Проверили статус запуска");
+	console.log("Проверяем статус запуска");
 	chrome.tabs.query({ active: true }, (tabs) => {
 		const tab = tabs[0];
 		if (tab) {

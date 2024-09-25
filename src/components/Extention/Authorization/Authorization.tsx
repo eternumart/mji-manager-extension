@@ -50,7 +50,7 @@ const ActivateForm = () => {
 const LoginForm = () => {
 	const logIn = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		const currentIP = `${apiConfig.address.ip}:${apiConfig.address.port}`;
+		const currentIP = `${apiConfig.address.protocol}${apiConfig.address.ip}/`;
 		const loginForm = document.querySelector("#login-form") as HTMLFormElement;
 		const login = loginForm.querySelector("#login") as HTMLInputElement;
 		const password = loginForm.querySelector("#password") as HTMLInputElement;
@@ -80,6 +80,7 @@ const LoginForm = () => {
 			}
 		});
 		if (login.value !== "" && password.value !== "") {
+			console.log("Step 1. Отправка запроса на сервер")
 			chrome.runtime.sendMessage({
 				contentScriptQuery: "logIn",
 				data: {

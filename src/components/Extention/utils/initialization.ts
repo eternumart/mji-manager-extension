@@ -4,19 +4,11 @@ import { launchApp } from "./launchApp";
 export const initialization = async (currentFio: string, login: string, loginIsPossible: boolean, launchStatus: boolean, currentIP: string) => {
 	console.log("Запуск приложения");
 	let appData: any;
-    appData = getAppData(currentIP);
-    console.log(appData);
-	// function getAppDataFromServer() {
-	// 	appData = getAppData(currentIP);
-	// 	if (appData) {
-	// 		setTimeout(getAppDataFromServer, 1000);
-	// 	} else {
-	// 		console.log(appData);
-	// 		init();
-	// 	}
-	// }
+	appData = await getAppData(currentIP);
+	console.log(appData);
 
 	function init() {
+		debugger
 		document.querySelector(".server-error")?.classList.remove("server-error_visible");
 		chrome.tabs.query({ active: true }, (tabs) => {
 			const tab = tabs[0];
@@ -29,6 +21,5 @@ export const initialization = async (currentFio: string, login: string, loginIsP
 			}
 		});
 	}
-    init();
-	//getAppDataFromServer();
+	appData ?? init();
 };

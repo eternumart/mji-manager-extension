@@ -2,7 +2,7 @@ import { apiConfig } from "../apiConfig";
 
 console.log("DOMEvaluator.ts loaded");
 
-const baseUrl = `http://${apiConfig.address.ip}:${apiConfig.address.port}`
+const baseUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}/`
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 	if (request.contentScriptQuery == "activation") {
@@ -43,6 +43,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 	// 	return true;
 	// }
 	if (request.contentScriptQuery == "logIn") {
+		
+		if(!request.data.login || !request.data.password){
+			return;
+		}
 		console.log("logIn flow from extention started", `${baseUrl}${apiConfig.routes.api.login}`);
 		await fetch(`${baseUrl}${apiConfig.routes.api.login}`, {
 			method: "POST",
@@ -89,7 +93,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 				});
 			});
 	}
-	if (request.contentScriptQuery == "appdata") {
+	if (request.contentScriptQuery == "appData") {
 		await fetch(`${baseUrl}${apiConfig.routes.api.getAppData}`, {
 			method: "POST",
 			headers: {
@@ -102,14 +106,14 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 				console.log("Пришел ответ с данными");
 				chrome.runtime.sendMessage({
 					data: res,
-					contentScriptQuery: "appdata",
+					contentScriptQuery: "appData",
 				});
 			})
 			.catch((err) => {
 				chrome.runtime.sendMessage({
 					contentScriptQuery: "Error",
 					error: `${err}`,
-					flow: "appdata",
+					flow: "appData",
 				});
 			});
 	}

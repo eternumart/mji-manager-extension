@@ -1,8 +1,9 @@
 export const apiConfig = {
 	address: {
 		protocol: "http://",
-		ip: "192.168.0.28",
-		port: 80,
+		ip: "mjimanager.ru",
+		devPort: 3000, 
+		prodPort: 80,
 	},
 	routes: {
 		pages: {
@@ -26,6 +27,7 @@ export const apiConfig = {
             changeAccount: "api/change-account",
             deactivateAccount: "api/deactivate-account",
             getAppData: "api/get-app-data",
+			checResponseFromServer: "api/check-response-from-server",
 		},
 	},
 };

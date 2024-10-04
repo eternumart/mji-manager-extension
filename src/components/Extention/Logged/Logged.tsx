@@ -1,8 +1,6 @@
 import { logOut } from "../utils/logOut";
 
 export const Logged = () => {
-	const logOutButton = document.querySelector('.logged__button') as HTMLButtonElement;
-	logOutButton.addEventListener('click', logOut)
 	return (
 		<>
 			<div className='logged logged_hidden'>
@@ -11,7 +9,7 @@ export const Logged = () => {
 					<button className='logged__login'>#####</button>
 				</div>
 				<div className='logged__bottom'>
-					<button className='logged__button'>Выйти</button>
+					<button className='logged__button' onClick={logOut}>Выйти</button>
 				</div>
 			</div>
 			<div className='account account_hidden'>

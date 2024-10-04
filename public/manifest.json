@@ -14,7 +14,8 @@
 	"permissions": ["scripting", "activeTab", "storage", "webRequest", "debugger"],
 	"host_permissions": ["http://*/*", "https://*/*"],
 	"background": {
-		"service_worker": "./static/js/content.js"
+		"service_worker": "./static/js/content.js",
+		"type": "module"
 	},
 	"content_scripts": [
 		{

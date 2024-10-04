@@ -13,7 +13,7 @@ export const apiConfig = {
             defectEditor: "defect-editor",
 		},
 		api: {
-			registration: "/auth/registration",
+			registration: "auth/registration",
 			login: "auth/login",
 			activation: "auth/activation",
             getApp: "api/get-app", 

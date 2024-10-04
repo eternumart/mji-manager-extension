@@ -1,4 +1,8 @@
+import { logOut } from "../utils/logOut";
+
 export const Logged = () => {
+	const logOutButton = document.querySelector('.logged__button') as HTMLButtonElement;
+	logOutButton.addEventListener('click', logOut)
 	return (
 		<>
 			<div className='logged logged_hidden'>

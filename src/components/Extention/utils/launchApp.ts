@@ -1,5 +1,6 @@
-export const launchApp = (currentFio: string, login: string, loginIsPossible: boolean, launchStatus: boolean, appData: any) => {
+export const launchApp = (currentFio: string, login: string, loginIsPossible: boolean, launchStatus: boolean, appDataString: any) => {
 	debugger;
+	const appData = JSON.parse(appDataString);
 	// Хранилище всех переменных приложения
 	const appVariables: any = {};
 	const resultsDefectsInputs: any = {

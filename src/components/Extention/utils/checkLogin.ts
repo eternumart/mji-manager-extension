@@ -1,6 +1,6 @@
 import { changePopupState } from "./changePopupState";
 import { checkLayoutBeforeInit } from "./checkLayoutBeforeInit";
-import { initialization } from "./initialization";
+import { getAppData } from "./getAppData";
 
 export const checkLogin = (log: string, loginIsPossible: boolean, launchStatus: boolean, currentIP: string) => {
 	const loggedLogin = document.querySelector(".logged__login") as HTMLButtonElement;
@@ -26,9 +26,15 @@ export const checkLogin = (log: string, loginIsPossible: boolean, launchStatus: 
 					currentLogin = result.logged;
 				}
 			}
+			const userData = {
+				currentFio: currentFio,
+				currentLogin: currentLogin,
+				loginIsPossible: loginIsPossible,
+				launchStatus: launchStatus,
+			}
 			changePopupState("logged");
 			checkLayoutBeforeInit();
-			initialization(currentFio, currentLogin, loginIsPossible, launchStatus, currentIP);
+			getAppData(currentIP, userData);
 		}
 	});
 };

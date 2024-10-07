@@ -3,11 +3,11 @@ import { randomFio } from "../utils/randomFio";
 import { checkLogin } from "../utils/checkLogin";
 import { initLoader } from "../utils/loader";
 import { apiConfig } from "../../../apiConfig";
+import { getCurrentIp } from "../utils/getCurrentIp";
 
 export const LoginForm = () => {
 	const logIn = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		const currentIP = `${apiConfig.address.protocol}${apiConfig.address.ip}/`;
 		const loginForm = document.querySelector("#login-form") as HTMLFormElement;
 		const login = loginForm.querySelector("#login") as HTMLInputElement;
 		const password = loginForm.querySelector("#password") as HTMLInputElement;
@@ -17,7 +17,7 @@ export const LoginForm = () => {
 		console.log("Запуск авторизации");
 		//initLoader(loginForm, true);
 		chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-			if (request.contentScriptQuery === "logIn") {
+			if (request.contentScriptQuery === "logIn-response") {
 				let fio = "";
 				if (request.data.loginIsPossible === true && request.data.activated) {
 					if (request.data.fio) {
@@ -26,7 +26,7 @@ export const LoginForm = () => {
 						fio = randomFio();
 					}
 					chrome.storage.local.set({ logged: `${login.value}`, fio: `${fio}` }).then(() => {
-						checkLogin(login.value, request.data.loginIsPossible, true, currentIP);
+						checkLogin(login.value, request.data.loginIsPossible, true, getCurrentIp() as any);
 						//initLoader(loginForm, false);
 					});
 				} else {
@@ -44,7 +44,7 @@ export const LoginForm = () => {
 					login: login.value,
 					password: password.value,
 				},
-				url: `${currentIP}logIn`,
+				url: `logIn`,
 			});
 		} else {
 			errorActivation.classList.add("auth__error_visible");

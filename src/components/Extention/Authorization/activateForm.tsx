@@ -2,11 +2,12 @@ import React from "react";
 import { checkLogin } from "../utils/checkLogin";
 import { initLoader } from "../utils/loader";
 import { apiConfig } from "../../../apiConfig";
+import { getCurrentIp } from "../utils/getCurrentIp";
 
 export const ActivateForm = () => {
 	const activate = (e: React.FormEvent<HTMLFormElement>) => {
 		console.log("Запуск активации продукта");
-		const currentIP = `${apiConfig.address.protocol}${apiConfig.address.ip}/`;
+		const currentIP = getCurrentIp() as any;
 		const activateForm = document.querySelector("#login-form") as HTMLFormElement;
 		const login = activateForm.querySelector("#login") as HTMLInputElement;
 		const password = activateForm.querySelector("#password") as HTMLInputElement;
@@ -39,7 +40,7 @@ export const ActivateForm = () => {
 					key: activateFormKey.value,
 					//usid: usid,
 				},
-				url: `${currentIP}activation`,
+				url: `activation`,
 			});
 		} else {
 			activateFormKeyError.classList.add("auth__error_visible");

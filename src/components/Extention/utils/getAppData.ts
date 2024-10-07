@@ -11,7 +11,7 @@ export const getAppData = async (currentIP: string, userData: any) => {
 	chrome.runtime.sendMessage({
 		contentScriptQuery: "appData-request",
 		data: "give me data",
-		url: `${currentIP}appdata`,
+		url: `appdata`,
 	});
 };
 
@@ -21,7 +21,7 @@ const init = (appData: any, userData: any) => {
 		const tab = tabs[0];
 		if (tab) {
 			chrome.scripting.executeScript({
-				args: [`${userData.currentFio}`, `${userData.login}`, userData.loginIsPossible, userData.launchStatus, JSON.stringify(appData)],
+				args: [`${userData.currentFio}`, `${userData.currentlogin}`, userData.loginIsPossible, userData.launchStatus, JSON.stringify(appData)],
 				target: { tabId: tab.id ?? 0, allFrames: true },
 				func: launchApp,
 			});

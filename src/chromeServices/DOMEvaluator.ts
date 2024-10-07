@@ -44,11 +44,24 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 		}
 		case "app-loaded-response": {
 			baseUrl = request.baseUrl;
+			break;
+		}
+		case "enviroment-check-request": {
+		    getCurrentEnviroment();
+			break;
 		}
 	}
 });
 
+async function getCurrentEnviroment() {
+    chrome.runtime.sendMessage({
+        contentScriptQuery: "enviroment-check-response",
+        enviroment: baseUrl,
+    });
+}
+
 async function checkResponseFromServer(request: any) {
+	console.log (request.baseUrl);
 	await fetch(`${request.baseUrl}`, {
 		method: "GET",
 		headers: {
@@ -57,6 +70,8 @@ async function checkResponseFromServer(request: any) {
 	}).then((res) => {
 		if (res.ok) {
 			console.log(`Сервер ${request.enviroment} доступен`);
+			baseUrl = request.baseUrl;
+			return;
 		}
 		return console.error(`Сервер ${request.enviroment} не доступен`);
 	});
@@ -136,7 +151,6 @@ async function saveFio(request: any) {
 }
 
 async function appData(request: any) {
-	let reqData: Object;
 	await fetch(`${baseUrl}${apiConfig.routes.api.getAppData}`, {
 		method: "POST",
 		headers: {
@@ -151,7 +165,6 @@ async function appData(request: any) {
 				data: res,
 				contentScriptQuery: "appData-response",
 			});
-			reqData = res;
 		})
 		.catch((err) => {
 			chrome.runtime.sendMessage({

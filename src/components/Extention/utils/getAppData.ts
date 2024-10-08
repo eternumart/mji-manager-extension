@@ -1,4 +1,4 @@
-import { launchApp } from "./launchApp";
+import { initApp } from "./launchApp";
 
 export const getAppData = async (currentIP: string, userData: any) => {
 	console.log("Запрашиваем данные приложения");
@@ -16,6 +16,7 @@ export const getAppData = async (currentIP: string, userData: any) => {
 };
 
 const init = (appData: any, userData: any) => {
+	console.log(appData)
 	document.querySelector(".server-error")?.classList.remove("server-error_visible");
 	chrome.tabs.query({ active: true }, (tabs) => {
 		const tab = tabs[0];
@@ -23,7 +24,7 @@ const init = (appData: any, userData: any) => {
 			chrome.scripting.executeScript({
 				args: [`${userData.currentFio}`, `${userData.currentlogin}`, userData.loginIsPossible, userData.launchStatus, JSON.stringify(appData)],
 				target: { tabId: tab.id ?? 0, allFrames: true },
-				func: launchApp,
+				func: initApp,
 			});
 		}
 	});

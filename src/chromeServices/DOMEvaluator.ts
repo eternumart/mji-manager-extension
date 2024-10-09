@@ -53,6 +53,24 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 	}
 });
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if (message.action === 'fetchScript') {
+	  fetch(`${baseUrl}server/appData/appBuild.js`)
+		.then(response => response.text())
+		.then(scriptContent => {
+		  // Отправляем полученный контент обратно
+		  sendResponse({ scriptContent });
+		})
+		.catch(error => {
+		  console.error('Ошибка при загрузке файла с бэкенда:', error);
+		  sendResponse({ error: 'Ошибка при загрузке файла с бэкенда' });
+		});
+	  
+	  // Возвращаем true, чтобы позволить асинхронный sendResponse
+	  return true;
+	}
+  });
+
 async function getCurrentEnviroment() {
     chrome.runtime.sendMessage({
         contentScriptQuery: "enviroment-check-response",

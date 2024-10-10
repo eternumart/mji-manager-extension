@@ -1,6 +1,6 @@
 import { changePopupState } from "./changePopupState";
 import { checkLayoutBeforeInit } from "./checkLayoutBeforeInit";
-import { getAppData } from "./getAppData";
+import { getAppData } from "./launchApp";
 
 export const checkLogin = (log: string, loginIsPossible: boolean, launchStatus: boolean, currentIP: string) => {
 	const loggedLogin = document.querySelector(".logged__login") as HTMLButtonElement;

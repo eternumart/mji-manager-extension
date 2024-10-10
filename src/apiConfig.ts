@@ -28,6 +28,7 @@ export const apiConfig = {
             deactivateAccount: "api/deactivate-account",
             getAppData: "api/get-app-data",
 			checResponseFromServer: "api/check-response-from-server",
+			getScripts: "api/get-scripts"
 		},
 	},
 };

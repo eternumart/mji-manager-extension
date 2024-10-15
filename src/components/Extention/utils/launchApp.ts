@@ -1,6 +1,9 @@
+import { launchApp } from "../../Popup/index";
+
 let scriptContent: string;
 let appDataIsLoaded: boolean = false;
 let uploadedAppData: any;
+let lauchStarted: boolean = false;
 
 export const getAppData = async (currentIP: string, userData: any) => {
   console.log("Запрашиваем данные приложения");
@@ -16,7 +19,7 @@ export const getAppData = async (currentIP: string, userData: any) => {
         if (appDataIsLoaded) {
           console.log("Загрузка скрипта приложения");
           scriptContent = request.scriptContent;
-          init(uploadedAppData, userData);
+          init(uploadedAppData, userData, scriptContent.toString());
         }
         break;
       }
@@ -32,28 +35,22 @@ export const getAppData = async (currentIP: string, userData: any) => {
   });
 };
 
-const init = (appData: any, userData: any) => {
-  debugger;
+const init = (appData: any, userData: any, script: string) => {
+  if (lauchStarted) {
+    return;
+  }
   console.log(userData);
-  console.log(appData);
+  console.log(scriptContent);
   document.querySelector(".server-error")?.classList.remove("server-error_visible");
+  lauchStarted = true;
   chrome.tabs.query({ active: true }, (tabs) => {
     const tab = tabs[0];
     if (tab) {
       chrome.scripting.executeScript({
-        args: [`${userData.currentFio}`, `${userData.currentlogin}`, userData.loginIsPossible, userData.launchStatusm],
+        args: [`${userData.currentFio}`, `${userData.currentLogin}`, userData.loginIsPossible, userData.launchStatus, appData],
         target: { tabId: tab.id ?? 0, allFrames: true },
-        func: initApp,
+        func: launchApp,
       });
     }
   });
-};
-
-// Ваша функция initApp
-export const initApp = (currentFio: string, login: string, loginIsPossible: boolean, launchStatus: boolean) => {
-  debugger;
-  console.log(currentFio, login, loginIsPossible, launchStatus);
-  //document.querySelector("head")?.insertAdjacentHTML("beforeend", `<script src="http://mjimanager.ru:3000/public/appScript.js"></script>`);
-  document.querySelector("body")?.insertAdjacentHTML("beforeend", `<script>${scriptContent}</script>`);
-  //launchApp(currentFio, login, loginIsPossible, launchStatus);
 };

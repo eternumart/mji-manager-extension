@@ -1,4 +1,8 @@
 {
     "Codegeex.GenerationPreference": "automatic",
-    "prettier.printWidth": 250
+    "prettier.printWidth": 250,
+    "Codegeex.CompletionDelay": 0.3,
+    "Codegeex.Chat.fontSize": 10,
+    "Codegeex.CommitMessage.LanguagePreference": "English",
+    "Codegeex.RepoIndex": true
 }

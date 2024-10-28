@@ -1,9 +1,6 @@
-import { appVariables } from "./constants";
-
 export const openFakeSelect = (selectList: any) => {
-    const appVariables: appVariables = {};
-    if (appVariables.htmlBody.querySelector(".fakeSelect_opened")) {
-        closeFakeSelect(appVariables.htmlBody.querySelector(".fakeSelect_opened"));
+    if (window.appVariables.htmlBody.querySelector(".fakeSelect_opened")) {
+        closeFakeSelect(window.appVariables.htmlBody.querySelector(".fakeSelect_opened"));
     }
     selectList.classList.add("fakeSelect_opened");
 }

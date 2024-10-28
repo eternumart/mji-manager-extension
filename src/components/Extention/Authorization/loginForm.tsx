@@ -6,7 +6,7 @@ import { apiConfig } from "../../../apiConfig";
 import { getCurrentIp } from "../utils/getCurrentIp";
 
 export const LoginForm = () => {
-	const logIn = (e: React.FormEvent<HTMLFormElement>) => {
+	const logIn = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const loginForm = document.querySelector("#login-form") as HTMLFormElement;
 		const login = loginForm.querySelector("#login") as HTMLInputElement;
@@ -16,7 +16,7 @@ export const LoginForm = () => {
 
 		console.log("Запуск авторизации");
 		//initLoader(loginForm, true);
-		chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+		await chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 			if (request.contentScriptQuery === "logIn-response") {
 				let fio = "";
 				if (request.data.loginIsPossible === true && request.data.activated) {
@@ -26,7 +26,7 @@ export const LoginForm = () => {
 						fio = randomFio();
 					}
 					chrome.storage.local.set({ logged: `${login.value}`, fio: `${fio}` }).then(() => {
-						checkLogin(login.value, request.data.loginIsPossible, true, getCurrentIp() as any);
+						checkLogin(login.value, request.data.loginIsPossible, true);
 						//initLoader(loginForm, false);
 					});
 				} else {

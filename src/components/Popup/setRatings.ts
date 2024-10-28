@@ -1,54 +1,52 @@
-import { appVariables, allRatesPercentsInputs } from "./constants";
 import { searchAllInputs } from "./searchAllInputs";
 import { clickGenerator } from "./clickGenerator";
-import { appData } from ".";
 
 export const setRatings = () => {
-    if (!appData.availableFunctions.setRatings) {
+    if (!window.appData.functions.setRatings) {
         return;
     }
-    const ratesData = appData.ratesData;
+    const ratesData = window.appData.ratesData;
     searchAllInputs();
 
-    for (let key in appVariables) {
+    for (let key in window.appVariables) {
         if (key.includes("Ocenka") && !key.includes("Proshl")) {
             const name = key.replace("Ocenka", "");
-            if (!allRatesPercentsInputs[name]) {
-                allRatesPercentsInputs[name] = new Object();
+            if (!window.allRatesPercentsInputs[name]) {
+                window.allRatesPercentsInputs[name] = new Object();
             }
-            allRatesPercentsInputs[name]["Ocenka"] = appVariables[key];
+            window.allRatesPercentsInputs[name]["Ocenka"] = window.appVariables[key];
         }
         if (key.includes("Percent")) {
             const name = key.replace("Percent", "");
-            if (!allRatesPercentsInputs[name]) {
-                allRatesPercentsInputs[name] = new Object();
+            if (!window.allRatesPercentsInputs[name]) {
+                window.allRatesPercentsInputs[name] = new Object();
             }
-            allRatesPercentsInputs[name]["Percent"] = appVariables[key];
-            allRatesPercentsInputs[name]["Group"] = appVariables[key].closest(".groupBorder").querySelector("legend").textContent;
+            window.allRatesPercentsInputs[name]["Percent"] = window.appVariables[key];
+            window.allRatesPercentsInputs[name]["Group"] = window.appVariables[key].closest(".groupBorder").querySelector("legend").textContent;
         }
         if (key.includes("Name")) {
             const name = key.replace("Name", "");
-            if (!allRatesPercentsInputs[name]) {
-                allRatesPercentsInputs[name] = new Object();
+            if (!window.allRatesPercentsInputs[name]) {
+                window.allRatesPercentsInputs[name] = new Object();
             }
-            allRatesPercentsInputs[name]["name"] = appVariables[key];
+            window.allRatesPercentsInputs[name]["name"] = window.appVariables[key];
         }
     }
 
-    for (let key in allRatesPercentsInputs) {
-        if (!allRatesPercentsInputs[key]["Percent"]) {
+    for (let key in window.allRatesPercentsInputs) {
+        if (!window.allRatesPercentsInputs[key]["Percent"]) {
             break;
         }
-        const dataElement = allRatesPercentsInputs[key]["Ocenka"].parentElement.nextElementSibling;
+        const dataElement = window.allRatesPercentsInputs[key]["Ocenka"].parentElement.nextElementSibling;
         const listItems = dataElement.querySelectorAll("li");
 
-        allRatesPercentsInputs[key]["Percent"].addEventListener("change", (evt: any) => {
+        window.allRatesPercentsInputs[key]["Percent"].addEventListener("change", (evt: any) => {
             checkPercentValidity(evt.target.value, evt.target);
             checkRatePercent(evt.target.value, "Percent", evt.target, dataElement);
         });
         listItems.forEach((item: any) => {
             item.addEventListener("click", () => {
-                checkRatePercent(item.textContent, "Ocenka", item, allRatesPercentsInputs[key]["Percent"]);
+                checkRatePercent(item.textContent, "Ocenka", item, window.allRatesPercentsInputs[key]["Percent"]);
             });
         });
     }
@@ -62,18 +60,18 @@ export const setRatings = () => {
             const valueToNumber = Number(value);
             conditions = ratesData[groupName][rowName];
 
-            if (appData.availableFunctions.algorythms) {
+            if (window.appData.availableFunctions.algorythms) {
                 for (let ocenka in conditions) {
                     if (conditions[ocenka] === "algorythm A") {
-                        algorythmA(allRatesPercentsInputs, input, groupName);
+                        algorythmA(window.allRatesPercentsInputs, input, groupName);
                         return;
                     }
                     if (conditions[ocenka] === "algorythm B") {
-                        algorythmB(allRatesPercentsInputs, input, groupName);
+                        algorythmB(window.allRatesPercentsInputs, input, groupName);
                         return;
                     }
                     if (conditions[ocenka] === "algorythm C") {
-                        algorythmC(allRatesPercentsInputs, input, groupName);
+                        algorythmC(window.allRatesPercentsInputs, input, groupName);
                         return;
                     }
                 }
@@ -174,7 +172,7 @@ export const setRatings = () => {
     }
 
     function algorythmA(rowsInputs: any, input: any, groupName: any) {
-        if (!appData.availableFunctions.algorythms) {
+        if (!window.appData.availableFunctions.algorythms) {
             return;
         }
         const rates = [];
@@ -201,7 +199,7 @@ export const setRatings = () => {
 
         if (rates.find((rate) => rate["Ocenka"] === "А")) {
             resultRate = "А";
-            clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+            clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
             return;
         }
         if (resultRate !== "") {
@@ -212,13 +210,13 @@ export const setRatings = () => {
                 case "Стропильная система":
                     if (rate.Ocenka === "ОГР") {
                         resultRate = "ОГР";
-                        clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+                        clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
                     }
                     return;
                 case "Покрытие ж/б":
                     if (rate.Ocenka === "ОГР") {
                         resultRate = "ОГР";
-                        clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+                        clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
                     }
                     return;
             }
@@ -231,21 +229,21 @@ export const setRatings = () => {
                 case "Кровля":
                     if (rate.Ocenka === "Н") {
                         resultRate = "Н";
-                        clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+                        clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
                         return;
                     }
                     break;
                 case "Свесы":
                     if (rate.Ocenka === "Н") {
                         resultRate = "Н";
-                        clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+                        clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
                         return;
                     }
                     break;
                 case "Чердак":
                     if (rate.Ocenka === "Н") {
                         resultRate = "Н";
-                        clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+                        clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
                         return;
                     }
                     break;
@@ -255,11 +253,11 @@ export const setRatings = () => {
             return;
         }
         resultRate = "Р";
-        clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+        clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
     }
 
     function algorythmB(rowsInputs: any, input: any, groupName: any) {
-        if (!appData.availableFunctions.algorythms) {
+        if (!window.appData.availableFunctions.algorythms) {
             return;
         }
         const rates = [];
@@ -286,7 +284,7 @@ export const setRatings = () => {
 
         if (rates.find((rate) => rate["Ocenka"] === "А")) {
             resultRate = "А";
-            clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+            clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
             return;
         }
         if (resultRate !== "") {
@@ -294,18 +292,18 @@ export const setRatings = () => {
         }
         if (rates.find((rate) => rate["Ocenka"] === "ОГР")) {
             resultRate = "ОГР";
-            clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+            clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
             return;
         }
         if (resultRate !== "") {
             return;
         }
         resultRate = "Р";
-        clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+        clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
     }
 
     function algorythmC(rowsInputs: any, input: any, groupName: any) {
-        if (!appData.availableFunctions.algorythms) {
+        if (!window.appData.availableFunctions.algorythms) {
             return;
         }
         const rates = [];
@@ -332,7 +330,7 @@ export const setRatings = () => {
 
         if (rates.find((rate) => rate["Ocenka"] === "А")) {
             resultRate = "А";
-            clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+            clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
             return;
         }
         if (resultRate !== "") {
@@ -340,13 +338,13 @@ export const setRatings = () => {
         }
         if (rates.find((rate) => rate["Ocenka"] === "Н")) {
             resultRate = "Н";
-            clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+            clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
             return;
         }
         if (resultRate !== "") {
             return;
         }
         resultRate = "Р";
-        clickGenerator(appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
+        clickGenerator(window.appVariables[`${rowNameTranslite}Ocenka`], resultRate, true);
     }
 }

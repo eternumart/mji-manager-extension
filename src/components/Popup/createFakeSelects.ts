@@ -1,27 +1,25 @@
-import { appVariables, resultsDefectsInputs } from "./constants";
 import { buttonError } from "./buttonError";
 import { searchAllInputs } from "./searchAllInputs";
 import { openFakeSelect, closeFakeSelect } from "./openCloseFakeSelect";
 import { splitBySentences } from "./splitBySentences";
-import { appData } from ".";
 
 export const createFakeSelects = () => {
-    if(!appData.availableFunctions.createFakeSelects) {
+    if(!window.appData.functions.createFakeSelects) {
         return;
     }
-    if (!buttonError(appVariables.copyButton, appVariables.currentPage, "main", "Всплывающие поля")) {
+    if (!buttonError(window.appVariables.copyButton, window.appVariables.currentPage, "main", "Всплывающие поля")) {
         return;
     }
 
-    const fakeSelectList = appData.appLayout.fakeSelectList;
-	const selectsValues = appData.defectsData;
+    const fakeSelectList = window.appData.appLayout.fakeSelectList;
+	const selectsValues = window.appData.defectsData;
 
     // Поиск полей отчета
     searchAllInputs();
 
     let counterItems = 1;
 
-    resultsDefectsInputs.inputs.forEach((input: any) => {
+    window.resultsDefectsInputs.inputs.forEach((input: any) => {
         const groupTable = input.closest(".groupBorder");
         const container = input.parentElement;
         const rowName = container.previousElementSibling.querySelector("span").textContent;
@@ -47,11 +45,11 @@ export const createFakeSelects = () => {
                     });
                     let listOptions, conditionNode, objAddress, objAddressOpt, objAddressGroup, objAddressRow;
                     try {
-                        objAddress = selectsValues[`${groupName}`][`${rowName}`][`conditionNode`]["appVariables"] || selectsValues[`${groupName}`][`${rowName}`][`conditionNode`];
+                        objAddress = selectsValues[`${groupName}`][`${rowName}`][`conditionNode`]["window.appVariables"] || selectsValues[`${groupName}`][`${rowName}`][`conditionNode`];
                         objAddressOpt = objAddress[0];
                         objAddressGroup = objAddress[1];
                         objAddressRow = objAddress[2];
-                        conditionNode = appVariables[objAddressOpt][objAddressGroup][objAddressRow];
+                        conditionNode = window.appVariables[objAddressOpt][objAddressGroup][objAddressRow];
                     } catch {}
 
                     if (conditionNode) {
@@ -104,10 +102,10 @@ export const createFakeSelects = () => {
         }
     });
 
-    appVariables.fakeSelectsButton.textContent = "Создано!";
-    appVariables.fakeSelectsButton.classList.add("main__button_done");
+    window.appVariables.fakeSelectsButton.textContent = "Создано!";
+    window.appVariables.fakeSelectsButton.classList.add("main__button_done");
     setTimeout(() => {
-        appVariables.fakeSelectsButton.textContent = "Всплывающие поля";
-        appVariables.fakeSelectsButton.classList.remove("main__button_done");
+        window.appVariables.fakeSelectsButton.textContent = "Всплывающие поля";
+        window.appVariables.fakeSelectsButton.classList.remove("main__button_done");
     }, 1500);
 }

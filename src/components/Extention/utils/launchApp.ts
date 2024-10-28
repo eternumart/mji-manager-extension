@@ -1,33 +1,16 @@
-import { launchApp } from "../../Popup/index";
-
-let scriptContent: string;
 let appDataIsLoaded: boolean = false;
-let uploadedAppData: any;
 let lauchStarted: boolean = false;
 
-export const getAppData = async (currentIP: string, userData: any) => {
-  console.log("Запрашиваем данные приложения");
+export const getAppData = async (userData: any) => {
+
   chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    switch (request.contentScriptQuery) {
-      case "appData-response": {
-        console.log("Запуск приложения с данными");
+    if (request.contentScriptQuery === "appData-response") {
+        console.log("Данные приложения получены. Запуск.");
         appDataIsLoaded = true;
-        uploadedAppData = request.data;
-        break;
-      }
-      case "fetchScript-response": {
-        if (appDataIsLoaded) {
-          console.log("Загрузка скрипта приложения");
-          scriptContent = request.scriptContent;
-          init(uploadedAppData, userData, scriptContent.toString());
-        }
-        break;
-      }
+        init(request.data, userData);
     }
   });
-  chrome.runtime.sendMessage({
-    contentScriptQuery: "fetchScript-request",
-  });
+  console.log("Запрашиваем данные приложения");
   chrome.runtime.sendMessage({
     contentScriptQuery: "appData-request",
     data: "give me data",
@@ -35,22 +18,36 @@ export const getAppData = async (currentIP: string, userData: any) => {
   });
 };
 
-const init = (appData: any, userData: any, script: string) => {
+const init = (appData: any, userData: any) => {
   if (lauchStarted) {
     return;
   }
-  console.log(userData);
-  console.log(scriptContent);
   document.querySelector(".server-error")?.classList.remove("server-error_visible");
   lauchStarted = true;
   chrome.tabs.query({ active: true }, (tabs) => {
     const tab = tabs[0];
     if (tab) {
-      chrome.scripting.executeScript({
-        args: [`${userData.currentFio}`, `${userData.currentLogin}`, userData.loginIsPossible, userData.launchStatus, appData],
-        target: { tabId: tab.id ?? 0, allFrames: true },
-        func: launchApp,
-      });
+      chrome.scripting.executeScript(
+        {
+          target: { tabId: tab.id ?? 0, allFrames: false },
+          files: ['static/js/popup.js'], // Инжектируем скомпилированный файл
+        },
+        () => {
+          // После успешной инъекции вызываем функцию runApp с необходимыми аргументами
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id ?? 0, allFrames: false },
+            func: (currentFio, login, loginIsPossible, launchStatus, appData) => {
+              // Вызов функции runApp, экспортированной из popup.js
+              if (typeof window.runApp === 'function') {
+                window.runApp(currentFio, login, loginIsPossible, launchStatus, appData);
+              } else {
+                console.error('runApp is not defined.');
+              }
+            },
+            args: [`${userData.currentFio}`, `${userData.currentLogin}`, userData.loginIsPossible, userData.launchStatus, appData],
+          });
+        }
+      );
     }
   });
 };

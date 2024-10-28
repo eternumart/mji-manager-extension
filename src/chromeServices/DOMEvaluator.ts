@@ -1,8 +1,12 @@
 import { apiConfig } from "../apiConfig";
+import { checkStorage } from "../components/Extention/utils/checkStorage";
 
 console.log("DOMEvaluator.ts loaded");
 
 let baseUrl: string;
+
+checkStorage();
+
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   switch (request.contentScriptQuery) {
@@ -18,6 +22,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         return;
       }
       login(request);
+      console.log("logIn-request");
       break;
     }
     case "setUsid-request": {
@@ -26,10 +31,12 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
     case "savefio-request": {
       saveFio(request);
+      console.log("savefio-request")
       break;
     }
     case "appData-request": {
       appData(request);
+      console.log("appData-request")
       break;
     }
     case "checkusid-request": {
@@ -48,10 +55,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
     case "enviroment-check-request": {
       getCurrentEnviroment();
+      console.log("enviroment-check-request")
       break;
-    }
-    case "fetchScript-request": {
-      getScripts();
     }
   }
 });
@@ -61,31 +66,6 @@ async function getCurrentEnviroment() {
     contentScriptQuery: "enviroment-check-response",
     enviroment: baseUrl,
   });
-}
-
-async function getScripts() {
-  // Запрос скриптов для встраивания
-  console.log(`Запрос скриптов для встраивания с адреса ${baseUrl}server/appData/appBuild.js`);
-  fetch(`${baseUrl}${apiConfig.routes.api.getScripts}`)
-    .then((response) => response.text())
-    .then((scriptContent) => {
-		chrome.runtime.sendMessage({
-			contentScriptQuery: "fetchScript-response",
-			scriptContent,
-		})
-      console.log("Скрипт пришел с сервера");
-    })
-    .catch((error) => {
-		chrome.runtime.sendMessage({
-			contentScriptQuery: "Error-response",
-			error: `${error}`,
-			flow: "fetchScript",
-		})
-      console.error("Ошибка при загрузке файла с бэкенда:", error);
-    });
-
-  // Возвращаем true, чтобы позволить асинхронный sendResponse
-  return true;
 }
 
 async function checkResponseFromServer(request: any) {
@@ -238,10 +218,5 @@ function checkResponse(res: any) {
   }
   return Promise.reject(res);
 }
-
-// chrome.runtime.sendMessage({
-// 	contentScriptQuery: "app-loaded",
-// 	data: "App loaded"
-// });
 
 export {};

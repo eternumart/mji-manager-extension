@@ -21,7 +21,7 @@ export const ActivateForm = () => {
 			if (request.contentScriptQuery == "activation-response") {
 				if (request.data.boolean == true) {
 					chrome.storage.local.set({ logged: `${login}` }).then(() => {});
-					checkLogin(login.value, true, true, currentIP);
+					checkLogin(login.value, true, true);
 					//initLoader(form, false);
 				}
 				if (request.data.boolean === false) {

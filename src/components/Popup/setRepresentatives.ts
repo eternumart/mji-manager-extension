@@ -1,26 +1,23 @@
-import { appVariables, representativesInputs } from "./constants";
-import { appData } from ".";
-
 export const setRepresentatives = () => {
-    if (!appData.availableFunctions.setRepresentatives) {
+    if (!window.appData.functions.setRepresentatives) {
         return;
     }
 
-    const representatives = appData.representativesData;
+    const representatives = window.appData.representativesData;
     
-    Object.keys(representativesInputs).forEach((key) => {
-        for (let i = 1; i < Object.keys(representativesInputs[key]).length; i += 2) {
-            if (typeof representativesInputs[key] == "boolean") {
+    Object.keys(window.representativesInputs).forEach((key) => {
+        for (let i = 1; i < Object.keys(window.representativesInputs[key]).length; i += 2) {
+            if (typeof window.representativesInputs[key] == "boolean") {
                 break;
             }
 
-            const firstColName = Object.keys(representativesInputs[key])[i]; // licaOt
-            const secondColName = Object.keys(representativesInputs[key])[i - 1]; // LicaDoljnost
-            const thirdColName = Object.keys(representativesInputs[key])[i + 1]; // licaFio
+            const firstColName = Object.keys(window.representativesInputs[key])[i]; // licaOt
+            const secondColName = Object.keys(window.representativesInputs[key])[i - 1]; // LicaDoljnost
+            const thirdColName = Object.keys(window.representativesInputs[key])[i + 1]; // licaFio
 
-            const firstColInput = representativesInputs[key][firstColName][0];
-            const secondColInput = representativesInputs[key][secondColName][0];
-            const thirdColInput = representativesInputs[key][thirdColName][0];
+            const firstColInput = window.representativesInputs[key][firstColName][0];
+            const secondColInput = window.representativesInputs[key][secondColName][0];
+            const thirdColInput = window.representativesInputs[key][thirdColName][0];
 
             switch (secondColInput.value) {
                 case "Генеральный директор": {
@@ -42,7 +39,7 @@ export const setRepresentatives = () => {
                 }
                 case "Исполнитель работ": {
                     firstColInput.value = "ООО СпецСтройЭксперт";
-                    thirdColInput.value = appVariables.currentFio;
+                    thirdColInput.value = window.appVariables.currentFio;
                 }
             }
         }

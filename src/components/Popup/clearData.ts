@@ -1,15 +1,13 @@
-import { appVariables } from "./constants";
 import { searchAllInputs } from "./searchAllInputs";
 import { clickGenerator } from "./clickGenerator";
 import { buttonError } from "./buttonError";
-import { appData } from ".";
 
 export const clearData = () => {
-    if (!appData.availableFunctions.clearData) {
+    if (!window.appData.functions.clearData) {
         return;
     }
     // Если страница не подходит для очистки - выдаем ошибку и выходим из функции
-    if (!buttonError(appVariables.clearDataButton, appVariables.currentPage, "main", "Очистка отчета")) {
+    if (!buttonError(window.appVariables.clearDataButton, window.appVariables.currentPage, "main", "Очистка отчета")) {
         return;
     }
     // находим все инпуты в отчете
@@ -18,359 +16,359 @@ export const clearData = () => {
     // РЕЗУЛЬТАТЫ ВЫБОРОЧНОГО ОБСЛЕДОВАНИЯ
     // Крыша
     // Кровля
-    appVariables.krovlyaDefecty.value = "";
-    appVariables.krovlyaPercent.value = "";
-    clickGenerator(appVariables.krovlyaOcenka, "-", false);
+    window.appVariables.krovlyaDefecty.value = "";
+    window.appVariables.krovlyaPercent.value = "";
+    clickGenerator(window.appVariables.krovlyaOcenka, "-", false);
 
     // Свесы
-    appVariables.svesyDefecty.value = "";
-    appVariables.svesyPercent.value = "";
-    clickGenerator(appVariables.svesyOcenka, "-", false);
+    window.appVariables.svesyDefecty.value = "";
+    window.appVariables.svesyPercent.value = "";
+    clickGenerator(window.appVariables.svesyOcenka, "-", false);
 
     // Стропильная система
-    appVariables.stropilnayaSistemaDefecty.value = "";
-    appVariables.stropilnayaSistemaPercent.value = "";
-    clickGenerator(appVariables.stropilnayaSistemaOcenka, "-", false);
+    window.appVariables.stropilnayaSistemaDefecty.value = "";
+    window.appVariables.stropilnayaSistemaPercent.value = "";
+    clickGenerator(window.appVariables.stropilnayaSistemaOcenka, "-", false);
 
     // Чердак
-    appVariables.cherdakDefecty.value = "";
-    appVariables.cherdakPercent.value = "";
-    clickGenerator(appVariables.cherdakOcenka, "-", false);
+    window.appVariables.cherdakDefecty.value = "";
+    window.appVariables.cherdakPercent.value = "";
+    clickGenerator(window.appVariables.cherdakOcenka, "-", false);
 
     // Покрытие ж/б
-    appVariables.pokritieJBDefecty.value = "";
-    appVariables.pokritieJBPercent.value = "";
-    clickGenerator(appVariables.pokritieJBOcenka, "-", false);
+    window.appVariables.pokritieJBDefecty.value = "";
+    window.appVariables.pokritieJBPercent.value = "";
+    clickGenerator(window.appVariables.pokritieJBOcenka, "-", false);
 
     // Все элементы
-    appVariables.vsyaKrishaDefecty.value = "";
-    appVariables.vsyaKrishaPercent.value = "";
-    clickGenerator(appVariables.vsyaKrishaOcenka, "-", false);
+    window.appVariables.vsyaKrishaDefecty.value = "";
+    window.appVariables.vsyaKrishaPercent.value = "";
+    clickGenerator(window.appVariables.vsyaKrishaOcenka, "-", false);
 
     // Водоотвод
-    appVariables.vodootvodDefecty.value = "";
-    appVariables.vodootvodPercent.value = "";
-    clickGenerator(appVariables.vodootvodOcenka, "-", false);
+    window.appVariables.vodootvodDefecty.value = "";
+    window.appVariables.vodootvodPercent.value = "";
+    clickGenerator(window.appVariables.vodootvodOcenka, "-", false);
 
     // Межпанельные стыки
-    appVariables.majpanelnyeStykiDefecty.value = "";
-    appVariables.majpanelnyeStykiPercent.value = "";
-    clickGenerator(appVariables.majpanelnyeStykiProshlOcenka, "-", false);
+    window.appVariables.majpanelnyeStykiDefecty.value = "";
+    window.appVariables.majpanelnyeStykiPercent.value = "";
+    clickGenerator(window.appVariables.majpanelnyeStykiProshlOcenka, "-", false);
 
     // Фасад
-    appVariables.fasadDefecty.value = "";
-    appVariables.fasadPercent.value = "";
-    clickGenerator(appVariables.fasadOcenka, "-", false);
+    window.appVariables.fasadDefecty.value = "";
+    window.appVariables.fasadPercent.value = "";
+    clickGenerator(window.appVariables.fasadOcenka, "-", false);
 
     // Балконы
     // Балконы
-    appVariables.balkonyDefecty.value = "";
-    appVariables.balkonyPercent.value = "";
-    clickGenerator(appVariables.balkonyOcenka, "-", false);
+    window.appVariables.balkonyDefecty.value = "";
+    window.appVariables.balkonyPercent.value = "";
+    clickGenerator(window.appVariables.balkonyOcenka, "-", false);
 
     // Лоджии
-    appVariables.lodjiiDefecty.value = "";
-    appVariables.lodjiiPercent.value = "";
-    clickGenerator(appVariables.lodjiiOcenka, "-", false);
+    window.appVariables.lodjiiDefecty.value = "";
+    window.appVariables.lodjiiPercent.value = "";
+    clickGenerator(window.appVariables.lodjiiOcenka, "-", false);
 
     // Козырьки
-    appVariables.kozirkiDefecty.value = "";
-    appVariables.kozirkiPercent.value = "";
-    clickGenerator(appVariables.kozirkiOcenka, "-", false);
+    window.appVariables.kozirkiDefecty.value = "";
+    window.appVariables.kozirkiPercent.value = "";
+    clickGenerator(window.appVariables.kozirkiOcenka, "-", false);
 
     // Эркеры
-    appVariables.erkeryDefecty.value = "";
-    appVariables.erkeryPercent.value = "";
-    clickGenerator(appVariables.erkeryOcenka, "-", false);
+    window.appVariables.erkeryDefecty.value = "";
+    window.appVariables.erkeryPercent.value = "";
+    clickGenerator(window.appVariables.erkeryOcenka, "-", false);
 
     // Все элементы
-    appVariables.vseBalkonyDefecty.value = "";
-    appVariables.vseBalkonyPercent.value = "";
-    clickGenerator(appVariables.vseBalkonyOcenka, "-", false);
+    window.appVariables.vseBalkonyDefecty.value = "";
+    window.appVariables.vseBalkonyPercent.value = "";
+    clickGenerator(window.appVariables.vseBalkonyOcenka, "-", false);
 
     // Стены
-    appVariables.stenyDefecty.value = "";
-    appVariables.stenyPercent.value = "";
-    clickGenerator(appVariables.stenyOcenka, "-", false);
+    window.appVariables.stenyDefecty.value = "";
+    window.appVariables.stenyPercent.value = "";
+    clickGenerator(window.appVariables.stenyOcenka, "-", false);
 
     // Подвал
-    appVariables.podvalDefecty.value = "";
-    appVariables.podvalPercent.value = "";
-    clickGenerator(appVariables.podvalOcenka, "-", false);
+    window.appVariables.podvalDefecty.value = "";
+    window.appVariables.podvalPercent.value = "";
+    clickGenerator(window.appVariables.podvalOcenka, "-", false);
 
     // Тех.подполье
-    appVariables.techPodpolieDefecty.value = "";
-    appVariables.techPodpoliePercent.value = "";
-    clickGenerator(appVariables.techPodpolieOcenka, "-", false);
+    window.appVariables.techPodpolieDefecty.value = "";
+    window.appVariables.techPodpoliePercent.value = "";
+    clickGenerator(window.appVariables.techPodpolieOcenka, "-", false);
 
     // Тех.этаж
-    appVariables.techEtajDefecty.value = "";
-    appVariables.techEtajPercent.value = "";
-    clickGenerator(appVariables.techEtajOcenka, "-", false);
+    window.appVariables.techEtajDefecty.value = "";
+    window.appVariables.techEtajPercent.value = "";
+    clickGenerator(window.appVariables.techEtajOcenka, "-", false);
 
     // Гараж стоянка (подземный)
-    appVariables.garageDefecty.value = "";
-    appVariables.garagePercent.value = "";
-    clickGenerator(appVariables.garageOcenka, "-", false);
+    window.appVariables.garageDefecty.value = "";
+    window.appVariables.garagePercent.value = "";
+    clickGenerator(window.appVariables.garageOcenka, "-", false);
 
     // Места общего пользования
     // Вестибюли
-    appVariables.mopVestibuliDefecty.value = "";
-    appVariables.mopVestibuliPercent.value = "";
-    clickGenerator(appVariables.mopVestibuliOcenka, "-", false);
+    window.appVariables.mopVestibuliDefecty.value = "";
+    window.appVariables.mopVestibuliPercent.value = "";
+    clickGenerator(window.appVariables.mopVestibuliOcenka, "-", false);
 
     // Крыльца
-    appVariables.mopKrilcaDefecty.value = "";
-    appVariables.mopKrilcaPercent.value = "";
-    clickGenerator(appVariables.mopKrilcaOcenka, "-", false);
+    window.appVariables.mopKrilcaDefecty.value = "";
+    window.appVariables.mopKrilcaPercent.value = "";
+    clickGenerator(window.appVariables.mopKrilcaOcenka, "-", false);
 
     // Пандусы наружные
-    appVariables.mopPandusyNaruzhnieDefecty.value = "";
-    appVariables.mopPandusyNaruzhniePercent.value = "";
-    clickGenerator(appVariables.mopPandusyNaruzhnieOcenka, "-", false);
+    window.appVariables.mopPandusyNaruzhnieDefecty.value = "";
+    window.appVariables.mopPandusyNaruzhniePercent.value = "";
+    clickGenerator(window.appVariables.mopPandusyNaruzhnieOcenka, "-", false);
 
     // Пандусы внутри-подъездные
-    appVariables.mopPandusyVnutrennieDefecty.value = "";
-    appVariables.mopPandusyVnutrenniePercent.value = "";
-    clickGenerator(appVariables.mopPandusyVnutrennieOcenka, "-", false);
+    window.appVariables.mopPandusyVnutrennieDefecty.value = "";
+    window.appVariables.mopPandusyVnutrenniePercent.value = "";
+    clickGenerator(window.appVariables.mopPandusyVnutrennieOcenka, "-", false);
 
     // Сходы/съезды
-    appVariables.mopShodySiezdyDefecty.value = "";
-    appVariables.mopShodySiezdyPercent.value = "";
-    clickGenerator(appVariables.mopShodySiezdyOcenka, "-", false);
+    window.appVariables.mopShodySiezdyDefecty.value = "";
+    window.appVariables.mopShodySiezdyPercent.value = "";
+    clickGenerator(window.appVariables.mopShodySiezdyOcenka, "-", false);
 
     // Окна, двери
-    appVariables.mopOknaDveriDefecty.value = "";
-    appVariables.mopOknaDveriPercent.value = "";
-    clickGenerator(appVariables.mopOknaDveriOcenka, "-", false);
+    window.appVariables.mopOknaDveriDefecty.value = "";
+    window.appVariables.mopOknaDveriPercent.value = "";
+    clickGenerator(window.appVariables.mopOknaDveriOcenka, "-", false);
 
     // Внутренняя отделка помещений
-    appVariables.mopVnOtdelkaPomeshDefecty.value = "";
-    appVariables.mopVnOtdelkaPomeshPercent.value = "";
-    clickGenerator(appVariables.mopVnOtdelkaPomeshOcenka, "-", false);
+    window.appVariables.mopVnOtdelkaPomeshDefecty.value = "";
+    window.appVariables.mopVnOtdelkaPomeshPercent.value = "";
+    clickGenerator(window.appVariables.mopVnOtdelkaPomeshOcenka, "-", false);
 
     // Все элементы
-    appVariables.mopVseElementyDefecty.value = "";
-    appVariables.mopVseElementyPercent.value = "";
-    clickGenerator(appVariables.mopVseElementyOcenka, "-", false);
+    window.appVariables.mopVseElementyDefecty.value = "";
+    window.appVariables.mopVseElementyPercent.value = "";
+    clickGenerator(window.appVariables.mopVseElementyOcenka, "-", false);
 
     // Лестницы
-    appVariables.lestnicyDefecty.value = "";
-    appVariables.lestnicyPercent.value = "";
-    clickGenerator(appVariables.lestnicyOcenka, "-", false);
+    window.appVariables.lestnicyDefecty.value = "";
+    window.appVariables.lestnicyPercent.value = "";
+    clickGenerator(window.appVariables.lestnicyOcenka, "-", false);
 
     // Перекрытия
-    appVariables.perekrityaDefecty.value = "";
-    appVariables.perekrityaPercent.value = "";
-    clickGenerator(appVariables.perekrityaOcenka, "-", false);
+    window.appVariables.perekrityaDefecty.value = "";
+    window.appVariables.perekrityaPercent.value = "";
+    clickGenerator(window.appVariables.perekrityaOcenka, "-", false);
 
     // Система отопления
     // Тех.подполье/тех.этаж
-    appVariables.otopleniyeTehPodpolieDefecty.value = "";
-    appVariables.otopleniyeTehPodpoliePercent.value = "";
-    clickGenerator(appVariables.otopleniyeTehPodpolieOcenka, "-", false);
+    window.appVariables.otopleniyeTehPodpolieDefecty.value = "";
+    window.appVariables.otopleniyeTehPodpoliePercent.value = "";
+    clickGenerator(window.appVariables.otopleniyeTehPodpolieOcenka, "-", false);
 
     // Транзит питающий
-    appVariables.otopleniyeTranzitPitaushDefecty.value = "";
-    appVariables.otopleniyeTranzitPitaushPercent.value = "";
-    clickGenerator(appVariables.otopleniyeTranzitPitaushOcenka, "-", false);
+    window.appVariables.otopleniyeTranzitPitaushDefecty.value = "";
+    window.appVariables.otopleniyeTranzitPitaushPercent.value = "";
+    clickGenerator(window.appVariables.otopleniyeTranzitPitaushOcenka, "-", false);
 
     // Чердак
-    appVariables.otopleniyeCherdakDefecty.value = "";
-    appVariables.otopleniyeCherdakPercent.value = "";
-    clickGenerator(appVariables.otopleniyeCherdakOcenka, "-", false);
+    window.appVariables.otopleniyeCherdakDefecty.value = "";
+    window.appVariables.otopleniyeCherdakPercent.value = "";
+    clickGenerator(window.appVariables.otopleniyeCherdakOcenka, "-", false);
 
     // Этажи
-    appVariables.otopleniyeEtajiDefecty.value = "";
-    appVariables.otopleniyeEtajiPercent.value = "";
-    clickGenerator(appVariables.otopleniyeEtajiOcenka, "-", false);
+    window.appVariables.otopleniyeEtajiDefecty.value = "";
+    window.appVariables.otopleniyeEtajiPercent.value = "";
+    clickGenerator(window.appVariables.otopleniyeEtajiOcenka, "-", false);
 
     // Вся система
-    appVariables.vseOtopleniyeDefecty.value = "";
-    appVariables.vseOtopleniyePercent.value = "";
-    clickGenerator(appVariables.vseOtopleniyeOcenka, "-", false);
+    window.appVariables.vseOtopleniyeDefecty.value = "";
+    window.appVariables.vseOtopleniyePercent.value = "";
+    clickGenerator(window.appVariables.vseOtopleniyeOcenka, "-", false);
 
     // ГВС
     // Тех.подполье/тех.этаж
-    appVariables.gvsTehPodpolieDefecty.value = "";
-    appVariables.gvsTehPodpoliePercent.value = "";
-    clickGenerator(appVariables.gvsTehPodpolieOcenka, "-", false);
+    window.appVariables.gvsTehPodpolieDefecty.value = "";
+    window.appVariables.gvsTehPodpoliePercent.value = "";
+    clickGenerator(window.appVariables.gvsTehPodpolieOcenka, "-", false);
 
     // Транзит питающий
-    appVariables.gvsTranzitPitaushDefecty.value = "";
-    appVariables.gvsTranzitPitaushPercent.value = "";
-    clickGenerator(appVariables.gvsTranzitPitaushOcenka, "-", false);
+    window.appVariables.gvsTranzitPitaushDefecty.value = "";
+    window.appVariables.gvsTranzitPitaushPercent.value = "";
+    clickGenerator(window.appVariables.gvsTranzitPitaushOcenka, "-", false);
 
     // Чердак
-    appVariables.gvsCherdakDefecty.value = "";
-    appVariables.gvsCherdakPercent.value = "";
-    clickGenerator(appVariables.gvsCherdakOcenka, "-", false);
+    window.appVariables.gvsCherdakDefecty.value = "";
+    window.appVariables.gvsCherdakPercent.value = "";
+    clickGenerator(window.appVariables.gvsCherdakOcenka, "-", false);
 
     // Этажи
-    appVariables.gvsEtajiDefecty.value = "";
-    appVariables.gvsEtajiPercent.value = "";
-    clickGenerator(appVariables.gvsEtajiOcenka, "-", false);
+    window.appVariables.gvsEtajiDefecty.value = "";
+    window.appVariables.gvsEtajiPercent.value = "";
+    clickGenerator(window.appVariables.gvsEtajiOcenka, "-", false);
 
     // Вся система
-    appVariables.vseGvsDefecty.value = "";
-    appVariables.vseGvsPercent.value = "";
-    clickGenerator(appVariables.vseGvsOcenka, "-", false);
+    window.appVariables.vseGvsDefecty.value = "";
+    window.appVariables.vseGvsPercent.value = "";
+    clickGenerator(window.appVariables.vseGvsOcenka, "-", false);
 
     // ХВС
     // Тех.подполье/тех.этаж
-    appVariables.hvsTehPodpolieDefecty.value = "";
-    appVariables.hvsTehPodpoliePercent.value = "";
-    clickGenerator(appVariables.hvsTehPodpolieOcenka, "-", false);
+    window.appVariables.hvsTehPodpolieDefecty.value = "";
+    window.appVariables.hvsTehPodpoliePercent.value = "";
+    clickGenerator(window.appVariables.hvsTehPodpolieOcenka, "-", false);
 
     // Транзит питающий
-    appVariables.hvsTranzitPitaushDefecty.value = "";
-    appVariables.hvsTranzitPitaushPercent.value = "";
-    clickGenerator(appVariables.hvsTranzitPitaushOcenka, "-", false);
+    window.appVariables.hvsTranzitPitaushDefecty.value = "";
+    window.appVariables.hvsTranzitPitaushPercent.value = "";
+    clickGenerator(window.appVariables.hvsTranzitPitaushOcenka, "-", false);
 
     // Этажи
-    appVariables.hvsEtajiDefecty.value = "";
-    appVariables.hvsEtajiPercent.value = "";
-    clickGenerator(appVariables.hvsEtajiOcenka, "-", false);
+    window.appVariables.hvsEtajiDefecty.value = "";
+    window.appVariables.hvsEtajiPercent.value = "";
+    clickGenerator(window.appVariables.hvsEtajiOcenka, "-", false);
 
     // Внутренний пожарный водопровод
-    appVariables.hvsVnPozharProvodDefecty.value = "";
-    appVariables.hvsVnPozharProvodPercent.value = "";
-    clickGenerator(appVariables.hvsVnPozharProvodOcenka, "-", false);
+    window.appVariables.hvsVnPozharProvodDefecty.value = "";
+    window.appVariables.hvsVnPozharProvodPercent.value = "";
+    clickGenerator(window.appVariables.hvsVnPozharProvodOcenka, "-", false);
 
     // Вся система
-    appVariables.vseHvsDefecty.value = "";
-    appVariables.vseHvsPercent.value = "";
-    clickGenerator(appVariables.vseHvsOcenka, "-", false);
+    window.appVariables.vseHvsDefecty.value = "";
+    window.appVariables.vseHvsPercent.value = "";
+    clickGenerator(window.appVariables.vseHvsOcenka, "-", false);
 
     // Канализация
     // Тех.подполье/тех.этаж
-    appVariables.kanalizaciaTehPodpolieDefecty.value = "";
-    appVariables.kanalizaciaTehPodpoliePercent.value = "";
-    clickGenerator(appVariables.kanalizaciaTehPodpolieOcenka, "-", false);
+    window.appVariables.kanalizaciaTehPodpolieDefecty.value = "";
+    window.appVariables.kanalizaciaTehPodpoliePercent.value = "";
+    clickGenerator(window.appVariables.kanalizaciaTehPodpolieOcenka, "-", false);
 
     // Этажи
-    appVariables.kanalizaciaEtajiDefecty.value = "";
-    appVariables.kanalizaciaEtajiPercent.value = "";
-    clickGenerator(appVariables.kanalizaciaEtajiOcenka, "-", false);
+    window.appVariables.kanalizaciaEtajiDefecty.value = "";
+    window.appVariables.kanalizaciaEtajiPercent.value = "";
+    clickGenerator(window.appVariables.kanalizaciaEtajiOcenka, "-", false);
 
     // Вся система
-    appVariables.vseKanalizaciaDefecty.value = "";
-    appVariables.vseKanalizaciaPercent.value = "";
-    clickGenerator(appVariables.vseKanalizaciaOcenka, "-", false);
+    window.appVariables.vseKanalizaciaDefecty.value = "";
+    window.appVariables.vseKanalizaciaPercent.value = "";
+    clickGenerator(window.appVariables.vseKanalizaciaOcenka, "-", false);
 
     // Мусоропроводы
-    appVariables.musoroprovodyDefecty.value = "";
-    appVariables.musoroprovodyPercent.value = "";
-    clickGenerator(appVariables.musoroprovodyOcenka, "-", false);
+    window.appVariables.musoroprovodyDefecty.value = "";
+    window.appVariables.musoroprovodyPercent.value = "";
+    clickGenerator(window.appVariables.musoroprovodyOcenka, "-", false);
 
     // Связь с ОДС
-    appVariables.odsDefecty.value = "";
-    appVariables.odsPosledneeObsled.value = "";
-    appVariables.odsOrganizacia.value = "";
-    clickGenerator(appVariables.odsOcenka, "-", false);
+    window.appVariables.odsDefecty.value = "";
+    window.appVariables.odsPosledneeObsled.value = "";
+    window.appVariables.odsOrganizacia.value = "";
+    clickGenerator(window.appVariables.odsOcenka, "-", false);
 
     // Вентиляция
-    appVariables.ventilaciaDefecty.value = "";
-    appVariables.ventilaciaPosledneeObsled.value = "";
-    appVariables.odsOrganizacia.value = "";
-    clickGenerator(appVariables.ventilaciaOcenka, "-", false);
+    window.appVariables.ventilaciaDefecty.value = "";
+    window.appVariables.ventilaciaPosledneeObsled.value = "";
+    window.appVariables.odsOrganizacia.value = "";
+    clickGenerator(window.appVariables.ventilaciaOcenka, "-", false);
 
     // Система промывки и прочистки стволов мусоропроводов
-    appVariables.musoroChistSistemaDefecty.value = "";
-    appVariables.musoroChistSistemaPosledObsled.value = "";
-    appVariables.musoroChistSistemaOrganizacia.value = "";
-    clickGenerator(appVariables.musoroChistSistemaOcenka, "-", false);
+    window.appVariables.musoroChistSistemaDefecty.value = "";
+    window.appVariables.musoroChistSistemaPosledObsled.value = "";
+    window.appVariables.musoroChistSistemaOrganizacia.value = "";
+    clickGenerator(window.appVariables.musoroChistSistemaOcenka, "-", false);
 
     // ОЗДС (охранно-защитная дератизационная система)
-    appVariables.ozdsDefecty.value = "";
-    appVariables.ozdsPosledObsled.value = "";
-    appVariables.ozdsOrganizacia.value = "";
-    clickGenerator(appVariables.ozdsOcenka, "-", false);
+    window.appVariables.ozdsDefecty.value = "";
+    window.appVariables.ozdsPosledObsled.value = "";
+    window.appVariables.ozdsOrganizacia.value = "";
+    clickGenerator(window.appVariables.ozdsOcenka, "-", false);
 
     // Газоходы
-    appVariables.gazohodyDefecty.value = "";
-    appVariables.gazohodyPosledObsled.value = "";
-    appVariables.gazohodyOrganizacia.value = "";
-    clickGenerator(appVariables.gazohodyOcenka, "-", false);
+    window.appVariables.gazohodyDefecty.value = "";
+    window.appVariables.gazohodyPosledObsled.value = "";
+    window.appVariables.gazohodyOrganizacia.value = "";
+    clickGenerator(window.appVariables.gazohodyOcenka, "-", false);
 
     // Лифты
-    appVariables.liftyDefecty.value = "";
-    appVariables.liftyPosledObsled.value = "";
-    appVariables.liftyOrganizacia.value = "";
-    clickGenerator(appVariables.liftyOcenka, "-", false);
+    window.appVariables.liftyDefecty.value = "";
+    window.appVariables.liftyPosledObsled.value = "";
+    window.appVariables.liftyOrganizacia.value = "";
+    clickGenerator(window.appVariables.liftyOcenka, "-", false);
 
     // Подъёмное устройство для маломобильной группы населения
-    appVariables.podyomnikDefecty.value = "";
-    appVariables.podyomnikPosledObsled.value = "";
-    appVariables.podyomnikOrganizacia.value = "";
-    clickGenerator(appVariables.podyomnikOcenka, "-", false);
+    window.appVariables.podyomnikDefecty.value = "";
+    window.appVariables.podyomnikPosledObsled.value = "";
+    window.appVariables.podyomnikOrganizacia.value = "";
+    clickGenerator(window.appVariables.podyomnikOcenka, "-", false);
 
     // Устройство для автоматического опускания лифта
-    appVariables.autoSpuskLiftDefecty.value = "";
-    appVariables.autoSpuskLiftPosledObsled.value = "";
-    appVariables.autoSpuskLiftOrganizacia.value = "";
-    clickGenerator(appVariables.autoSpuskLiftOcenka, "-", false);
+    window.appVariables.autoSpuskLiftDefecty.value = "";
+    window.appVariables.autoSpuskLiftPosledObsled.value = "";
+    window.appVariables.autoSpuskLiftOrganizacia.value = "";
+    clickGenerator(window.appVariables.autoSpuskLiftOcenka, "-", false);
 
     // Система ЭС
-    appVariables.systemEsDefecty.value = "";
-    appVariables.systemEsPosledObsled.value = "";
-    appVariables.systemEsOrganizacia.value = "";
-    clickGenerator(appVariables.systemEsOcenka, "-", false);
+    window.appVariables.systemEsDefecty.value = "";
+    window.appVariables.systemEsPosledObsled.value = "";
+    window.appVariables.systemEsOrganizacia.value = "";
+    clickGenerator(window.appVariables.systemEsOcenka, "-", false);
 
     // ВКВ (второй кабельный ввод)
-    appVariables.vkvDefecty.value = "";
-    appVariables.vkvPosledObsled.value = "";
-    appVariables.vkvOrganizacia.value = "";
-    clickGenerator(appVariables.vkvOcenka, "-", false);
+    window.appVariables.vkvDefecty.value = "";
+    window.appVariables.vkvPosledObsled.value = "";
+    window.appVariables.vkvOrganizacia.value = "";
+    clickGenerator(window.appVariables.vkvOcenka, "-", false);
 
     // АВР (автоматическое включение резервного питания)
-    appVariables.avrDefecty.value = "";
-    appVariables.avrPosledObsled.value = "";
-    appVariables.avrOrganizacia.value = "";
-    clickGenerator(appVariables.avrOcenka, "-", false);
+    window.appVariables.avrDefecty.value = "";
+    window.appVariables.avrPosledObsled.value = "";
+    window.appVariables.avrOrganizacia.value = "";
+    clickGenerator(window.appVariables.avrOcenka, "-", false);
 
     // ППАиДУ
-    appVariables.ppaiduDefecty.value = "";
-    appVariables.ppaiduPosledObsled.value = "";
-    appVariables.ppaiduOrganizacia.value = "";
-    clickGenerator(appVariables.ppaiduOcenka, "-", false);
+    window.appVariables.ppaiduDefecty.value = "";
+    window.appVariables.ppaiduPosledObsled.value = "";
+    window.appVariables.ppaiduOrganizacia.value = "";
+    clickGenerator(window.appVariables.ppaiduOcenka, "-", false);
 
     // Система оповещения о пожаре
-    appVariables.pozharOpoveshenDefecty.value = "";
-    appVariables.pozharOpoveshenPosledObsled.value = "";
-    appVariables.pozharOpoveshenOrganizacia.value = "";
-    clickGenerator(appVariables.pozharOpoveshenOcenka, "-", false);
+    window.appVariables.pozharOpoveshenDefecty.value = "";
+    window.appVariables.pozharOpoveshenPosledObsled.value = "";
+    window.appVariables.pozharOpoveshenOrganizacia.value = "";
+    clickGenerator(window.appVariables.pozharOpoveshenOcenka, "-", false);
 
     // Система ГС
-    appVariables.sistemaGsDefecty.value = "";
-    appVariables.sistemaGsPosledObsled.value = "";
-    appVariables.sistemaGsOrganizacia.value = "";
-    clickGenerator(appVariables.sistemaGsOcenka, "-", false);
+    window.appVariables.sistemaGsDefecty.value = "";
+    window.appVariables.sistemaGsPosledObsled.value = "";
+    window.appVariables.sistemaGsOrganizacia.value = "";
+    clickGenerator(window.appVariables.sistemaGsOcenka, "-", false);
 
     // Система видеонаблюдения
-    appVariables.sistemaVideonabDefecty.value = "";
-    appVariables.sistemaVideonabPosledObsled.value = "";
-    appVariables.sistemaVideonabOrganizacia.value = "";
-    clickGenerator(appVariables.sistemaVideonabProshlOcenka, "-", false);
+    window.appVariables.sistemaVideonabDefecty.value = "";
+    window.appVariables.sistemaVideonabPosledObsled.value = "";
+    window.appVariables.sistemaVideonabOrganizacia.value = "";
+    clickGenerator(window.appVariables.sistemaVideonabProshlOcenka, "-", false);
 
-    appVariables.dopolnitDannye.value = "";
-    clickGenerator(appVariables.recomendatciiPoUtepleniuSten, "Н/и (не имеется)", false);
-    appVariables.recomendatciiPoDopRabotam.value = "";
+    window.appVariables.dopolnitDannye.value = "";
+    clickGenerator(window.appVariables.recomendatciiPoUtepleniuSten, "Н/и (не имеется)", false);
+    window.appVariables.recomendatciiPoDopRabotam.value = "";
 
     // Подписывающие лица
-    for (let i = 1; i < appVariables.signatoriesRows.length; i++) {
-        if (!appVariables.signatoriesRows[i].querySelector("#comp_12340")) {
+    for (let i = 1; i < window.appVariables.signatoriesRows.length; i++) {
+        if (!window.appVariables.signatoriesRows[i].querySelector("#comp_12340")) {
             continue;
         }
-        appVariables[i]["licaOt"].value = "";
-        appVariables[i]["LicaDoljnost"].value = "";
-        appVariables[i]["licaFio"].value = "";
+        window.appVariables[i]["licaOt"].value = "";
+        window.appVariables[i]["LicaDoljnost"].value = "";
+        window.appVariables[i]["licaFio"].value = "";
     }
 
-    appVariables.clearDataButton.textContent = "Очищено";
-    appVariables.clearDataButton.classList.add("main__button_done");
+    window.appVariables.clearDataButton.textContent = "Очищено";
+    window.appVariables.clearDataButton.classList.add("main__button_done");
     setTimeout(() => {
-        appVariables.clearDataButton.textContent = "Очистка отчета";
-        appVariables.clearDataButton.classList.remove("main__button_done");
+        window.appVariables.clearDataButton.textContent = "Очистка отчета";
+        window.appVariables.clearDataButton.classList.remove("main__button_done");
     }, 1500);
 }

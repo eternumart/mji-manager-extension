@@ -13,8 +13,7 @@ export const getAppData = async (userData: any) => {
   console.log("Запрашиваем данные приложения");
   chrome.runtime.sendMessage({
     contentScriptQuery: "appData-request",
-    data: "give me data",
-    url: `appdata`,
+    data: "give me data"
   });
 };
 

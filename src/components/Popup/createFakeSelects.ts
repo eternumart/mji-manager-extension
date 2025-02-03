@@ -4,7 +4,7 @@ import { openFakeSelect, closeFakeSelect } from "./openCloseFakeSelect";
 import { splitBySentences } from "./splitBySentences";
 
 export const createFakeSelects = () => {
-    if(!window.appData.functions.createFakeSelects) {
+    if (!window.appData.functions.createFakeSelects) {
         return;
     }
     if (!buttonError(window.appVariables.copyButton, window.appVariables.currentPage, "main", "Всплывающие поля")) {
@@ -12,7 +12,7 @@ export const createFakeSelects = () => {
     }
 
     const fakeSelectList = window.appData.appLayout.fakeSelectList;
-	const selectsValues = window.appData.defectsData;
+    const selectsValues = window.appData.defectsData;
 
     // Поиск полей отчета
     searchAllInputs();
@@ -21,84 +21,65 @@ export const createFakeSelects = () => {
 
     window.resultsDefectsInputs.inputs.forEach((input: any) => {
         const groupTable = input.closest(".groupBorder");
+        if (!groupTable) return; // Пропускаем, если нет родительской таблицы
+
         const container = input.parentElement;
-        const rowName = container.previousElementSibling.querySelector("span").textContent;
-        const groupName = groupTable.querySelector("legend").textContent;
+        if (!container) return;
 
-        input.style.boxSizing = "border-box";
+        const rowNameElem = container.previousElementSibling?.querySelector("span");
+        const groupNameElem = groupTable.querySelector("legend");
 
-        if (selectsValues[groupName]) {
-            if (rowName !== "Все элементы" && rowName !== "Вся система") {
-                if (!container.querySelector(".fakeSelect")) {
-                    container.style.position = "relative";
-                    container.insertAdjacentHTML("afterBegin", fakeSelectList);
-                    const currentSelect = container.querySelector(".fakeSelect");
-                    const currentSelectList = currentSelect.querySelector(".fakeSelect__list");
-                    const currentSelectOpenButton = container.querySelector(".fakeSelect__selector");
-                    const currentSelectCloseBtn = currentSelect.querySelector(".fakeSelect__close-selector");
+        if (!rowNameElem || !groupNameElem) return; // Пропускаем, если не нашли заголовки
 
-                    currentSelectOpenButton.addEventListener("click", () => {
-                        openFakeSelect(currentSelect);
-                    });
-                    currentSelectCloseBtn.addEventListener("click", () => {
-                        closeFakeSelect(currentSelect);
-                    });
-                    let listOptions, conditionNode, objAddress, objAddressOpt, objAddressGroup, objAddressRow;
-                    try {
-                        objAddress = selectsValues[`${groupName}`][`${rowName}`][`conditionNode`]["window.appVariables"] || selectsValues[`${groupName}`][`${rowName}`][`conditionNode`];
-                        objAddressOpt = objAddress[0];
-                        objAddressGroup = objAddress[1];
-                        objAddressRow = objAddress[2];
-                        conditionNode = window.appVariables[objAddressOpt][objAddressGroup][objAddressRow];
-                    } catch {}
+        const rowName = rowNameElem.textContent;
+        const groupName = groupNameElem.textContent;
 
-                    if (conditionNode) {
-                        const conditionValue = `${conditionNode.value}`;
-                        const conditions = selectsValues[`${groupName}`][`${rowName}`][`conditions`];
-                        listOptions = conditions[`${conditionValue}`];
-                    } else {
-                        console.info(`${groupName}: ${rowName} - безусловно`);
-                        if (!selectsValues[`${groupName}`][`${rowName}`]) {
-                            listOptions = ["#", "#"];
-                        } else {
-                            listOptions = selectsValues[`${groupName}`][`${rowName}`][`conditions`]["Безусловно"];
-                        }
-                    }
+        console.log(`Обрабатываем поле: ${rowName} в группе ${groupName}`);
 
-                    listOptions.forEach((item: any) => {
-                        const listItem = `
-                            <div class="fakeSelect__item-wrapper">
-                                <input type="checkbox" id="fakselect-item-${counterItems}" />
-                                <label for="fakselect-item-${counterItems}">${item}</label>
-                            </div>`;
-                        currentSelectList.insertAdjacentHTML("beforeend", listItem);
-                        counterItems += 1;
-                    });
+        if (!selectsValues[groupName] || rowName === "Все элементы" || rowName === "Вся система") return;
 
-                    const allGroupItems = currentSelectList.querySelectorAll(".fakeSelect__item-wrapper");
+        if (!container.querySelector(".fakeSelect")) {
+            container.style.position = "relative";
+            container.insertAdjacentHTML("afterBegin", fakeSelectList);
 
-                    currentSelectCloseBtn.addEventListener("click", () => {
-                        const resultValue: any = [];
-                        allGroupItems.forEach((item: any) => {
-                            const checkbox = item.querySelector("input");
-                            const value = item.querySelector("label");
+            const currentSelect = container.querySelector(".fakeSelect");
+            if (!currentSelect) return;
 
-                            if (checkbox.checked) {
-                                if (!input.value.includes(value.textContent)) {
-                                    resultValue.push(value.textContent);
-                                }
-                            } else {
-                                const sentences = splitBySentences(input.value);
-                                const toDelete = sentences.find((str: any) => `${str}.` === value.textContent);
-                                if (toDelete) {
-                                    input.value = input.value.trimStart().trimEnd().replace(`${toDelete}.`, "");
-                                }
-                            }
-                        });
-                        input.value = `${input.value.trimStart().trimEnd()} ${resultValue.join(" ").trimStart().trimEnd()}`.trimStart().trimEnd();
-                    });
-                }
+            const currentSelectList = currentSelect.querySelector(".fakeSelect__list");
+            const currentSelectOpenButton = container.querySelector(".fakeSelect__selector");
+            const currentSelectCloseBtn = currentSelect.querySelector(".fakeSelect__close-selector");
+
+            if (!currentSelectOpenButton || !currentSelectCloseBtn) return;
+
+            currentSelectOpenButton.addEventListener("click", () => openFakeSelect(currentSelect));
+            currentSelectCloseBtn.addEventListener("click", () => closeFakeSelect(currentSelect));
+
+            let listOptions = selectsValues[groupName]?.[rowName]?.conditions?.["Безусловно"] || [];
+            if (!listOptions.length) {
+                console.warn(`Нет условий для ${groupName} - ${rowName}`);
+                listOptions = ["Нет данных"];
             }
+
+            listOptions.forEach((item: string) => {
+                const listItem = `
+                    <div class="fakeSelect__item-wrapper">
+                        <input type="checkbox" id="fakeSelect-item-${counterItems}" />
+                        <label for="fakeSelect-item-${counterItems}">${item}</label>
+                    </div>`;
+                currentSelectList.insertAdjacentHTML("beforeend", listItem);
+                counterItems += 1;
+            });
+
+            // Закрытие и обновление значений input'а
+            currentSelectCloseBtn.addEventListener("click", () => {
+                const selectedValues: string[] = [];
+                currentSelectList.querySelectorAll(".fakeSelect__item-wrapper input:checked").forEach((checkbox: any) => {
+                    selectedValues.push((checkbox as HTMLInputElement).nextElementSibling?.textContent || "");
+                });
+
+                input.value = selectedValues.join(", ");
+                console.log(`Выбрано: ${input.value}`);
+            });
         }
     });
 
@@ -108,4 +89,4 @@ export const createFakeSelects = () => {
         window.appVariables.fakeSelectsButton.textContent = "Всплывающие поля";
         window.appVariables.fakeSelectsButton.classList.remove("main__button_done");
     }, 1500);
-}
+};

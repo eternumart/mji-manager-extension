@@ -1,27 +1,35 @@
+import { changePopupState } from "./changePopupState";
+import { checkLayoutBeforeInit } from "./checkLayoutBeforeInit";
 import { getAppData } from "./launchApp";
 
-export const checkStorage = async () => {
-    const storageData = {
-        currentFio: "",
-        currentLogin: "",
-        loginIsPossible: false,
-        launchStatus: false,
-      }
+export function checkStorage(request: any) {
+  const userData = {
+    currentFio: request.fio || "",
+    currentLogin: request.logged || "",
+    loginIsPossible: false,
+    launchStatus: false,
+  };
 
-    storageData.currentFio = await getFromStorage("fio");
-    storageData.currentLogin = await getFromStorage("login");
-    if(storageData.currentFio !== "" && storageData.currentLogin !== "") {
-        storageData.loginIsPossible = true;
+  const loggedLogin = document.querySelector(".logged__login") as HTMLButtonElement | null;
+  const accountFio = document.querySelector(".account__fio") as HTMLInputElement | null;
+
+  if (userData.currentLogin && userData.currentFio) {
+    if (loggedLogin) {
+      loggedLogin.textContent = userData.currentLogin;
+    } else {
+      console.warn("Элемент .logged__login не найден в DOM");
     }
 
-    getAppData(storageData);
-}
-
-async function getFromStorage(name: string) {
-  await chrome.storage.sync.get([name]).then((res) => {
-    if (res[name]) {
-      return res[name] as string;
+    if (accountFio) {
+      accountFio.value = userData.currentFio;
+    } else {
+      console.warn("Элемент .account__fio не найден в DOM");
     }
-  });
-  return "";
+
+    changePopupState("logged");
+    checkLayoutBeforeInit();
+    getAppData(userData);
+  } else {
+    console.error("Не удалось получить данные из хранилища для автозаполнения.");
+  }
 }

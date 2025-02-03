@@ -1,10 +1,15 @@
-export const getCurrentIp = () => {
-    chrome.runtime.sendMessage({
-        contentScrptQuery: 'enviroment-check-request'
-    })
-    chrome.runtime.onMessage.addListener((response) => {
-        if(response.contentScriptQuery === 'enviroment-check-response') {
-            return response.enviroment;
+export const getCurrentIp = async (): Promise<string> => {
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        { contentScriptQuery: "enviroment-check-request" },
+        (response) => {
+          if (response && response.enviroment) {
+            resolve(response.enviroment);
+          } else {
+            console.error("Не удалось получить environment");
+            resolve(""); // Возвращаем пустую строку в случае ошибки
+          }
         }
-    })
-}
+      );
+    });
+  };

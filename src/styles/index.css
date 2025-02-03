@@ -362,7 +362,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80px;
+  height: calc(100% - 28px);
+  width: 100%;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  top: 28px;
+  left: 0;
+  background: #fff;
 }
 .mji-manager-app .loader_loading svg {
   animation: load;
@@ -429,23 +436,17 @@
   border: 1px solid #9f0000;
   transition: 0.3s;
 }
-
 .mji-manager-app .switcher {
   position: absolute;
   top: 5px;
   left: 20px;
   align-items: center;
   display: flex;
-}
-
-.mji-manager-app .switcher {
   font-size: 10px;
 }
-
 .mji-manager-app .switch input {
   display: none;
 }
-
 .mji-manager-app .switch {
   display: inline-block;
   width: 20px; /*=w*/
@@ -453,7 +454,6 @@
   margin-right: 4px;
   position: relative;
 }
-
 .mji-manager-app .slider {
   position: absolute;
   top: 0;
@@ -467,7 +467,6 @@
   overflow: hidden;
   transition: 0.2s;
 }
-
 .mji-manager-app .slider:before {
   position: absolute;
   content: "";
@@ -478,12 +477,10 @@
   transform: translateX(0px); /*translateX(-(w-h))*/
   transition: 0.2s;
 }
-
 .mji-manager-app input:checked + .slider:before {
   transform: translateX(10px); /*translateX(w-h)*/
   background-color: #00931a;
 }
-
 .mji-manager-app input:checked + .slider {
   box-shadow: 0 0 0 2px #00931a, 0 0 8px #00931a;
-}
+}/*# sourceMappingURL=index.css.map */

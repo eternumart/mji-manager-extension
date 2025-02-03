@@ -8,9 +8,10 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.106",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
+    "archiver": "^7.0.1",
+    "fs": "^0.0.1-security",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "^5.0.1",
@@ -22,7 +23,9 @@
     "start": "react-scripts start",
     "build": "set \"INLINE_RUNTIME_CHUNK=false\" && craco build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postbuild": "ts-node scripts/create-self-extract.ts && 7z a -sfx MJI-manager.exe MJI-manager.sfx.zip",
+    "release": "npm run build && npm run postbuild"
   },
   "eslintConfig": {
     "extends": [
@@ -43,6 +46,8 @@
     ]
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.270"
+    "@types/archiver": "^6.0.3",
+    "@types/chrome": "^0.0.270",
+    "@types/node": "^22.13.0"
   }
 }

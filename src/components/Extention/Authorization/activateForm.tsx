@@ -18,6 +18,7 @@ export const ActivateForm = () => {
 		//const usid = generateID();
 
 		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+			console.log("Отправка данных формы логина в DOMEvaluator.ts из activateForm.ts")
 			if (request.contentScriptQuery == "activation-response") {
 				if (request.data.boolean == true) {
 					chrome.storage.local.set({ logged: `${login}` }).then(() => {});

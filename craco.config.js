@@ -18,6 +18,7 @@ module.exports = {
                 optimization: {
                     ...webpackConfig.optimization,
                     runtimeChunk: false,  // Отключаем отдельный runtime файл для каждой точки входа
+                    minimize: false,  // Отключаем минификацию
                 },
             };
         },

@@ -1,6 +1,6 @@
 {
   "name": "mji-manager-extension",
-  "version": "3.0.0",
+  "version": "3.2.0",
   "private": true,
   "dependencies": {
     "@craco/craco": "^5.9.0",
@@ -23,7 +23,6 @@
     "start": "react-scripts start",
     "build": "set \"INLINE_RUNTIME_CHUNK=false\" && craco build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
     "postbuild": "ts-node scripts/create-self-extract.ts && 7z a -sfx MJI-manager.exe MJI-manager.sfx.zip",
     "release": "npm run build && npm run postbuild"
   },

@@ -1,5 +1,5 @@
 import React from "react";
-import { checkLogin } from "../utils/checkLogin";
+//import { checkLogin } from "../utils/checkLogin";
 import { initLoader } from "../utils/loader";
 import { apiConfig } from "../../../apiConfig";
 import { getCurrentIp } from "../utils/getCurrentIp";
@@ -22,7 +22,7 @@ export const ActivateForm = () => {
 			if (request.contentScriptQuery == "activation-response") {
 				if (request.data.boolean == true) {
 					chrome.storage.local.set({ logged: `${login}` }).then(() => {});
-					checkLogin(login.value, true, true);
+					//checkLogin(login.value, true, true);
 					//initLoader(form, false);
 				}
 				if (request.data.boolean === false) {

@@ -1,81 +1,87 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { randomFio } from "../utils/randomFio";
-import { checkStorage } from "../utils/checkStorage";
 import { apiConfig } from "../../../apiConfig";
-import { useState } from "react";
+import { saveToCache } from "../utils/saveToCache";
+import { getAppData } from "../utils/launchApp";
 
 export const LoginForm = () => {
-  const { setIsLogged, setUserData } = useAuth();
-  const [errorMessage, setErrorMessage] = useState("");
+	const { setIsLogged, setUserData, serverState } = useAuth();
+	const [errorMessage, setErrorMessage] = useState("");
 
-  const logIn = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const loginForm = document.querySelector("#login-form") as HTMLFormElement;
-    const login = loginForm.querySelector("#login") as HTMLInputElement;
-    const password = loginForm.querySelector("#password") as HTMLInputElement;
-    const errorActivation = loginForm.querySelector("#error-activation") as HTMLSpanElement;
+	const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
+	const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
 
-    console.log("Запуск авторизации");
-    const baseUrl = apiConfig.address.protocol + apiConfig.address.ip;
+	const logIn = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		console.log("📤 Отправляем данные для авторизации...");
 
-    chrome.runtime.sendMessage(
-      {
-        contentScriptQuery: "logIn-request",
-        data: {
-          login: login.value,
-          password: password.value,
-        },
-        url: `${baseUrl}/auth/login`,
-      },
-      (response) => {
-        if (!response || response.error) {
-          setErrorMessage("Ошибка авторизации. Попробуйте еще раз.");
-          console.error("Ошибка авторизации:", response?.error || "Неизвестная ошибка");
-          return;
-        }
+		const loginInput = document.querySelector("#login-auth") as HTMLInputElement;
+		const passwordInput = document.querySelector("#password-auth") as HTMLInputElement;
 
-        const fio = response.data?.fio || randomFio();
-        if (response.data?.loginIsPossible === true && response.data?.activated) {
-          console.log("Авторизация успешна!");
+		if (!loginInput || !passwordInput) {
+			console.error("❌ Поля ввода не найдены!");
+			return;
+		}
 
-          const storageKey = baseUrl; // Используем только домен как ключ
+		const login = loginInput.value;
+		const password = passwordInput.value;
 
-          chrome.storage.local.get(storageKey, (existingData) => {
-            if (!existingData[storageKey]) {
-              chrome.storage.local.set(
-                { [storageKey]: { logged: login.value, fio: fio } },
-                () => {
-                  console.log("✅ Данные сохранены в storage по ключу:", storageKey);
-                }
-              );
-            } else {
-              console.log("Данные для", storageKey, "уже существуют в storage");
-            }
-          });
+		if (!login || !password) {
+			console.error("❌ Поля логина и пароля должны быть заполнены!");
+			setErrorMessage("Введите логин и пароль.");
+			return;
+		}
 
-          setIsLogged(true);
-          setUserData({ fio, login: login.value });
-          checkStorage({ logged: login.value, fio });
-        } else {
-          errorActivation.classList.add("auth__error_visible");
-          errorActivation.textContent = response.data?.activation || "Ошибка активации аккаунта.";
-        }
-      }
-    );
-  };
+		chrome.runtime.sendMessage({
+			contentScriptQuery: "logIn-request",
+			data: { login, password },
+			url: `${baseUrl}/auth/login`,
+		});
 
-  return (
-    <form className="auth__form auth__form_login auth__form_active" id="login-form" action="submit" onSubmit={logIn}>
-      <fieldset className="auth__input-wrapper">
-        <input type="email" className="auth__input" placeholder="Логин" id="login" required />
-        <span className="auth__error" id="error-login"></span>
-      </fieldset>
-      <fieldset className="auth__input-wrapper">
-        <input type="password" className="auth__input" placeholder="Пароль" id="password" required />
-        <span className="auth__error" id="error-activation">{errorMessage}</span>
-      </fieldset>
-      <input className="auth__button" id="login-btn" value="Войти" type="submit" />
-    </form>
-  );
+		console.log(`📨 logIn-request отправлен на сервер (${serverState}), ожидаем logIn-response...`);
+	};
+
+	useEffect(() => {
+		const handleLoginResponse = (message: any) => {
+			if (message.contentScriptQuery === "logIn-response") {
+				console.log("🔹 Получен logIn-response:", message.data);
+
+				if (message.data[0].user.loginIsPossible) {
+					console.log("✅ Авторизация успешна:", message.data[1]);
+					setUserData({ fio: message.data[0].user.fio, login: message.data[1] });
+					setIsLogged(true);
+					setErrorMessage("");
+
+					saveToCache(baseUrl, { fio: message.data[0].user.fio, login: message.data[1] });
+					console.log("📥 Данные пользователя сохранены в кэш", baseUrl);
+					getAppData(message.data[0].user)
+				} else {
+					console.error("❌ Ошибка авторизации");
+					setErrorMessage("Ошибка авторизации. Проверьте логин и пароль.");
+				}
+			}
+		};
+
+		chrome.runtime.onMessage.addListener(handleLoginResponse);
+
+		return () => {
+			chrome.runtime.onMessage.removeListener(handleLoginResponse);
+		};
+	}, []);
+
+	return (
+		<form className="auth__form auth__form_login auth__form_active" id="login-form" action="submit" onSubmit={logIn}>
+			<fieldset className="auth__input-wrapper">
+				<input type="email" className="auth__input" placeholder="Логин" id="login-auth" required />
+				<span className="auth__error" id="error-login"></span>
+			</fieldset>
+			<fieldset className="auth__input-wrapper">
+				<input type="password" className="auth__input" placeholder="Пароль" id="password-auth" required />
+				<span className="auth__error" id="error-activation">
+					{errorMessage}
+				</span>
+			</fieldset>
+			<input className="auth__button" id="login-btn" value="Войти" type="submit" />
+		</form>
+	);
 };

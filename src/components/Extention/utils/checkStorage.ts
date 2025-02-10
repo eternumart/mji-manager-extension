@@ -1,4 +1,4 @@
-import { changePopupState } from "./changePopupState";
+//import { changePopupState } from "./changePopupState";
 import { checkLayoutBeforeInit } from "./checkLayoutBeforeInit";
 import { getAppData } from "./launchApp";
 
@@ -26,7 +26,7 @@ export function checkStorage(request: any) {
       console.warn("Элемент .account__fio не найден в DOM");
     }
 
-    changePopupState("logged");
+    //changePopupState("logged");
     checkLayoutBeforeInit();
     getAppData(userData);
   } else {

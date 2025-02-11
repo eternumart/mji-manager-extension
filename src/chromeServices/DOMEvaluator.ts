@@ -86,30 +86,24 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 	}
 });
 
-async function fetchWithRetryAndCache(
-	url: string,
-	options: RequestInit,
-	retries: number = 1, // По умолчанию запрос выполняется только 1 раз
-	useCache: boolean = false
-): Promise<any> {
+async function fetchWithRetryAndCache(url: string, options: RequestInit, retries: number = 1, useCache: boolean = false): Promise<any> {
 	if (loadingFlags.get(url)) {
-		console.log("⏱️ Запрос уже выполняется:", url);
 		return;
 	}
 
 	loadingFlags.set(url, true);
 	isLoading = true;
 
-	chrome.runtime.sendMessage({
-		contentScriptQuery: "loader-state-response",
-		isLoading: isLoading,
-	});
-
-	// 🚀 Пытаемся выполнить запрос (для `login` и `appData` используется `retries = 5`)
 	for (let i = 0; i < retries; i++) {
 		try {
 			console.info(`⏳ Попытка доступа к серверу №${i + 1} по URL ${url}`);
-			const response = await fetch(url, options);
+			const controller = new AbortController();
+			const timeout = setTimeout(() => controller.abort(), 5000); // ⏳ 5 секунд
+
+			const response = await fetch(url, { ...options, signal: controller.signal });
+
+			clearTimeout(timeout);
+
 			if (!response.ok) {
 				chrome.runtime.sendMessage({
 					contentScriptQuery: "Error-response",
@@ -121,11 +115,6 @@ async function fetchWithRetryAndCache(
 			loadingFlags.set(url, false);
 			isLoading = false;
 
-			chrome.runtime.sendMessage({
-				contentScriptQuery: "loader-state-response",
-				isLoading: isLoading,
-			});
-
 			if (retries === 3) {
 				console.log("4! 📦 Сервер вернул данные пользователя.");
 			}
@@ -136,7 +125,7 @@ async function fetchWithRetryAndCache(
 		} catch (error) {
 			chrome.runtime.sendMessage({
 				contentScriptQuery: "Error-response",
-				error: `⚠️ Попытка #${i + 1} не удалась: нет соединения с сервером.`,
+				error: `⚠️ Попытка загрузки #${i + 1} из ${retries} не удалась. Повторная попытка`,
 			});
 			if (i === retries - 1) {
 				if (useCache) {
@@ -149,10 +138,6 @@ async function fetchWithRetryAndCache(
 					if (cachedData) {
 						loadingFlags.set(url, false);
 						isLoading = false;
-						chrome.runtime.sendMessage({
-							contentScriptQuery: "loader-state-response",
-							isLoading: isLoading,
-						});
 
 						chrome.runtime.sendMessage({
 							contentScriptQuery: "Error-response",
@@ -164,11 +149,12 @@ async function fetchWithRetryAndCache(
 						contentScriptQuery: "Error-response",
 						error: "❌ Все попытки подключения к серверу провалились. Данные в кеше отсутствуют.",
 					});
+				} else {
+					chrome.runtime.sendMessage({
+						contentScriptQuery: "Error-response",
+						error: "❌ Все попытки подключения к серверу провалились.",
+					});
 				}
-				chrome.runtime.sendMessage({
-					contentScriptQuery: "Error-response",
-					error: "❌ Все попытки подключения к серверу провалились.",
-				});
 			}
 		}
 	}

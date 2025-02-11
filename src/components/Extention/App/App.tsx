@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { EnviromentSwitch } from "../EnviromentSwitch/EnviromentSwitch";
 import { UpdateLink } from "../UpdateLink";
-import { Authorization } from "../Authorization";
-import { Logged } from "../Logged";
-import { Loader } from "../Loader";
+import { Authorization } from "../Authorization/Authorization";
+import { Logged } from "../Logged/Logged";
+import { Loader } from "../Loader/Loader";
 import { useAppContext } from "../../../context/Context";
 import { apiConfig } from "../../../apiConfig";
 import { getAppData } from "../utils/launchApp";
 import { Errors } from "../Errors/Errors";
 
 function App() {
-	const { isLogged, setIsLogged, setUserData, serverState, errorText, setErrors } = useAppContext();
-	const [isLoaded, setIsLoaded] = useState(false);
+	const { isLogged, setIsLogged, setUserData, serverState, errorText, setErrors, isLoading, setLoading } = useAppContext();
 
 	const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
 	const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
 
 	useEffect(() => {
+		setLoading(true);
 		console.log("🌍 Устанавливаем baseUrl:", baseUrl);
 
 		chrome.storage.local.get(null, (result) => {
@@ -26,11 +26,11 @@ function App() {
 				console.log("✅ Пользователь найден в storage, авторизация подтверждена.");
 				setIsLogged(true);
 				setUserData({ fio: result[baseUrl].currentFio, login: result[baseUrl].currentLogin });
-				getAppData(result[baseUrl]);
+				getAppData(result[baseUrl], setLoading);
 			} else {
 				console.warn(`⚠️ В local storage нет данных для текущего baseUrl: ${baseUrl}.`);
+				setLoading(false);
 			}
-			setIsLoaded(true);
 		});
 	}, [serverState]);
 
@@ -41,10 +41,7 @@ function App() {
 				console.error("🔴 Ошибка получена:", request.error);
 
 				// ✅ Гарантируем, что `setErrors()` получает строку
-				const errorMessage =
-					typeof request.error === "string"
-						? request.error
-						: request.error?.message || "Произошла неизвестная ошибка";
+				const errorMessage = typeof request.error === "string" ? request.error : request.error?.message || "Произошла неизвестная ошибка";
 
 				setErrors(errorMessage);
 			}
@@ -67,12 +64,27 @@ function App() {
 		}
 	}, [errorText]);
 
+	useEffect(() => {
+		const handleLoader = (request: any) => {
+			if (request.contentScriptQuery === "loader-state-response") {
+				console.log("🔄 Получен `loader-state-response`: ", request.isLoading);
+				setLoading(request.isLoading);
+			}
+		};
+
+		chrome.runtime.onMessage.addListener(handleLoader);
+
+		return () => {
+			chrome.runtime.onMessage.removeListener(handleLoader);
+		};
+	}, []);
+
 	return (
 		<>
 			<EnviromentSwitch />
 			<UpdateLink />
-			{isLogged && isLoaded ? <Logged /> : <Authorization />}
-			{!isLoaded && <Loader />}
+			{isLogged ? <Logged /> : <Authorization />}
+			{isLoading && <Loader />}
 			<Errors />
 		</>
 	);

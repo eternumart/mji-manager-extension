@@ -1,12 +1,11 @@
 import React, { useEffect } from "react";
 import { useAppContext } from "../../../context/Context";
-//import { checkStorage } from "../utils/checkStorage";
 import { logOut } from "../utils/logOut";
 import { apiConfig } from "../../../apiConfig";
 import { getAppData } from "../utils/launchApp";
 
 export const Logged = () => {
-	const { userData, isLogged, setIsLogged, setUserData, serverState } = useAppContext();
+	const { userData, isLogged, setIsLogged, setUserData, serverState, setLoading } = useAppContext();
 
 	const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
 	const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
@@ -24,13 +23,11 @@ export const Logged = () => {
 					console.log("✅ Пользователь найден в storage, авторизация подтверждена.");
 					setIsLogged(true);
 					setUserData({ fio: result[baseUrl].currentFio, login: result[baseUrl].currentLogin });
-					getAppData(result[baseUrl]);
+					getAppData(result[baseUrl], setLoading);
 				} else {
 					console.warn("⚠️ В local storage нет данных для текущего `baseUrl`.");
 				}
-				// setIsLoaded(true);
 			});
-			//checkStorage({ logged: userData?.login, fio: userData?.fio });
 		}, 300);
 	}, [userData]);
 

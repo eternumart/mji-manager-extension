@@ -4,7 +4,7 @@ import { apiConfig } from "../../../apiConfig";
 import { saveToCache } from "../utils/saveToCache";
 
 export const LoginForm = () => {
-	const { setIsLogged, setUserData, serverState } = useAppContext();
+	const { setIsLogged, setUserData, serverState, setLoading } = useAppContext();
 	const [errorMessage, setErrorMessage] = useState("");
 
 	const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
@@ -31,31 +31,28 @@ export const LoginForm = () => {
 		}
 
 		console.log("1!📤 Отправляем данные для авторизации...");
+		setLoading(true);
 
 		chrome.runtime.sendMessage({
 			contentScriptQuery: "logIn-request",
 			data: { login, password },
-			url: `${baseUrl}${apiConfig.routes.api.login}`
+			url: `${baseUrl}${apiConfig.routes.api.login}`,
 		});
 
 		console.log(`2!📨 logIn-request отправлен на сервер (${serverState}), ожидаем logIn-response...`);
 	};
 
 	useEffect(() => {
-		const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
-		const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
-
-
 		const handleLoginResponse = (message: any) => {
 			if (message.contentScriptQuery === "logIn-response") {
 				const loginResponseData = message.data[0];
 				const login = message.data[1];
-	
+
 				console.log("6! 🔹 Получен logIn-response:", message.data);
-	
+
 				if (loginResponseData.loginIsPossible) {
 					console.log("7! ✅ Авторизация успешна:", login);
-	
+
 					setUserData({ fio: loginResponseData.fio, login: login });
 					setIsLogged(true);
 					setErrorMessage("");
@@ -63,9 +60,9 @@ export const LoginForm = () => {
 					saveToCache(baseUrl, {
 						fio: loginResponseData.fio,
 						login: login,
-						loginIsPossible: loginResponseData.loginIsPossible, // ✅ Передаём loginIsPossible
+						loginIsPossible: loginResponseData.loginIsPossible,
 					});
-					
+
 					chrome.runtime.sendMessage({
 						contentScriptQuery: "appData-request",
 						serverState,
@@ -73,10 +70,11 @@ export const LoginForm = () => {
 				} else {
 					console.error("❌ Ошибка авторизации");
 					setErrorMessage("Ошибка авторизации. Проверьте логин и пароль.");
+					setLoading(false);
 				}
 			}
 		};
-	
+
 		chrome.runtime.onMessage.addListener(handleLoginResponse);
 		return () => chrome.runtime.onMessage.removeListener(handleLoginResponse);
 	}, [serverState]);

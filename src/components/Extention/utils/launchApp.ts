@@ -1,11 +1,12 @@
 let appDataIsLoaded: boolean = false;
 let lauchStarted: boolean = false;
 
-export const getAppData = async (data: Object) => {
+export const getAppData = async (data: Object, setLoading: (loading: boolean) => void) => {
 	chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 		if (request.contentScriptQuery === "appData-response") {
 			console.log("11! ⚙️ Данные приложения получены. Запуск.");
 			appDataIsLoaded = true;
+			setLoading(false);
 			init(data);
 		}
 	});

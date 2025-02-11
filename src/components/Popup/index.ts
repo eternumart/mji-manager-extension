@@ -5,7 +5,6 @@ import { setRatings } from "./setRatings";
 
 export const runApp = (currentFioValue: string, login: string, loginIsPossible: Boolean, launchStatus: Boolean, appData: any) => {
 	const launchApp = (currentFioValue: string, login: string, loginIsPossible: Boolean, launchStatus: Boolean, appData: any) => {
-		debugger;
 		interface appData {
 			[key: string]: any;
 		}

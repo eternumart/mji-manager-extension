@@ -97,7 +97,7 @@ export async function searchAddress(address: string): Promise<string> {
 		const timeout = setTimeout(() => {
 			observer.disconnect();
 			resolve("⚠️ Для этого адреса УК не определена.");
-		}, 5000);
+		}, randomInterval());
 
 		const observer = new MutationObserver(() => {
 			const hintItem = hintsContainer.querySelector(".manageSearch__hintDataTitle_address");
@@ -114,6 +114,17 @@ export async function searchAddress(address: string): Promise<string> {
 	});
 }
 
+function randomInterval(): number {
+	const min = 5000;
+	const max = 10000;
+	const step = 500;
+
+	// Генерируем случайное число от 0 до количества возможных шагов
+	const randomStep = Math.floor(Math.random() * ((max - min) / step + 1));
+
+	// Вычисляем случайное значение в заданном диапазоне с шагом 500
+	return min + randomStep * step;
+}
 
 function showLoader(total: number) {
 	if (!window.appVariables.loader || !window.appVariables.loaderText) {

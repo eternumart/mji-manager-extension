@@ -36,13 +36,13 @@ export const createPopup = (currentPage: string) => {
 	window.appVariables.formParser = window.appVariables.app.querySelector(".form_parser");
 	window.appVariables.formParserInput = window.appVariables.app.querySelector("#fileInputParser");
 	window.appVariables.formParserButton = window.appVariables.app.querySelector("#processBtnParser");
-	window.appVariables.loader = window.appVariables.querySelector("#loader");
-	window.appVariables.loaderText = window.appVariables.querySelector("#progressText");
+	window.appVariables.loader = window.appVariables.app.querySelector("#loader");
+	window.appVariables.loaderText = window.appVariables.app.querySelector("#progressText");
 	window.appVariables.formParserPDF = window.appVariables.app.querySelector(".form_parserPDF");
 	window.appVariables.formParserPDFInput = window.appVariables.app.querySelector(".fileInputParserPDF");
-	window.appVariables.formParsefPDFButton = window.appVariables.querySelector("#processBtnParserPDF");
-	window.appVariables.loaderPDF = window.appVariables.querySelector("#loaderPDF");
-	window.appVariables.loaderPDFText = window.appVariables.querySelector("#progressTextPDF");
+	window.appVariables.formParsefPDFButton = window.appVariables.app.querySelector("#processBtnParserPDF");
+	window.appVariables.loaderPDF = window.appVariables.app.querySelector("#loaderPDF");
+	window.appVariables.loaderPDFText = window.appVariables.app.querySelector("#progressTextPDF");
 
 	// Обработчики действий пользователя
 	window.appVariables.dragIco.addEventListener("mousedown", startDraggingDiv);

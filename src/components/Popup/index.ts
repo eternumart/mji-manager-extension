@@ -5,6 +5,7 @@ import { setRatings } from "./setRatings";
 
 export const runApp = (currentFioValue: string, login: string, loginIsPossible: Boolean, launchStatus: Boolean, appData: any) => {
 	const launchApp = (currentFioValue: string, login: string, loginIsPossible: Boolean, launchStatus: Boolean, appData: any) => {
+		debugger;
 		interface appData {
 			[key: string]: any;
 		}
@@ -85,8 +86,9 @@ export const runApp = (currentFioValue: string, login: string, loginIsPossible: 
 		setToStorage(true, true, null, null);
 
 		setInitialDate(appVariables.inputDate);
-
-		setRatings();
+		if (appVariables.currentPage !== "parser") {
+			setRatings();
+		}
 	};
 	launchApp(currentFioValue, login, loginIsPossible, launchStatus, appData);
 };

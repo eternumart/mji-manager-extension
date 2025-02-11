@@ -1,5 +1,5 @@
 export const setRepresentatives = () => {
-    if (!window.appData.functions.setRepresentatives) {
+    if (!window.appData.functions.setRepresentatives || window.appVariables.currentPage === "parser") {
         return;
     }
 

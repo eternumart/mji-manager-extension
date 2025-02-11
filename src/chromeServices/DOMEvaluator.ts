@@ -3,7 +3,7 @@ import { saveToCache } from "../components/Extention/utils/saveToCache";
 
 console.log("DOMEvaluator.ts loaded");
 
-export let baseUrl: string;
+export let baseUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`; // По умолчанию выбран сервер Prod
 let isLoading = false;
 const loadingFlags = new Map<string, boolean>();
 
@@ -18,22 +18,21 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 		}
 		case "logIn-request": {
 			if (!request.data.login || !request.data.password) {
-				console.log("logIn-request break");
 				return;
 			}
 
-			console.log("🔹 logIn-request получен, начинаем авторизацию...");
+			console.log("3!🔹 logIn-request получен, начинаем авторизацию...");
 
 			login(request)
 				.then((response) => {
-					console.log("✅ Авторизация завершена, отправляем logIn-response...");
+					console.log("5! ✅ Авторизация завершена, отправляем logIn-response...");
 					chrome.runtime.sendMessage({
 						contentScriptQuery: "logIn-response",
 						data: [response, request.data.login],
 					});
 				})
 				.catch((error) => {
-					console.error("❌ Ошибка авторизации:", error);
+					console.error("5!❌ Ошибка авторизации:", error);
 					chrome.runtime.sendMessage({
 						contentScriptQuery: "logIn-response",
 						data: { success: false, error: error.message },
@@ -52,7 +51,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 			break;
 		}
 		case "appData-request": {
-			console.log("appData-request");
 			await appData(request);
 			break;
 		}
@@ -61,7 +59,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 			break;
 		}
 		case "enviromentSwitch-request": {
-			console.log(`Запросы пойдут на ${request.enviroment} сервер.`);
+			console.log(`🛠 Запросы пойдут на ${request.enviroment} сервер.`);
 			baseUrl = request.baseUrl;
 			checkResponseFromServer(request);
 			break;
@@ -91,11 +89,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 async function fetchWithRetryAndCache(
 	url: string,
 	options: RequestInit,
-	retries: number = 1, // ✅ По умолчанию запрос выполняется только 1 раз
+	retries: number = 1, // По умолчанию запрос выполняется только 1 раз
 	useCache: boolean = false
 ): Promise<any> {
 	if (loadingFlags.get(url)) {
-		console.log("Запрос уже выполняется:", url);
+		console.log("⏱️ Запрос уже выполняется:", url);
 		return;
 	}
 
@@ -107,39 +105,15 @@ async function fetchWithRetryAndCache(
 		isLoading: isLoading,
 	});
 
-	// ✅ Если `useCache = true`, проверяем кеш в локальном хранилище
-	if (useCache) {
-		const cachedData = await new Promise((resolve) => {
-			chrome.storage.local.get([url], (result) => {
-				resolve(result[url] || null);
-			});
-		});
-
-		if (cachedData) {
-			console.log("✅ Используем кешированные данные для:", url);
-			loadingFlags.set(url, false);
-			isLoading = false;
-			chrome.runtime.sendMessage({
-				contentScriptQuery: "loader-state-response",
-				isLoading: isLoading,
-			});
-			return cachedData;
-		}
-	}
-
 	// 🚀 Пытаемся выполнить запрос (для `login` и `appData` используется `retries = 5`)
 	for (let i = 0; i < retries; i++) {
 		try {
+			console.info(`⏳ Попытка доступа к серверу №${i + 1} по URL ${url}`);
 			const response = await fetch(url, options);
 			if (!response.ok) {
-				throw new Error(`HTTP error! статус: ${response.status}`);
+				throw new Error(`❌ Сервер не доступен. Статус: ${response.status}`);
 			}
 			const data = await response.json();
-
-			// ✅ Если запрос успешен, кешируем только если `useCache === true`
-			if (useCache) {
-				saveToCache(url, data);
-			}
 
 			loadingFlags.set(url, false);
 			isLoading = false;
@@ -149,11 +123,37 @@ async function fetchWithRetryAndCache(
 				isLoading: isLoading,
 			});
 
+			if (retries === 3) {
+				console.log("4! 📦 Сервер вернул данные пользователя.");
+			}
+			if (retries === 5) {
+				console.log("9! 📦 Сервер прислал приложение.")
+			}
 			return data;
 		} catch (error) {
 			console.warn(`Попытка ${i + 1} не удалась: ${error}`);
 			if (i === retries - 1) {
-				throw new Error("❌ Все попытки подключения к серверу провалились.");
+				if (useCache) {
+					const cachedData = await new Promise((resolve) => {
+						chrome.storage.local.get([url], (result) => {
+							resolve(result[url] || null);
+						});
+					});
+
+					if (cachedData) {
+						loadingFlags.set(url, false);
+						isLoading = false;
+						chrome.runtime.sendMessage({
+							contentScriptQuery: "loader-state-response",
+							isLoading: isLoading,
+						});
+
+						console.warn("4.1! 9.1! ⚠️ Все попытки подключения к серверу провалились, используем кешированные данные ", baseUrl);
+						return cachedData;
+					}
+					throw new Error("4.2! 9.2! ❌ Все попытки подключения к серверу провалились. Данные в кеше отсутствуют.");
+				}
+				throw new Error("4.3! 9.3! ❌ Все попытки подключения к серверу провалились.");
 			}
 		}
 	}
@@ -167,20 +167,20 @@ async function getCurrentEnviroment() {
 }
 
 async function checkResponseFromServer(request: any) {
-	console.log("Проверка ответа сервера DOMEvaluator.ts");
+	console.log("⏳ Проверка ответа сервера DOMEvaluator.ts");
 	try {
 		const url = `${baseUrl}${apiConfig.routes.api.checResponseFromServer}`;
 
 		// Выполняем запрос без использования флагов загрузки
-		const data = await fetchWithRetryAndCache(url, {
+		await fetchWithRetryAndCache(url, {
 			method: "GET",
 			headers: { "Content-Type": "application/json" },
+		}).then((res) => {
+			console.log(`🟢 Сервер ${request.enviroment} доступен`);
+			baseUrl = request.baseUrl;
 		});
-
-		console.log(`Сервер ${request.enviroment} доступен`);
-		baseUrl = request.baseUrl;
 	} catch (error) {
-		console.error(`Сервер ${request.enviroment} не доступен`, error);
+		console.error(`🔴 Сервер ${request.enviroment} не доступен`, error);
 	}
 }
 
@@ -204,7 +204,6 @@ async function activation(request: any) {
 }
 
 async function login(request: any) {
-	console.log("🔹 Запуск процесса входа...");
 	const url = `${baseUrl}${apiConfig.routes.api.login}`;
 
 	try {
@@ -215,13 +214,11 @@ async function login(request: any) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ data: request.data }),
 			},
-			5, // ✅ Только `login()` использует 5 повторов
+			3, // 3 попытки доступа к серверу
 			true
 		);
 
-		chrome.runtime.sendMessage({ data, contentScriptQuery: "logIn-response" });
-
-		return { success: true, user: data };
+		return data;
 	} catch (error) {
 		chrome.runtime.sendMessage({
 			contentScriptQuery: "Error-response",
@@ -251,7 +248,7 @@ async function saveFio(request: any) {
 }
 
 async function appData(request: any) {
-	console.log("🔹 Получение данных приложения...");
+	console.log("8! ⏳ Получение данных приложения.");
 	const url = `${baseUrl}${apiConfig.routes.api.getAppData}`;
 
 	try {
@@ -262,12 +259,14 @@ async function appData(request: any) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ data: request.data }),
 			},
-			5, // ✅ `appData()` также использует 5 повторов
+			5, // 5 попыток доступа к серверу
 			true
 		);
-
+		console.log("10! ✅ Данные приложения получены, сохранение в storage...");
+		saveToCache(baseUrl, data);
 		chrome.runtime.sendMessage({ data, contentScriptQuery: "appData-response" });
 	} catch (error) {
+		console.log("10.1! ❌ Данные приложения не получены.");
 		chrome.runtime.sendMessage({
 			contentScriptQuery: "Error-response",
 			error: error,

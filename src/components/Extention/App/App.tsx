@@ -18,16 +18,16 @@ function App() {
 	useEffect(() => {
 		console.log("🌍 Устанавливаем baseUrl:", baseUrl);
 	  
-		chrome.storage.local.get(null, (result) => { // Теперь получаем ВСЕ данные в local storage
+		chrome.storage.local.get(null, (result) => {
 		  console.log("📂 Все данные в storage:", result);
 		  
-		  if (result[baseUrl]?.fio && result[baseUrl]?.login) {
+		  if (result[baseUrl]?.currentFio && result[baseUrl]?.currentLogin) {
 			console.log("✅ Пользователь найден в storage, авторизация подтверждена.");
 			setIsLogged(true);
-			setUserData({ fio: result[baseUrl].fio, login: result[baseUrl].login });
+			setUserData({ fio: result[baseUrl].currentFio, login: result[baseUrl].currentLogin });
 			getAppData(result[baseUrl])
 		  } else {
-			console.warn("⚠️ В local storage нет данных для текущего `baseUrl`.");
+			console.warn(`⚠️ В local storage нет данных для текущего baseUrl: ${baseUrl}.`);
 		  }
 		  setIsLoaded(true);
 		});

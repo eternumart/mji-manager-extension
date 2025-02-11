@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { apiConfig } from "../../../apiConfig";
 import { saveToCache } from "../utils/saveToCache";
-import { getAppData } from "../utils/launchApp";
 
 export const LoginForm = () => {
 	const { setIsLogged, setUserData, serverState } = useAuth();
@@ -13,7 +12,6 @@ export const LoginForm = () => {
 
 	const logIn = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		console.log("📤 Отправляем данные для авторизации...");
 
 		const loginInput = document.querySelector("#login-auth") as HTMLInputElement;
 		const passwordInput = document.querySelector("#password-auth") as HTMLInputElement;
@@ -32,42 +30,56 @@ export const LoginForm = () => {
 			return;
 		}
 
+		console.log("1!📤 Отправляем данные для авторизации...");
+
 		chrome.runtime.sendMessage({
 			contentScriptQuery: "logIn-request",
 			data: { login, password },
-			url: `${baseUrl}/auth/login`,
+			url: `${baseUrl}${apiConfig.routes.api.login}`
 		});
 
-		console.log(`📨 logIn-request отправлен на сервер (${serverState}), ожидаем logIn-response...`);
+		console.log(`2!📨 logIn-request отправлен на сервер (${serverState}), ожидаем logIn-response...`);
 	};
 
 	useEffect(() => {
+		const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
+		const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
+
+
 		const handleLoginResponse = (message: any) => {
 			if (message.contentScriptQuery === "logIn-response") {
-				console.log("🔹 Получен logIn-response:", message.data);
-
-				if (message.data[0].user.loginIsPossible) {
-					console.log("✅ Авторизация успешна:", message.data[1]);
-					setUserData({ fio: message.data[0].user.fio, login: message.data[1] });
+				const loginResponseData = message.data[0];
+				const login = message.data[1];
+	
+				console.log("6! 🔹 Получен logIn-response:", message.data);
+	
+				if (loginResponseData.loginIsPossible) {
+					console.log("7! ✅ Авторизация успешна:", login);
+	
+					setUserData({ fio: loginResponseData.fio, login: login });
 					setIsLogged(true);
 					setErrorMessage("");
 
-					saveToCache(baseUrl, { fio: message.data[0].user.fio, login: message.data[1] });
-					console.log("📥 Данные пользователя сохранены в кэш", baseUrl);
-					getAppData(message.data[0].user)
+					saveToCache(baseUrl, {
+						fio: loginResponseData.fio,
+						login: login,
+						loginIsPossible: loginResponseData.loginIsPossible, // ✅ Передаём loginIsPossible
+					});
+					
+					chrome.runtime.sendMessage({
+						contentScriptQuery: "appData-request",
+						serverState,
+					});
 				} else {
 					console.error("❌ Ошибка авторизации");
 					setErrorMessage("Ошибка авторизации. Проверьте логин и пароль.");
 				}
 			}
 		};
-
+	
 		chrome.runtime.onMessage.addListener(handleLoginResponse);
-
-		return () => {
-			chrome.runtime.onMessage.removeListener(handleLoginResponse);
-		};
-	}, []);
+		return () => chrome.runtime.onMessage.removeListener(handleLoginResponse);
+	}, [serverState]);
 
 	return (
 		<form className="auth__form auth__form_login auth__form_active" id="login-form" action="submit" onSubmit={logIn}>

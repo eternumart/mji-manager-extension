@@ -12,16 +12,18 @@ export const Logged = () => {
 	const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
 
 	useEffect(() => {
-		console.log("Компонент <Logged /> загружен");
+		console.log("⚙️ Компонент <Logged /> загружен");
 
 		setTimeout(() => {
 			chrome.storage.local.get(baseUrl, (result) => {
 				console.log("📂 Все данные в storage по baseUrl:", result);
 
-				if (result[baseUrl].fio && result[baseUrl].login) {
+				if (isLogged) return;
+
+				if (result[baseUrl].currentFio && result[baseUrl].currentLogin) {
 					console.log("✅ Пользователь найден в storage, авторизация подтверждена.");
 					setIsLogged(true);
-					setUserData({ fio: result[baseUrl].fio, login: result[baseUrl].login });
+					setUserData({ fio: result[baseUrl].currentFio, login: result[baseUrl].currentLogin });
 					getAppData(result[baseUrl]);
 				} else {
 					console.warn("⚠️ В local storage нет данных для текущего `baseUrl`.");

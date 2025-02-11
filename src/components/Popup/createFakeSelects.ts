@@ -4,7 +4,7 @@ import { openFakeSelect, closeFakeSelect } from "./openCloseFakeSelect";
 import { splitBySentences } from "./splitBySentences";
 
 export const createFakeSelects = () => {
-    if (!window.appData.functions.createFakeSelects) {
+    if (!window.appData.functions.createFakeSelects || window.appVariables.currentPage === "parser") {
         return;
     }
     if (!buttonError(window.appVariables.copyButton, window.appVariables.currentPage, "main", "Всплывающие поля")) {

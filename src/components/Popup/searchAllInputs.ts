@@ -1,5 +1,5 @@
 export const searchAllInputs = () => {
-    if (!window.appData.functions.searchAllInputs) {
+    if (!window.appData.functions.searchAllInputs || window.appVariables.currentPage === "parser") {
         return;
     }
     window.appVariables.area = window.appVariables.wholeAddress.split(",")[0];

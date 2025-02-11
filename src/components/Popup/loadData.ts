@@ -4,7 +4,7 @@ import { setRepresentatives } from "./setRepresentatives";
 import { buttonError } from "./buttonError";
 
 export const loadData = () => {
-    if (!window.appData.functions.loadData) {
+    if (!window.appData.functions.loadData || window.appVariables.currentPage === "parser") {
         return;
     }
     // Находим все поля в отчете

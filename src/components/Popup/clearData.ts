@@ -3,7 +3,7 @@ import { clickGenerator } from "./clickGenerator";
 import { buttonError } from "./buttonError";
 
 export const clearData = () => {
-    if (!window.appData.functions.clearData) {
+    if (!window.appData.functions.clearData || window.appVariables.currentPage === "parser") {
         return;
     }
     // Если страница не подходит для очистки - выдаем ошибку и выходим из функции

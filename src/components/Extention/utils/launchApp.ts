@@ -1,22 +1,21 @@
 let appDataIsLoaded: boolean = false;
 let lauchStarted: boolean = false;
 
-export const getAppData = async (userData: Object) => {
+export const getAppData = async (data: Object) => {
 	chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 		if (request.contentScriptQuery === "appData-response") {
-			console.log("Данные приложения получены. Запуск.");
+			console.log("11! ⚙️ Данные приложения получены. Запуск.");
 			appDataIsLoaded = true;
-			init(request.data, userData);
+			init(data);
 		}
 	});
-	console.log("Запрашиваем данные приложения");
 	chrome.runtime.sendMessage({
 		contentScriptQuery: "appData-request",
-		data: "give me data",
+		data: "⛓️",
 	});
 };
 
-const init = (appData: any, userData: any) => {
+const init = (data: any) => {
 	if (lauchStarted) {
 		return;
 	}
@@ -36,7 +35,6 @@ const init = (appData: any, userData: any) => {
 					chrome.scripting.executeScript({
 						target: { tabId: tab.id ?? 0, allFrames: false },
 						func: (currentFio, login, loginIsPossible, launchStatus, appData) => {
-							debugger;
 							// Вызов функции runApp, экспортированной из popup.js
 							if (typeof window.runApp === "function") {
 								window.runApp(currentFio, login, loginIsPossible, launchStatus, appData);
@@ -44,7 +42,7 @@ const init = (appData: any, userData: any) => {
 								console.error("runApp is not defined.");
 							}
 						},
-						args: [`${userData.currentFio}`, `${userData.currentLogin}`, userData.loginIsPossible, userData.launchStatus, appData],
+						args: [`${data.currentFio}`, `${data.currentLogin}`, data.loginIsPossible, false, data.appData],
 					});
 				}
 			);

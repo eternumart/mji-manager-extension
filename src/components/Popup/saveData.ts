@@ -2,7 +2,7 @@ import { searchAllInputs } from "./searchAllInputs";
 import { buttonError } from "./buttonError";
 
 export const saveData = () => {
-    if (!window.appData.functions.saveData) {
+    if (!window.appData.functions.saveData || window.appVariables.currentPage === "parser") {
         return;
     }
     // Если страница не подходит для сохранения - выдаем ошибку и выходим из функции

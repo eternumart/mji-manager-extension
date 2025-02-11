@@ -2,7 +2,7 @@ import { searchAllInputs } from "./searchAllInputs";
 import { clickGenerator } from "./clickGenerator";
 
 export const setRatings = () => {
-    if (!window.appData.functions.setRatings) {
+    if (!window.appData.functions.setRatings || window.appVariables.currentPage === "parser") {
         return;
     }
     const ratesData = window.appData.ratesData;

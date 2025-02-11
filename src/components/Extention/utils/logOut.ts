@@ -1,4 +1,3 @@
-import { useAuth } from "../../../context/AuthContext";
 import { apiConfig } from "../../../apiConfig";
 
 export const logOut = () => {

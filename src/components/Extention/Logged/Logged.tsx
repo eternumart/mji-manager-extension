@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
-import { useAuth } from "../../../context/AuthContext";
+import { useAppContext } from "../../../context/Context";
 //import { checkStorage } from "../utils/checkStorage";
 import { logOut } from "../utils/logOut";
 import { apiConfig } from "../../../apiConfig";
 import { getAppData } from "../utils/launchApp";
 
 export const Logged = () => {
-	const { userData, isLogged, setIsLogged, setUserData, serverState } = useAuth();
+	const { userData, isLogged, setIsLogged, setUserData, serverState } = useAppContext();
 
 	const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
 	const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
@@ -57,7 +57,6 @@ export const Logged = () => {
 			<div className="account account_hidden">
 				<input className="account__fio" value={userData?.fio} />
 			</div>
-			<p className="server-error">#####</p>
 		</>
 	);
 };

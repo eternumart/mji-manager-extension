@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../../context/AuthContext";
+import { useAppContext } from "../../../context/Context";
 import { apiConfig } from "../../../apiConfig";
 import { saveToCache } from "../utils/saveToCache";
 
 export const LoginForm = () => {
-	const { setIsLogged, setUserData, serverState } = useAuth();
+	const { setIsLogged, setUserData, serverState } = useAppContext();
 	const [errorMessage, setErrorMessage] = useState("");
 
 	const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;

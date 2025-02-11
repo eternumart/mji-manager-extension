@@ -453,13 +453,8 @@ $color-error: #9f0000;
   .server-error {
     margin: 0;
     padding-top: 10px;
-    font-size: 18px;
+    font-size: 14px;
     color: $color-brand-red;
-    display: none;
-
-    &_visible {
-      display: initial;
-    }
   }
 
   .update {

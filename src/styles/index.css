@@ -389,12 +389,8 @@
 .mji-manager-app .server-error {
   margin: 0;
   padding-top: 10px;
-  font-size: 18px;
+  font-size: 14px;
   color: #e2000f;
-  display: none;
-}
-.mji-manager-app .server-error_visible {
-  display: initial;
 }
 .mji-manager-app .update {
   position: absolute;

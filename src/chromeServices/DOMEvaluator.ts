@@ -111,7 +111,10 @@ async function fetchWithRetryAndCache(
 			console.info(`⏳ Попытка доступа к серверу №${i + 1} по URL ${url}`);
 			const response = await fetch(url, options);
 			if (!response.ok) {
-				throw new Error(`❌ Сервер не доступен. Статус: ${response.status}`);
+				chrome.runtime.sendMessage({
+					contentScriptQuery: "Error-response",
+					error: "❌ Сервер недоступен. Статус: ${response.status}",
+				});
 			}
 			const data = await response.json();
 
@@ -127,11 +130,14 @@ async function fetchWithRetryAndCache(
 				console.log("4! 📦 Сервер вернул данные пользователя.");
 			}
 			if (retries === 5) {
-				console.log("9! 📦 Сервер прислал приложение.")
+				console.log("9! 📦 Сервер прислал приложение.");
 			}
 			return data;
 		} catch (error) {
-			console.warn(`Попытка ${i + 1} не удалась: ${error}`);
+			chrome.runtime.sendMessage({
+				contentScriptQuery: "Error-response",
+				error: `⚠️ Попытка #${i + 1} не удалась: нет соединения с сервером.`,
+			});
 			if (i === retries - 1) {
 				if (useCache) {
 					const cachedData = await new Promise((resolve) => {
@@ -148,12 +154,21 @@ async function fetchWithRetryAndCache(
 							isLoading: isLoading,
 						});
 
-						console.warn("4.1! 9.1! ⚠️ Все попытки подключения к серверу провалились, используем кешированные данные ", baseUrl);
+						chrome.runtime.sendMessage({
+							contentScriptQuery: "Error-response",
+							error: "⚠️ Все попытки подключения к серверу провалились, используем кешированные данные",
+						});
 						return cachedData;
 					}
-					throw new Error("4.2! 9.2! ❌ Все попытки подключения к серверу провалились. Данные в кеше отсутствуют.");
+					chrome.runtime.sendMessage({
+						contentScriptQuery: "Error-response",
+						error: "❌ Все попытки подключения к серверу провалились. Данные в кеше отсутствуют.",
+					});
 				}
-				throw new Error("4.3! 9.3! ❌ Все попытки подключения к серверу провалились.");
+				chrome.runtime.sendMessage({
+					contentScriptQuery: "Error-response",
+					error: "❌ Все попытки подключения к серверу провалились.",
+				});
 			}
 		}
 	}
@@ -262,11 +277,17 @@ async function appData(request: any) {
 			5, // 5 попыток доступа к серверу
 			true
 		);
-		console.log("10! ✅ Данные приложения получены, сохранение в storage...");
+		console.log("10! ✅ Данные приложения получены, сохранение в кеш...");
 		saveToCache(baseUrl, data);
 		chrome.runtime.sendMessage({ data, contentScriptQuery: "appData-response" });
 	} catch (error) {
-		console.log("10.1! ❌ Данные приложения не получены.");
+		console.log("10.1! ❌ Данные приложения не получены. Загружаем из кеша...");
+		chrome.storage.local.get(baseUrl, (result) => {
+			chrome.runtime.sendMessage({
+				contentScriptQuery: "appData-response",
+				data: result[baseUrl],
+			});
+		});
 		chrome.runtime.sendMessage({
 			contentScriptQuery: "Error-response",
 			error: error,

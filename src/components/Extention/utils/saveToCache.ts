@@ -38,12 +38,12 @@ export const saveToCache = async (key: string, data: any) => {
 		// Сохраняем обновленный объект в `chrome.storage.local`
 		chrome.storage.local.set({ [key]: finalObject }, () => {
 			if (chrome.runtime.lastError) {
-				console.error("❌ Ошибка сохранения в chrome.storage:", chrome.runtime.lastError);
+				console.error("8! ❌ Ошибка сохранения в chrome.storage:", chrome.runtime.lastError);
 			} else {
 				console.log("8! ✅ Данные успешно сохранены в chrome.storage.");
 			}
 		});
 	} catch (error) {
-		console.error("❌ Ошибка при получении данных из chrome.storage:", error);
+		console.error("8! ❌ Ошибка при получении данных из chrome.storage:", error);
 	}
 };

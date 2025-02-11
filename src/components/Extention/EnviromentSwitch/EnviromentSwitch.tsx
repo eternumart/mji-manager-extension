@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "../../../context/AuthContext";
+import { useState } from "react";
+import { useAppContext } from "../../../context/Context";
 import { apiConfig } from "../../../apiConfig";
 
 export const EnviromentSwitch = () => {
-	const { serverState, setServerState } = useAuth();
+	const { serverState, setServerState } = useAppContext();
 	const [isDev, setIsDev] = useState(serverState === "test");
 
 	const handleSwitch = (evt: React.ChangeEvent<HTMLInputElement>) => {

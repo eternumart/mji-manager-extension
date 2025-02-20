@@ -1,3 +1,4 @@
+import styles from "../../../styles/components/Loader.module.scss";
 import React from "react";
 import { useAppContext } from "../../../context/Context";
 
@@ -9,7 +10,7 @@ export const Loader = () => {
 	if (!isLoading) return null;
 
 	return (
-		<div className="loader loader_loading">
+		<div className={`${styles.loader} ${styles.loaderLoading}`}>
 			<svg width="39.994888" height="39.995743" viewBox="0 0 39.9949 39.9957" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<defs />
 				<path

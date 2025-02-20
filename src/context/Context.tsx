@@ -16,6 +16,10 @@ interface ContextType {
 	setErrors: React.Dispatch<React.SetStateAction<string>>;
 	isLoading: boolean;
 	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	activeTab: string;
+	setActiveTab: React.Dispatch<React.SetStateAction<string>>
+	activated: boolean;
+	setActivated: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const Context = createContext<ContextType | null>(null);
@@ -26,6 +30,8 @@ export const ContextProvider = ({ children }: { children: React.ReactNode }) => 
 	const [serverState, setServerState] = useState<string>("prod");
 	const [errorText, setErrors] = useState<string>("");
 	const [isLoading, setLoading] = useState<boolean>(false);
+	const [activeTab, setActiveTab] = useState<string>("login");
+	const [activated, setActivated] = useState<boolean>(false);
 
 	return (
 		<Context.Provider
@@ -40,6 +46,10 @@ export const ContextProvider = ({ children }: { children: React.ReactNode }) => 
 				setErrors,
 				isLoading,
 				setLoading,
+				activeTab,
+				setActiveTab,
+				activated,
+				setActivated
 			}}>
 			{children}
 		</Context.Provider>

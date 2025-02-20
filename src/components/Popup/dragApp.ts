@@ -1,26 +1,43 @@
-export const startDraggingDiv = (event: any) => {
-    window.appVariables.dragIco.style.cursor = "grabbing";
-    let shiftX = event.clientX - window.appVariables.app.getBoundingClientRect().left;
+export const startDraggingDiv = (event: MouseEvent) => {
+    event.preventDefault(); // ❌ Отключаем стандартное выделение текста
 
-    window.appVariables.html.addEventListener("mousemove", onMouseMove);
-    window.appVariables.html.addEventListener("mouseup", () => {
-        window.appVariables.html.removeEventListener("mousemove", onMouseMove);
-        window.appVariables.dragIco.style.cursor = "grab";
-        window.appVariables.dragIco.onmouseup = null;
-    });
+    const app = window.appVariables.app;
+    const dragIco = window.appVariables.dragIco;
+    const html = window.appVariables.html;
 
-    function moveAt(screenX: any, screenY: any) {
-        window.appVariables.app.style.left = screenX - 255 + "px";
-        window.appVariables.app.style.top = screenY - 142 + "px";
+    dragIco.style.cursor = "grabbing";
+
+    // 📌 Вычисляем смещение курсора внутри элемента (чтобы курсор был в центре при перетаскивании)
+    const shiftX = event.clientX - app.getBoundingClientRect().left;
+    const shiftY = event.clientY - app.getBoundingClientRect().top;
+
+    // 🔥 Отключаем выделение текста во время перетаскивания
+    document.body.style.userSelect = "none";
+
+    function moveAt(clientX: number, clientY: number) {
+        app.style.left = `${clientX - shiftX}px`;
+        app.style.top = `${clientY - shiftY}px`;
     }
 
-    function onMouseMove(event: any) {
-        moveAt(event.screenX, event.screenY);
+    function onMouseMove(event: MouseEvent) {
+        moveAt(event.clientX, event.clientY);
     }
 
-    moveAt(event.screenX, event.screenY);
-}
+    function onMouseUp() {
+        html.removeEventListener("mousemove", onMouseMove);
+        html.removeEventListener("mouseup", onMouseUp);
 
-export const removeDefaultDrag = () => {
-    return false;
-}
+        // ✅ Возвращаем стиль курсора и разрешаем выделение текста
+        dragIco.style.cursor = "grab";
+        document.body.style.userSelect = "";
+    }
+
+    html.addEventListener("mousemove", onMouseMove);
+    html.addEventListener("mouseup", onMouseUp);
+
+    // Начальное перемещение
+    moveAt(event.clientX, event.clientY);
+};
+
+// ❌ Полностью блокируем дефолтное поведение drag&drop
+export const removeDefaultDrag = () => false;

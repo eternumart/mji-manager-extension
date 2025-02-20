@@ -1,0 +1,20 @@
+.animation {
+	animation: colorChange;
+	animation-duration: 1s;
+	animation-timing-function: ease-in-out;
+	animation-fill-mode: both;
+	animation-direction: normal;
+	animation-iteration-count: 1;
+}
+
+@keyframes colorChange {
+	0% {
+		fill: #787878;
+	}
+	50% {
+		fill: $color-success;
+	}
+	100% {
+		fill: #787878;
+	}
+}

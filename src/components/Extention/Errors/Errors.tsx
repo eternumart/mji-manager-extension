@@ -1,3 +1,4 @@
+import styles from "../../../styles/components/Errors.module.scss";
 import React from "react";
 import { useAppContext } from "../../../context/Context";
 
@@ -7,5 +8,5 @@ export const Errors = () => {
 	// ✅ Если ошибки нет — ничего не рендерим
 	if (!errorText) return null;
 
-	return <p className="server-error">{errorText}</p>;
+	return <p className={styles.serverError}>{errorText}</p>;
 };

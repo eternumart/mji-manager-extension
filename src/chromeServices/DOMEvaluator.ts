@@ -1,5 +1,6 @@
 import { apiConfig } from "../apiConfig";
 import { saveToCache } from "../components/Extention/utils/saveToCache";
+import { decodeToken } from "../components/Extention/utils/decodeToken";
 
 console.log("DOMEvaluator.ts loaded");
 
@@ -9,36 +10,30 @@ const loadingFlags = new Map<string, boolean>();
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 	switch (request.contentScriptQuery) {
-		case "activation-request": {
-			if (!request.data.login || !request.data.password) {
+		case "activate-request": {
+			if (!request.data.login || !request.data.password || !request.data.key) {
+				console.error("❌ Поля активации не заполнены!");
 				return;
 			}
+			console.log("📩 Запрос на активацию получен:", request.data);
 			activation(request);
 			break;
 		}
 		case "logIn-request": {
-			if (!request.data.login || !request.data.password) {
-				return;
-			}
-
-			console.log("3!🔹 logIn-request получен, начинаем авторизацию...");
-
-			login(request)
-				.then((response) => {
-					console.log("5! ✅ Авторизация завершена, отправляем logIn-response...");
-					chrome.runtime.sendMessage({
-						contentScriptQuery: "logIn-response",
-						data: [response, request.data.login],
-					});
-				})
-				.catch((error) => {
-					console.error("5!❌ Ошибка авторизации:", error);
-					chrome.runtime.sendMessage({
-						contentScriptQuery: "logIn-response",
-						data: { success: false, error: error.message },
-					});
+			login(request).then((response) => {
+				console.log("✅ Авторизация завершена, отправляем logIn-response...");
+				console.log(response);
+				const decoded = decodeToken(response.accessToken);
+				if (decoded) {
+					response.fio = decoded.fio;
+					response.login = decoded.login;
+				}
+				console.log("decoded token: ", decoded.fio, decoded.login);
+				chrome.runtime.sendMessage({
+					contentScriptQuery: "logIn-response",
+					data: [response, decoded.login],
 				});
-
+			});
 			return;
 		}
 		case "setUsid-request": {
@@ -186,20 +181,33 @@ async function checkResponseFromServer(request: any) {
 }
 
 async function activation(request: any) {
-	console.log("Запуск процесса активации из расширения DOMEvaluator.ts");
+	console.log("⏳ Начат процесс активации через расширение...");
 	const url = `${baseUrl}${apiConfig.routes.api.activation}`;
+
 	try {
+		// ✅ Отправляем запрос на сервер
 		const data = await fetchWithRetryAndCache(url, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ data: request.data }),
+			body: JSON.stringify({
+				login: request.data.login,
+				password: request.data.password,
+				key: request.data.key,
+			}),
 		});
-		chrome.runtime.sendMessage({ data, contentScriptQuery: "activation-response" });
-	} catch (error) {
+
+		console.log("✅ Сервер вернул данные по активации:", data);
+
+		// ✅ Отправляем данные обратно в `activateForm.tsx`
 		chrome.runtime.sendMessage({
-			contentScriptQuery: "Error-response",
-			error: error,
-			flow: "activation",
+			contentScriptQuery: "activate-response", // 🔥 Здесь было "activation-response"
+			data,
+		});
+	} catch (error) {
+		console.error("❌ Ошибка при активации:", error);
+		chrome.runtime.sendMessage({
+			contentScriptQuery: "activate-response",
+			error: "❌ Ошибка активации. Проверьте данные.",
 		});
 	}
 }
@@ -263,17 +271,45 @@ async function appData(request: any) {
 			5, // 5 попыток доступа к серверу
 			true
 		);
-		console.log("10! ✅ Данные приложения получены, сохранение в кеш...");
-		saveToCache(baseUrl, data);
-		chrome.runtime.sendMessage({ data, contentScriptQuery: "appData-response" });
-	} catch (error) {
-		console.log("10.1! ❌ Данные приложения не получены. Загружаем из кеша...");
-		chrome.storage.local.get(baseUrl, (result) => {
-			chrome.runtime.sendMessage({
-				contentScriptQuery: "appData-response",
-				data: result[baseUrl],
+
+		console.log("10! ✅ Данные приложения получены, сохраняем в кеш...");
+
+		// ✅ Сохраняем в `chrome.storage.local` и ждем завершения
+		await new Promise<void>((resolve) => {
+			chrome.storage.local.set({ [baseUrl]: data }, () => {
+				console.log("📦 ✅ Данные успешно сохранены в chrome.storage.local");
+				resolve(); // 🔥 Теперь мы точно знаем, что данные сохранены
 			});
 		});
+
+		// ✅ Теперь загружаем данные из `chrome.storage.local`
+		chrome.storage.local.get(baseUrl, (result) => {
+			if (result[baseUrl] && Object.keys(result[baseUrl]).length > 0) {
+				console.log("📦 ✅ Загружены полные данные из кеша:", result[baseUrl]);
+				chrome.runtime.sendMessage({
+					contentScriptQuery: "appData-response",
+					data: result[baseUrl], // ✅ Отправляем полные данные
+				});
+			} else {
+				console.log("⚠️ ❌ Данных в кеше нет или они пустые!");
+			}
+		});
+	} catch (error) {
+		console.log("10.1! ❌ Данные приложения не получены. Загружаем из кеша...");
+
+		// ✅ Если сервер недоступен, пробуем загрузить из кеша
+		chrome.storage.local.get(baseUrl, (result) => {
+			if (result[baseUrl] && Object.keys(result[baseUrl]).length > 0) {
+				console.log("📦 ✅ Загружены полные данные из кеша.");
+				chrome.runtime.sendMessage({
+					contentScriptQuery: "appData-response",
+					data: result[baseUrl],
+				});
+			} else {
+				console.log("⚠️ ❌ Данных в кеше нет!");
+			}
+		});
+
 		chrome.runtime.sendMessage({
 			contentScriptQuery: "Error-response",
 			error: error,

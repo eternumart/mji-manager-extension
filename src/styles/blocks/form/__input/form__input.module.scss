@@ -1,0 +1,29 @@
+.formInput[type="file"]::file-selector-button {
+	width: 190px;
+	border: none;
+	background: $color-brand;
+	padding: 10px 30px;
+	margin-right: 10px;
+	color: $color-white;
+	cursor: pointer;
+	transition: opacity 0.3s;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 100%;
+}
+.formInput[type="file"]::file-selector-button:hover {
+	transition: opacity 0.3s;
+	opacity: 0.7;
+}
+.formInput[type="date"] {
+	width: 190px;
+	border: 1px solid $color-brand;
+	padding: 11px 10px;
+	color: #1a1a18;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 100%;
+	outline: none;
+}

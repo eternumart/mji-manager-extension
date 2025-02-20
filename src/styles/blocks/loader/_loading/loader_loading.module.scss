@@ -1,0 +1,21 @@
+.loaderLoading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    width: 100%;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    top: 28px;
+    left: 0;
+    background: #fff;
+
+    svg {
+      animation: load;
+      animation-duration: 10s;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-iteration-count: infinite;
+    }
+  }

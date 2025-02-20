@@ -1,0 +1,11 @@
+.mjiManagerAppMinimized {
+	top: unset !important;
+	bottom: 0 !important;
+	left: unset !important;
+	max-height: 48px;
+	width: auto;
+
+	.header {
+		gap: 20px;
+	}
+}

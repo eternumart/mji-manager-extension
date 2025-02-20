@@ -1,0 +1,12 @@
+@import "../blocks/variables.scss";
+@import "../blocks/loggeed/logged.module.scss";
+@import "../blocks/loggeed/__top/logged__top.module.scss";
+@import "../blocks/loggeed/__login/logged__login.module.scss";
+@import "../blocks/loggeed/__bottom/logged__bottom.module.scss";
+@import "../blocks/loggeed/_hidden/logged_hidden.module.scss";
+@import "../blocks/account/account.module.scss";
+@import "../blocks/account/_hidden/account_hidden.module.scss";
+@import "../blocks/account/__login/account__login.module.scss";
+@import "../blocks/account/__fio/account__fio.module.scss";
+@import "../blocks/account/__fio/_saved/account__fio_saved.module.scss";
+@import "../blocks/account/__fio/_error/account__fio_error.module.scss";

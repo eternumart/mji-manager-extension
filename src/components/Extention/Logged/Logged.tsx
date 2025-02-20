@@ -1,3 +1,4 @@
+import styles from "../../../styles/components/Logged.module.scss";
 import React, { useEffect } from "react";
 import { useAppContext } from "../../../context/Context";
 import { logOut } from "../utils/logOut";
@@ -40,19 +41,19 @@ export const Logged = () => {
 
 	return (
 		<>
-			<div className="logged" style={{ display: isLogged ? "flex" : "none" }}>
-				<div className="logged__top">
-					<p className="logged__user">{userData?.fio}</p>
-					<button className="logged__login">{userData?.login}</button>
+			<div className={styles.logged} style={{ display: isLogged ? "flex" : "none" }}>
+				<div className={styles.loggedTop}>
+					<p className={styles.loggedUser}>{userData?.fio}</p>
+					<button className={styles.loggedLogin}>{userData?.login}</button>
 				</div>
-				<div className="logged__bottom">
-					<button className="logged__button" onClick={handleLogout}>
+				<div className={styles.loggedBottom}>
+					<button className={styles.loggedButton} onClick={handleLogout}>
 						Выйти
 					</button>
 				</div>
 			</div>
-			<div className="account account_hidden">
-				<input className="account__fio" value={userData?.fio} />
+			<div className={`${styles.account} ${styles.accountHidden}`}>
+				<input className={styles.accountFio} value={userData?.fio} />
 			</div>
 		</>
 	);

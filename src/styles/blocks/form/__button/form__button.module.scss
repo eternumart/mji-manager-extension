@@ -1,0 +1,19 @@
+.formButton {
+	width: 190px;
+	outline: none;
+	border: none;
+	background: $color-brand;
+	color: $color-white;
+	transition: 0.3s;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 100%;
+	cursor: pointer;
+	padding: 10px 30px;
+
+	&:hover {
+		transition: 0.3s;
+		opacity: 0.7;
+	}
+}

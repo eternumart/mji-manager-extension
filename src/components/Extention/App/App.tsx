@@ -1,6 +1,8 @@
+import "../../../styles/global.scss"
+import styles from "../../../styles/components/App.module.scss"
 import React, { useEffect, useState } from "react";
 import { EnviromentSwitch } from "../EnviromentSwitch/EnviromentSwitch";
-import { UpdateLink } from "../UpdateLink";
+import { UpdateLink } from "../UpdateLink/UpdateLink";
 import { Authorization } from "../Authorization/Authorization";
 import { Logged } from "../Logged/Logged";
 import { Loader } from "../Loader/Loader";
@@ -28,7 +30,7 @@ function App() {
 				setUserData({ fio: result[baseUrl].currentFio, login: result[baseUrl].currentLogin });
 				getAppData(result[baseUrl], setLoading);
 			} else {
-				console.warn(`⚠️ В local storage нет данных для текущего baseUrl: ${baseUrl}.`);
+				console.log(`⚠️ В local storage нет данных для текущего baseUrl: ${baseUrl}.`);
 				setLoading(false);
 			}
 		});
@@ -80,13 +82,13 @@ function App() {
 	}, []);
 
 	return (
-		<>
+		<div className={styles.mjiManagerApp}>
 			<EnviromentSwitch />
 			<UpdateLink />
 			{isLogged ? <Logged /> : <Authorization />}
 			{isLoading && <Loader />}
 			<Errors />
-		</>
+		</div>
 	);
 }
 

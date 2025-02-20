@@ -3,17 +3,12 @@ import { apiConfig } from "../../../apiConfig";
 export const logOut = () => {
 	console.log("🔴 Выход из аккаунта...");
 
-	// Очищаем данные из локального хранилища
-	chrome.storage.local.remove(["authToken", "userData"], () => {
-	  console.log("✅ Данные авторизации удалены.");
-	});
-  
-	const baseUrl = apiConfig.address.protocol + apiConfig.address.ip;
-	chrome.storage.local.remove([baseUrl], () => {
-	  console.log(`✅ Очистили данные авторизации для ${baseUrl}`);
+	// ✅ Полностью очищаем локальное хранилище
+	chrome.storage.local.clear(() => {
+		console.log("✅ Полностью очистили chrome.storage.local");
 	});
 
-	// ✅ Закрываем всплывающее окно
+	// ✅ Очищаем `localStorage`
 	chrome.tabs.query({ active: true }, (tabs) => {
 		const tab = tabs[0];
 		if (tab) {
@@ -21,11 +16,17 @@ export const logOut = () => {
 				target: { tabId: tab.id ?? 0, allFrames: true },
 				func: () => {
 					try {
+						console.log("🛑 Очищаем localStorage...");
+						localStorage.clear();
+						sessionStorage.clear();
 						document.querySelector(".mji-manager-app")?.remove();
-					} catch {}
-					localStorage.setItem("status", JSON.stringify({ layout: false, init: false, authorized: false, uid: null }));
+						console.log("✅ localStorage и sessionStorage очищены!");
+					} catch (error) {
+						console.error("❌ Ошибка очистки localStorage:", error);
+					}
 				},
 			});
 		}
 	});
 };
+

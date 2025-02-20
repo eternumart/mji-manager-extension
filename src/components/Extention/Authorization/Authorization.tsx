@@ -1,21 +1,16 @@
-import React from "react";
-import { LoginForm } from "./loginForm";
-import { ActivateForm } from "./activateForm";
-const Tabs = () => {
-	function changeTab(clickedTab: any) {
-		document.querySelector(".tabs__button_active")?.classList.remove("tabs__button_active");
-		clickedTab.classList.add("tabs__button_active");
-		document.querySelector(".auth__form_active")?.classList.add("auth__form_deactive");
-		document.querySelector(".auth__form_active")?.classList.remove("auth__form_active");
-		document.querySelector(`#${clickedTab.id.split("-")[0]}-form`)?.classList.add("auth__form_active");
-		document.querySelector(`#${clickedTab.id.split("-")[0]}-form`)?.classList.remove("auth__form_deactive");
-	}
+import styles from "../../../styles/components/Authorization.module.scss";
+import React, { useState } from "react";
+import { LoginForm } from "./Login/loginForm";
+import { ActivateForm } from "./Activation/activateForm";
+import { useAppContext } from "../../../context/Context";
+
+const Tabs = ({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) => {
 	return (
-		<div className='tabs'>
-			<button className='tabs__button tabs__button_active tabs__button_login' id='login-tab' onClick={(e) => changeTab(e.target)}>
+		<div className={styles.tabs}>
+			<button className={`${styles.tabsButton} ${activeTab === "login" ? styles.tabsButtonActive : ""}`} id="login-tab" onClick={() => setActiveTab("login")}>
 				Войти
 			</button>
-			<button className='tabs__button tabs__button_activate' id='activate-tab' onClick={(e) => changeTab(e.target)}>
+			<button className={`${styles.tabsButton} ${activeTab === "activate" ? styles.tabsButtonActive : ""}`} id="activate-tab" onClick={() => setActiveTab("activate")}>
 				Активировать
 			</button>
 		</div>
@@ -23,11 +18,12 @@ const Tabs = () => {
 };
 
 export const Authorization = () => {
+	const {activeTab, setActiveTab} = useAppContext(); // ✅ Состояние активной вкладки
+
 	return (
-		<div className='auth'>
-			<Tabs />
-			<ActivateForm />
-			<LoginForm />
-		</div>
+		<>
+			<Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+			{activeTab === "login" ? <LoginForm /> : <ActivateForm />}
+		</>
 	);
 };

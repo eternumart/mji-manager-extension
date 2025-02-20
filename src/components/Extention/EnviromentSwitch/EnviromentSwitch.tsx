@@ -1,3 +1,4 @@
+import styles from "../../../styles/components/EnviromentSwitch.module.scss";
 import { useState } from "react";
 import { useAppContext } from "../../../context/Context";
 import { apiConfig } from "../../../apiConfig";
@@ -21,10 +22,10 @@ export const EnviromentSwitch = () => {
 	};
 
 	return (
-		<div className="switcher">
-			<label className="switch">
+		<div className={styles.switcher}>
+			<label className={styles.switch}>
 				<input type="checkbox" checked={isDev} onChange={handleSwitch} />
-				<span className="slider"></span>
+				<span className={styles.slider}></span>
 			</label>{" "}
 			<span>{isDev ? "Тестовый" : "Основной"}&nbsp;сервер</span>
 		</div>

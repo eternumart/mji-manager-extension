@@ -46,11 +46,11 @@ export const LoginForm = () => {
 	};
 
 	useEffect(() => {
-		const handleLoginResponse = (message: any) => {
+		const handleLoginResponse = async (message: any) => {
 			if (message.contentScriptQuery !== "logIn-response") return;
-
+	
 			console.log("🔹 Получен logIn-response:", message.data);
-
+	
 			// ✅ Проверяем, есть ли `accessToken` в `message.data[0]`
 			const accessToken = message.data[0]?.accessToken;
 			if (!accessToken) {
@@ -59,7 +59,7 @@ export const LoginForm = () => {
 				setLoading(false);
 				return;
 			}
-
+	
 			// ✅ Декодируем токен
 			const decoded = decodeToken(accessToken);
 			if (!decoded || !decoded.login) {
@@ -68,22 +68,26 @@ export const LoginForm = () => {
 				setLoading(false);
 				return;
 			}
-
+	
 			console.log("✅ Авторизация успешна:", decoded);
-
+	
 			// ✅ Обновляем состояние пользователя
 			setUserData({ fio: decoded.fio, login: decoded.login });
 			setIsLogged(true);
 			setErrorMessage("");
-
-			// ✅ Сохраняем в `chrome.storage.local`
-			saveToCache(baseUrl, {
+	
+			// ✅ Сохраняем в `chrome.storage.local` и ждем завершения
+			console.log("💾 Сохраняем данные пользователя в `chrome.storage.local`...");
+			await saveToCache(baseUrl, {
 				appData: null,
 				fio: decoded.fio,
 				login: decoded.login,
 				loginIsPossible: true,
 			});
-
+	
+			console.log("💾 ✅ Данные сохранены! Теперь загружаем `appData`...");
+			
+			// ✅ Теперь можно загружать `appData`
 			getAppData(
 				{
 					appData: null,
@@ -94,10 +98,10 @@ export const LoginForm = () => {
 				setLoading
 			);
 		};
-
+	
 		// ✅ Добавляем слушатель сообщений
 		chrome.runtime.onMessage.addListener(handleLoginResponse);
-
+	
 		// ✅ Удаляем слушатель при размонтировании
 		return () => chrome.runtime.onMessage.removeListener(handleLoginResponse);
 	}, [serverState]);

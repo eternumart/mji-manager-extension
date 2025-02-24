@@ -46,7 +46,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 			break;
 		}
 		case "appData-request": {
-			await appData(request);
+			await appData(baseUrl);
 			break;
 		}
 		case "checkusid-request": {
@@ -256,51 +256,39 @@ async function saveFio(request: any) {
 	}
 }
 
+// ✅ 1. Функция загрузки `appData`, сначала из кеша, затем с сервера, если нужно
 async function appData(request: any) {
 	console.log("8! ⏳ Получение данных приложения.");
 	const url = `${baseUrl}${apiConfig.routes.api.getAppData}`;
 
 	try {
-		const data = await fetchWithRetryAndCache(
-			url,
-			{
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ data: request.data }),
-			},
-			5, // 5 попыток доступа к серверу
-			true
-		);
+		// ✅ Сначала пробуем загрузить данные из кеша
+		let data = await waitForStorageData(baseUrl);
 
-		console.log("10! ✅ Данные приложения получены, сохраняем в кеш...");
+		// ✅ Если данных нет – запрашиваем с сервера
+		if (!data) {
+			console.log("🌍 🔄 Данных нет в кеше, запрашиваем `appData` с сервера...");
+			data = await fetchWithRetryAndCache(
+				url,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ data: request.data }),
+				},
+				5, // 5 попыток запроса к серверу
+				true
+			);
 
-		// ✅ Ждем завершения сохранения в `chrome.storage.local`
-		await new Promise((resolve, reject) => {
-			chrome.storage.local.set({ [baseUrl]: data }, () => {
-				if (chrome.runtime.lastError) {
-					console.error("8! ❌ Ошибка сохранения в chrome.storage:", chrome.runtime.lastError);
-					reject(chrome.runtime.lastError);
-				} else {
-					console.log("8! ✅ Данные успешно сохранены в chrome.storage.");
-					resolve(true);
-				}
-			});
-		});
+			console.log("10! ✅ Данные приложения получены, сохраняем в `chrome.storage.local` через `saveToCache`...");
+
+			// ✅ Ждем завершения сохранения в `chrome.storage.local` через `saveToCache`
+			await saveToCache(baseUrl, { appData: data });
+		}
 
 		// ✅ Теперь загружаем данные из кеша (после завершения записи)
-		const cachedData = await new Promise((resolve, reject) => {
-			chrome.storage.local.get(baseUrl, (result) => {
-				if (result[baseUrl] && result[baseUrl].appData && Object.keys(result[baseUrl].appData).length > 0) {
-					console.log("📦 ✅ Загружены полные данные из кеша:", result[baseUrl]);
-					resolve(result[baseUrl]);
-				} else {
-					console.log("⚠️ ❌ Данных в кеше нет или они пустые!");
-					reject(new Error("Данных в кеше нет"));
-				}
-			});
-		});
+		const cachedData = await waitForStorageData(baseUrl);
 
-		// ✅ Отправляем `appData-response`, но только если он еще не отправлен
+		// ✅ Отправляем `appData-response`
 		console.log("🚀 Отправляем `appData-response` с актуальными данными.");
 		chrome.runtime.sendMessage({
 			contentScriptQuery: "appData-response",
@@ -311,19 +299,8 @@ async function appData(request: any) {
 
 		try {
 			// ✅ Если сервер недоступен, пробуем загрузить из кеша
-			const cachedData = await new Promise((resolve, reject) => {
-				chrome.storage.local.get(baseUrl, (result) => {
-					if (result[baseUrl] && result[baseUrl].appData && Object.keys(result[baseUrl].appData).length > 0) {
-						console.log("📦 ✅ Загружены полные данные из кеша.");
-						resolve(result[baseUrl]);
-					} else {
-						console.log("⚠️ ❌ Данных в кеше нет!");
-						reject(new Error("Данных в кеше нет"));
-					}
-				});
-			});
+			const cachedData = await waitForStorageData(baseUrl);
 
-			// ✅ Отправляем `appData-response` только если он не отправлен ранее
 			console.log("🚀 Отправляем `appData-response` после загрузки из кеша.");
 			chrome.runtime.sendMessage({
 				contentScriptQuery: "appData-response",
@@ -341,8 +318,34 @@ async function appData(request: any) {
 	}
 }
 
+// ✅ 2. Функция ожидания данных в `chrome.storage.local`
+async function waitForStorageData(baseUrl: string, retries = 5, delay = 100) {
+	for (let attempt = 1; attempt <= retries; attempt++) {
+		const cachedData = await new Promise((resolve) => {
+			chrome.storage.local.get(baseUrl, (result) => {
+				resolve(result[baseUrl] || null);
+			});
+		});
 
+		if (cachedData && Object.keys(cachedData).length > 0) {
+			console.log(`📦 ✅ Данные найдены в 'chrome.storage.local' на попытке ${attempt}:`, cachedData);
+			return cachedData;
+		}
 
+		console.log(`⚠️ ❌ Данных в кеше нет, попытка ${attempt}/${retries}. Ждем ${delay}мс...`);
+		await new Promise((resolve) => setTimeout(resolve, delay));
+	}
+
+	throw new Error("Данных в кеше нет после всех попыток.");
+}
+
+// ✅ 3. Обработчик `appData-request`
+chrome.runtime.onMessage.addListener((message) => {
+	if (message.contentScriptQuery === "appData-request") {
+		console.log("📥 Получен `appData-request`, загружаем данные...");
+		appData(message.data);
+	}
+});
 
 async function setUsid(request: any) {
 	fetch(`${request.url}`, {

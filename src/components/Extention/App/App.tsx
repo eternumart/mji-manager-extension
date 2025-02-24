@@ -41,20 +41,27 @@ function App() {
 		const handleMessage = (request: any) => {
 			if (request.contentScriptQuery === "Error-response") {
 				console.error("🔴 Ошибка получена:", request.error);
-
+	
 				// ✅ Гарантируем, что `setErrors()` получает строку
-				const errorMessage = typeof request.error === "string" ? request.error : request.error?.message || "Произошла неизвестная ошибка";
-
+				let errorMessage = "Произошла неизвестная ошибка";
+	
+				if (typeof request.error === "string") {
+					errorMessage = request.error;
+				} else if (request.error && typeof request.error === "object") {
+					errorMessage = request.error.message || JSON.stringify(request.error);
+				}
+	
 				setErrors(errorMessage);
 			}
 		};
-
+	
 		chrome.runtime.onMessage.addListener(handleMessage);
-
+	
 		return () => {
 			chrome.runtime.onMessage.removeListener(handleMessage);
 		};
 	}, []);
+	
 
 	// ✅ Убираем ошибку через 5 секунд, но только если она есть
 	useEffect(() => {

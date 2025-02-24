@@ -114,7 +114,7 @@ async function fetchWithRetryAndCache(url: string, options: RequestInit, retries
 				console.log("4! 📦 Сервер вернул данные пользователя.");
 			}
 			if (retries === 5) {
-				console.log("9! 📦 Сервер прислал приложение.");
+				console.log("9! 📦 Сервер прислал приложение.", data);
 			}
 			return data;
 		} catch (error) {
@@ -274,49 +274,75 @@ async function appData(request: any) {
 
 		console.log("10! ✅ Данные приложения получены, сохраняем в кеш...");
 
-		// ✅ Сохраняем в `chrome.storage.local` и ждем завершения
-		await new Promise<void>((resolve) => {
+		// ✅ Ждем завершения сохранения в `chrome.storage.local`
+		await new Promise((resolve, reject) => {
 			chrome.storage.local.set({ [baseUrl]: data }, () => {
-				console.log("📦 ✅ Данные успешно сохранены в chrome.storage.local");
-				resolve(); // 🔥 Теперь мы точно знаем, что данные сохранены
+				if (chrome.runtime.lastError) {
+					console.error("8! ❌ Ошибка сохранения в chrome.storage:", chrome.runtime.lastError);
+					reject(chrome.runtime.lastError);
+				} else {
+					console.log("8! ✅ Данные успешно сохранены в chrome.storage.");
+					resolve(true);
+				}
 			});
 		});
 
-		// ✅ Теперь загружаем данные из `chrome.storage.local`
-		chrome.storage.local.get(baseUrl, (result) => {
-			if (result[baseUrl] && Object.keys(result[baseUrl]).length > 0) {
-				console.log("📦 ✅ Загружены полные данные из кеша:", result[baseUrl]);
-				chrome.runtime.sendMessage({
-					contentScriptQuery: "appData-response",
-					data: result[baseUrl], // ✅ Отправляем полные данные
-				});
-			} else {
-				console.log("⚠️ ❌ Данных в кеше нет или они пустые!");
-			}
+		// ✅ Теперь загружаем данные из кеша (после завершения записи)
+		const cachedData = await new Promise((resolve, reject) => {
+			chrome.storage.local.get(baseUrl, (result) => {
+				if (result[baseUrl] && result[baseUrl].appData && Object.keys(result[baseUrl].appData).length > 0) {
+					console.log("📦 ✅ Загружены полные данные из кеша:", result[baseUrl]);
+					resolve(result[baseUrl]);
+				} else {
+					console.log("⚠️ ❌ Данных в кеше нет или они пустые!");
+					reject(new Error("Данных в кеше нет"));
+				}
+			});
+		});
+
+		// ✅ Отправляем `appData-response`, но только если он еще не отправлен
+		console.log("🚀 Отправляем `appData-response` с актуальными данными.");
+		chrome.runtime.sendMessage({
+			contentScriptQuery: "appData-response",
+			data: cachedData,
 		});
 	} catch (error) {
-		console.log("10.1! ❌ Данные приложения не получены. Загружаем из кеша...");
+		console.log("10.1! ❌ Ошибка получения данных. Пробуем загрузить из кеша...");
 
-		// ✅ Если сервер недоступен, пробуем загрузить из кеша
-		chrome.storage.local.get(baseUrl, (result) => {
-			if (result[baseUrl] && Object.keys(result[baseUrl]).length > 0) {
-				console.log("📦 ✅ Загружены полные данные из кеша.");
-				chrome.runtime.sendMessage({
-					contentScriptQuery: "appData-response",
-					data: result[baseUrl],
+		try {
+			// ✅ Если сервер недоступен, пробуем загрузить из кеша
+			const cachedData = await new Promise((resolve, reject) => {
+				chrome.storage.local.get(baseUrl, (result) => {
+					if (result[baseUrl] && result[baseUrl].appData && Object.keys(result[baseUrl].appData).length > 0) {
+						console.log("📦 ✅ Загружены полные данные из кеша.");
+						resolve(result[baseUrl]);
+					} else {
+						console.log("⚠️ ❌ Данных в кеше нет!");
+						reject(new Error("Данных в кеше нет"));
+					}
 				});
-			} else {
-				console.log("⚠️ ❌ Данных в кеше нет!");
-			}
-		});
+			});
 
-		chrome.runtime.sendMessage({
-			contentScriptQuery: "Error-response",
-			error: error,
-			flow: "appData",
-		});
+			// ✅ Отправляем `appData-response` только если он не отправлен ранее
+			console.log("🚀 Отправляем `appData-response` после загрузки из кеша.");
+			chrome.runtime.sendMessage({
+				contentScriptQuery: "appData-response",
+				data: cachedData,
+			});
+		} catch (cacheError) {
+			console.log("⚠️ ❌ Данных нет ни на сервере, ни в кеше!");
+
+			chrome.runtime.sendMessage({
+				contentScriptQuery: "Error-response",
+				error: cacheError,
+				flow: "appData",
+			});
+		}
 	}
 }
+
+
+
 
 async function setUsid(request: any) {
 	fetch(`${request.url}`, {

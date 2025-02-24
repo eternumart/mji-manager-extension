@@ -1,4 +1,6 @@
 export const saveToCache = async (key: string, data: any) => {
+	console.log(`[saveToCache.ts] Сохраняем данные: `, data)
+	
 	const finalObject = {
 		currentFio: "",
 		currentLogin: "",

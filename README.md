@@ -1,46 +1,51 @@
-# Getting Started with Create React App
+# MJI Manager Extension
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Описание
 
-## Available Scripts
+MJI Manager Extension — это браузерное расширение, разработанное с использованием **React**, **TypeScript** и **Craco**. Оно предназначено для управления и автоматизации процессов в системе MJI Manager.
 
-In the project directory, you can run:
+### Важное замечание
 
-### `npm start`
+Данное расширение **невозможно запустить в режиме разработки (dev)**. Его можно только **собрать (`build`) и затем вручную загрузить в браузер в режиме разработчика**.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Возможности
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- Авторизация и регистрация пользователей.
+- Интерактивный UI на базе React.
+- Поддержка SASS для стилизации.
+- Оптимизированная сборка с помощью **Craco**.
+- Самораспаковывающийся архив для удобной установки.
 
-### `npm test`
+## Технологии
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Проект использует следующие технологии:
 
-### `npm run build`
+- **React 18** — для создания пользовательского интерфейса.
+- **TypeScript** — для типизированного программирования.
+- **SASS** — для стилизации.
+- **Craco** — для управления конфигурацией сборки.
+- **Archiver** — для автоматической упаковки файлов.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Установка
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1. Клонирование репозитория
+git clone https://github.com/eternumart/mji-manager-extension.git cd mji-manager-extension
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 2. Установка зависимостей
+npm install
 
-### `npm run eject`
+## Сборка проекта и установка в браузер
+Так как расширение невозможно запустить в режиме разработки, его необходимо сначала собрать, а затем загрузить в браузер.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Сборка продакшен-версии:
+Собранные файлы будут находиться в папке `build/`.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Установка в браузер:
+1. Откройте Chrome, ЯндексБраузер и перейдите в `chrome://extensions/`
+2. Включите **режим разработчика** (Developer mode) в правом верхнем углу.
+3. Нажмите **Загрузить распакованное расширение** (Load unpacked) и выберите папку `build/`.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Создание самораспаковывающегося архива
+После сборки можно создать самораспаковывающийся архив с расширением:
+npm run postbuild
+Или выполнить полный процесс сборки и упаковки одной командой:

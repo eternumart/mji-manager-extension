@@ -43,7 +43,7 @@ export const Logged = () => {
 		<>
 			<div className={styles.logged} style={{ display: isLogged ? "flex" : "none" }}>
 				<div className={styles.loggedTop}>
-					<p className={styles.loggedUser}>{userData?.fio}</p>
+					<p className={styles.accountLogin}>{userData?.fio}</p>
 					<button className={styles.loggedLogin}>{userData?.login}</button>
 				</div>
 				<div className={styles.loggedBottom}>

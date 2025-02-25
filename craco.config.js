@@ -16,6 +16,12 @@ module.exports = {
 		configure: (webpackConfig, { env, paths }) => {
 			return {
 				...webpackConfig,
+				mode: env === "development" ? "development" : "production", // Оставляем режим разработки
+				devtool: env === "development" ? "eval-source-map" : false, // Включаем source maps для отладки
+				optimization: {
+					...webpackConfig.optimization,
+					minimize: false, // Отключаем минификацию
+				},
 				entry: {
 					main: [env === "development" && require.resolve("react-dev-utils/webpackHotDevClient"), paths.appIndexJs].filter(Boolean),
 					content: "./src/chromeServices/DOMEvaluator.ts",
@@ -29,3 +35,4 @@ module.exports = {
 		},
 	},
 };
+

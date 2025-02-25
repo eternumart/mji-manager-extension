@@ -49,9 +49,8 @@ export const LoginForm = () => {
 		const handleLoginResponse = async (message: any) => {
 			if (message.contentScriptQuery !== "logIn-response") return;
 	
-			console.log("🔹 Получен logIn-response:", message.data);
+			console.log("🔹 Получен `logIn-response`:", message.data);
 	
-			// ✅ Проверяем, есть ли `accessToken` в `message.data[0]`
 			const accessToken = message.data[0]?.accessToken;
 			if (!accessToken) {
 				console.error("❌ Токен не найден в ответе сервера");
@@ -60,7 +59,6 @@ export const LoginForm = () => {
 				return;
 			}
 	
-			// ✅ Декодируем токен
 			const decoded = decodeToken(accessToken);
 			if (!decoded || !decoded.login) {
 				console.error("❌ Ошибка декодирования токена");
@@ -76,27 +74,18 @@ export const LoginForm = () => {
 			setIsLogged(true);
 			setErrorMessage("");
 	
-			// ✅ Сохраняем в `chrome.storage.local` и ждем завершения
-			console.log("💾 Сохраняем данные пользователя в `chrome.storage.local`...");
-			await saveToCache(baseUrl, {
-				appData: null,
-				fio: decoded.fio,
-				login: decoded.login,
-				loginIsPossible: true,
-			});
-	
-			console.log("💾 ✅ Данные сохранены! Теперь загружаем `appData`...");
-			
-			// ✅ Теперь можно загружать `appData`
-			getAppData(
-				{
-					appData: null,
-					fio: decoded.fio,
-					login: decoded.login,
-					loginIsPossible: true,
-				},
-				setLoading
-			);
+			try {
+				await getAppData(
+					{
+						fio: decoded.fio,
+						login: decoded.login,
+						loginIsPossible: true,
+					},
+					setLoading
+				);
+			} catch (error) {
+				console.error("❌ Ошибка при загрузке `appData`:", error);
+			}
 		};
 	
 		// ✅ Добавляем слушатель сообщений

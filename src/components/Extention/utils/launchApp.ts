@@ -1,25 +1,68 @@
+import { baseUrl } from "../../../chromeServices/DOMEvaluator";
+import { saveToCache } from "./saveToCache";
+
 let appDataIsLoaded: boolean = false;
 let lauchStarted: boolean = false;
 
 export const getAppData = async (data: any, setLoading: (loading: boolean) => void) => {
-	chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+	const fullData = {
+		appData: {},
+		currentFio: data.fio || "",
+		currentLogin: data.login || "",
+		loginIsPossible: data.loginIsPossible || false,
+	};
+
+	const listener = function (request: any) {
 		if (request.contentScriptQuery === "appData-response") {
-			if (!data.appData) {
-				console.log("appData не пришла.");
+			// ✅ Проверяем, есть ли данные
+			if (request.data === "empty") {
+				const baseUrl = request.baseUrl;
+				console.log("⚠️ `appData` пустая, пытаемся взять из кеша...");
+
+				chrome.storage.local.get(baseUrl, (result) => {
+					const cachedData = result[baseUrl]; // ✅ Используем `result[baseUrl]`
+					if (cachedData?.currentFio && cachedData?.currentLogin && cachedData?.loginIsPossible && cachedData?.appData) {
+						console.log("✅ Пользователь найден в `chrome.storage.local`, авторизация подтверждена.");
+						init(cachedData);
+					} else {
+						console.log("⚠️ В кеше нет данных!");
+						setLoading(false);
+					}
+				});
+
+				chrome.runtime.onMessage.removeListener(listener);
 				return;
 			}
-			console.log("11! ⚙️ Данные приложения получены. Запуск.");
-			appDataIsLoaded = true;
-			setLoading(false);
-			console.log("Данные приложения: ", data);
-			init(data);
+
+			// ✅ Обновляем `fullData` и запускаем приложение
+			fullData.appData = request.data;
+			if (fullData.currentFio !== "" && fullData.currentLogin !== "" && fullData.loginIsPossible) {
+				console.log("11! ⚙️ Все данные приложения получены. Запуск.");
+				appDataIsLoaded = true;
+				setLoading(false);
+				console.log("📦 Полные данные:", fullData);
+				init(fullData);
+
+				// ✅ Сохраняем `fullData` в `chrome.storage.local`
+				saveToCache(request.baseUrl, fullData);
+			}
+
+			// ✅ Удаляем слушатель после успешного ответа
+			chrome.runtime.onMessage.removeListener(listener);
 		}
-	});
+	};
+
+	// ✅ Добавляем слушатель ОДИН раз
+	chrome.runtime.onMessage.addListener(listener);
+
+	// ✅ Отправляем запрос на сервер
+	console.log("📤 Отправляем `appData-request`...");
 	chrome.runtime.sendMessage({
 		contentScriptQuery: "appData-request",
 		data: "⛓️",
 	});
 };
+
 
 const init = (data: any) => {
 	if (lauchStarted) {

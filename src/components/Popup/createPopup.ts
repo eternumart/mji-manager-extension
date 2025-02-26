@@ -10,6 +10,7 @@ import { downloadPhotos } from "./downloadPhotos";
 import { createFakeSelects } from "./createFakeSelects";
 import { changeTab } from "./changeTab";
 import { initParserUK } from "./parser";
+import { initParserPDF } from "./parserPDF";
 
 export const createPopup = (currentPage: string) => {
 	const popupLayout = window.appData.appLayout.popupLayout;
@@ -33,16 +34,29 @@ export const createPopup = (currentPage: string) => {
 	window.appVariables.submitButton = window.appVariables.photoDownload.querySelector(".form__button");
 	window.appVariables.formInput = window.appVariables.app.querySelector("#file");
 	window.appVariables.userLogin = window.appVariables.app.querySelector(".account-info__login").querySelector("span");
-	window.appVariables.formParser = window.appVariables.app.querySelector(".form_parser");
-	window.appVariables.formParserInput = window.appVariables.app.querySelector("#fileInputParser");
-	window.appVariables.formParserButton = window.appVariables.app.querySelector("#processBtnParser");
-	window.appVariables.loader = window.appVariables.app.querySelector("#loader");
-	window.appVariables.loaderText = window.appVariables.app.querySelector("#progressText");
-	window.appVariables.formParserPDF = window.appVariables.app.querySelector(".form_parserPDF");
-	window.appVariables.formParserPDFInput = window.appVariables.app.querySelector(".fileInputParserPDF");
-	window.appVariables.formParsefPDFButton = window.appVariables.app.querySelector("#processBtnParserPDF");
-	window.appVariables.loaderPDF = window.appVariables.app.querySelector("#loaderPDF");
-	window.appVariables.loaderPDFText = window.appVariables.app.querySelector("#progressTextPDF");
+	if (window.appData.functions.parser) {
+		window.appVariables.formParser = window.appVariables.app.querySelector(".form_parser");
+		window.appVariables.formParserInput = window.appVariables.app.querySelector("#fileInputParser");
+		window.appVariables.formParserButton = window.appVariables.app.querySelector("#processBtnParser");
+		window.appVariables.loader = window.appVariables.app.querySelector("#loader");
+		window.appVariables.loaderText = window.appVariables.app.querySelector("#progressText");
+		window.appVariables.formParser.addEventListener("submit", initParserUK);
+	}
+	if (window.appData.functions.parserPDF) {
+		window.appVariables.formParserPDF = window.appVariables.app.querySelector(".form_parserPDF");
+		window.appVariables.formParserPDFInput = window.appVariables.app.querySelector("#fileInputParserPDF");
+		window.appVariables.formParsefPDFButton = window.appVariables.app.querySelector("#processBtnParserPDF");
+		window.appVariables.loaderPDF = window.appVariables.app.querySelector("#loaderPDF");
+		window.appVariables.loaderPDFText = window.appVariables.app.querySelector("#progressTextPDF");
+		window.appVariables.formParserPDF.addEventListener("submit", initParserPDF);
+	}
+	window.appVariables.aiswicherState = false; // по дефолту всегда false даже если функция отключена.
+	if (window.appData.functions.useAI) {
+		window.appVariables.aiswicher = window.appVariables.app.querySelector("#useAI");
+		window.appVariables.aiswicher.addEventListener("change", () => {
+			window.appVariables.aiswicherState = window.appVariables.aiswicher.checked;
+		});
+	}
 
 	// Обработчики действий пользователя
 	window.appVariables.dragIco.addEventListener("mousedown", startDraggingDiv);
@@ -55,8 +69,7 @@ export const createPopup = (currentPage: string) => {
 	window.appVariables.pasteButton.addEventListener("click", loadData);
 	window.appVariables.photoDownload.addEventListener("submit", downloadPhotos);
 	window.appVariables.fakeSelectsButton.addEventListener("click", createFakeSelects);
-	window.appVariables.formParser.addEventListener("submit", initParserUK);
-	//window.appVariables.formParserPDF.addEventListener("submit", parserPDF);
+
 	window.appVariables.tabs.forEach((tab: any) => {
 		tab.addEventListener("click", () => {
 			changeTab(tab);

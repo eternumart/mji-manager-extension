@@ -1,11 +1,58 @@
 import { apiConfig } from "../apiConfig";
 import { decodeToken } from "../components/Extention/utils/decodeToken";
+import { pdfParserListener } from "../components/Extention/utils/messageUtils";
 
 console.log("DOMEvaluator.ts loaded");
 
 export let baseUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`; // По умолчанию выбран сервер Prod
 let isLoading = false;
 const loadingFlags = new Map<string, boolean>();
+
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+	if (message.type === "UPLOAD_PDF") {
+		pdfParserListener(); // Подписываемся на события парсинга PDF
+		try {
+			console.log(`Получен PDF-файл: ${message.fileName}`);
+			if(message.useAI){
+				console.log("PDF будет обработан через AI")
+			}
+			// 🔹 Декодируем base64 (убираем префикс `data:application/pdf;base64,`)
+			const base64Data = message.fileData.split(",")[1]; // Убираем префикс
+			const binaryData = atob(base64Data);
+			const uint8Array = new Uint8Array(binaryData.length);
+
+			for (let i = 0; i < binaryData.length; i++) {
+				uint8Array[i] = binaryData.charCodeAt(i);
+			}
+
+			// 🔹 Создаем Blob для отправки
+			const blob = new Blob([uint8Array], { type: "application/pdf" });
+			console.log(`Размер перед отправкой: ${blob.size} байт`);
+
+			// Подготавливаем base64 для отправки
+			const fileBase64 = message.fileData; // Передаем полностью base64 строку
+
+			// Теперь отправляем base64 строку как JSON
+			const payload = {
+				fileName: message.fileName,
+				fileData: fileBase64,
+				useAI: message.useAI,
+			};
+
+			const response = await fetch(`${baseUrl}${apiConfig.routes.api.uploadPDF}`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload),
+			});
+
+			const result = await response.json();
+			chrome.runtime.sendMessage({ type: "UPLOAD_COMPLETE", data: result });
+		} catch (error: any) {
+			console.error("Ошибка загрузки PDF:", error);
+			chrome.runtime.sendMessage({ type: "UPLOAD_FAILED", error: error.message });
+		}
+	}
+});
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 	switch (request.contentScriptQuery) {
@@ -34,7 +81,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 				chrome.runtime.sendMessage({
 					contentScriptQuery: "userData-response",
 					data: [response, decoded.login],
-				})
+				});
 			});
 			return;
 		}

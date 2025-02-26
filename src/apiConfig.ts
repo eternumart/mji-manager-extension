@@ -28,7 +28,8 @@ export const apiConfig = {
             deactivateAccount: "/api/deactivate-account",
             getAppData: "/api/get-app-data",
 			checResponseFromServer: "/api/check-response-from-server",
-			getScripts: "/api/get-scripts"
+			getScripts: "/api/get-scripts",
+			uploadPDF: '/api/upload-pdf'
 		},
 	},
 };

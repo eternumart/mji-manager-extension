@@ -25,10 +25,6 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 				uint8Array[i] = binaryData.charCodeAt(i);
 			}
 
-			// 🔹 Создаем Blob для отправки
-			const blob = new Blob([uint8Array], { type: "application/pdf" });
-			console.log(`Размер перед отправкой: ${blob.size} байт`);
-
 			// Подготавливаем base64 для отправки
 			const fileBase64 = message.fileData; // Передаем полностью base64 строку
 
@@ -37,6 +33,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 				fileName: message.fileName,
 				fileData: fileBase64,
 				useAI: message.useAI,
+				prevSurveyNumber: message.prevSurveyNumber,
 			};
 
 			const response = await fetch(`${baseUrl}${apiConfig.routes.api.uploadPDF}`, {

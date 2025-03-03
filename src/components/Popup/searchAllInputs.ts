@@ -175,6 +175,8 @@ export const searchAllInputs = () => {
         window.appVariables["vivodyPoRezultatam"][i]["tehSostoyanie"] = window.appVariables.conclusionsPrevSurveyRows[i].querySelector("td:nth-child(4)");
     }
 
+    window.appVariables["vivodyPoRezultatam"][0]["number"] = window.appVariables.prevSurveyNumber;
+
     // РЕКОМЕНДАЦИИ ПО КАП РЕМОНТУ
     window.appVariables.recomend = new Object();
     // Крыша

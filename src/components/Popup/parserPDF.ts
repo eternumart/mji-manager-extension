@@ -26,7 +26,8 @@ function initParserPDF(event: any) {
 				type: "UPLOAD_PDF",
 				fileName: file.name,
 				fileData: e.target.result,
-				useAI: window.appVariables.aiswicherState
+				useAI: window.appVariables.aiswicherState,
+				prevSurveyNumber: window.appVariables.prevSurveyNumber,
 			});
 		}
 	};

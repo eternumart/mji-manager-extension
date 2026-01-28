@@ -1,7 +1,5 @@
-import { baseUrl } from "../../../chromeServices/DOMEvaluator";
 import { saveToCache } from "./saveToCache";
 
-let appDataIsLoaded: boolean = false;
 let lauchStarted: boolean = false;
 
 export const getAppData = async (data: any, setLoading: (loading: boolean) => void) => {
@@ -38,7 +36,6 @@ export const getAppData = async (data: any, setLoading: (loading: boolean) => vo
 			fullData.appData = request.data;
 			if (fullData.currentFio !== "" && fullData.currentLogin !== "" && fullData.loginIsPossible) {
 				console.log("11! ⚙️ Все данные приложения получены. Запуск.");
-				appDataIsLoaded = true;
 				setLoading(false);
 				console.log("📦 Полные данные:", fullData);
 				init(fullData);

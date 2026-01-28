@@ -1,5 +1,3 @@
-import { apiConfig } from "../../../apiConfig";
-
 export const logOut = () => {
 	console.log("🔴 Выход из аккаунта...");
 

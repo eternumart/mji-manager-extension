@@ -27,7 +27,7 @@ export const apiConfig = {
             changeAccount: "/api/change-account",
             deactivateAccount: "/api/deactivate-account",
             getAppData: "/api/get-app-data",
-			checResponseFromServer: "/api/check-response-from-server",
+			checkResponseFromServer: "/api/check-response-from-server",
 			getScripts: "/api/get-scripts",
 			uploadPDF: '/api/upload-pdf'
 		},

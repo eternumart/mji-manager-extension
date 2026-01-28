@@ -3,7 +3,7 @@ import React from "react";
 import { useAppContext } from "../../../context/Context";
 
 export const Loader = () => {
-	const { isLoading, setLoading } = useAppContext();
+	const { isLoading } = useAppContext();
 
 	console.log("🌀 Статус загрузки:", isLoading);
 

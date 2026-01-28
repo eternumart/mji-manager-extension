@@ -1,6 +1,6 @@
 import "../../../styles/global.scss";
 import styles from "../../../styles/components/App.module.scss";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { EnviromentSwitch } from "../EnviromentSwitch/EnviromentSwitch";
 import { UpdateLink } from "../UpdateLink/UpdateLink";
 import { Authorization } from "../Authorization/Authorization";
@@ -42,6 +42,7 @@ function App() {
 				setLoading(false);
 			}
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [serverState]);
 
 	useEffect(() => {
@@ -68,6 +69,7 @@ function App() {
 		return () => {
 			chrome.runtime.onMessage.removeListener(handleMessage);
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// ✅ Убираем ошибку через 5 секунд, но только если она есть
@@ -93,6 +95,7 @@ function App() {
 		return () => {
 			chrome.runtime.onMessage.removeListener(handleLoader);
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

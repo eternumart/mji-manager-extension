@@ -77,6 +77,7 @@ export const ActivateForm = () => {
 
 		chrome.runtime.onMessage.addListener(handleActivateResponse);
 		return () => chrome.runtime.onMessage.removeListener(handleActivateResponse);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []); // ✅ Вызываем только при монтировании
 
 	return (

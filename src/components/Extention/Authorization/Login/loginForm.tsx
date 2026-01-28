@@ -2,7 +2,6 @@ import styles from "../../../../styles/components/LoginForm.module.scss";
 import { useEffect, useState } from "react";
 import { useAppContext } from "../../../../context/Context";
 import { apiConfig } from "../../../../apiConfig";
-import { saveToCache } from "../../utils/saveToCache";
 import { decodeToken } from "../../utils/decodeToken"; // ✅ Добавляем декодирование токена
 import { getAppData } from "../../utils/launchApp";
 
@@ -93,6 +92,7 @@ export const LoginForm = () => {
 	
 		// ✅ Удаляем слушатель при размонтировании
 		return () => chrome.runtime.onMessage.removeListener(handleLoginResponse);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [serverState]);
 
 	return (

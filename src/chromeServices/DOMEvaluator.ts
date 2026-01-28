@@ -5,7 +5,6 @@ import { pdfParserListener } from "../components/Extention/utils/messageUtils";
 console.log("DOMEvaluator.ts loaded");
 
 export let baseUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`; // По умолчанию выбран сервер Prod
-let isLoading = false;
 const loadingFlags = new Map<string, boolean>();
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -125,7 +124,6 @@ async function fetchWithRetry(url: string, options: RequestInit, retries: number
 	}
 
 	loadingFlags.set(url, true);
-	isLoading = true;
 
 	for (let i = 0; i < retries; i++) {
 		try {
@@ -140,13 +138,14 @@ async function fetchWithRetry(url: string, options: RequestInit, retries: number
 			if (!response.ok) {
 				chrome.runtime.sendMessage({
 					contentScriptQuery: "Error-response",
-					error: "❌ Сервер недоступен. Статус: ${response.status}",
+					error: `❌ Сервер недоступен. Статус: ${response.status}`,
 				});
+				loadingFlags.set(url, false);
+				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 			const data = await response.json();
 
 			loadingFlags.set(url, false);
-			isLoading = false;
 
 			if (retries === 3) {
 				console.log("4! 📦 Сервер вернул данные пользователя.");
@@ -170,7 +169,6 @@ async function fetchWithRetry(url: string, options: RequestInit, retries: number
 
 					if (cachedData) {
 						loadingFlags.set(url, false);
-						isLoading = false;
 
 						chrome.runtime.sendMessage({
 							contentScriptQuery: "Error-response",
@@ -203,7 +201,7 @@ async function getCurrentEnviroment() {
 async function checkResponseFromServer(request: any) {
 	console.log("⏳ Проверка ответа сервера DOMEvaluator.ts");
 	try {
-		const url = `${baseUrl}${apiConfig.routes.api.checResponseFromServer}`;
+		const url = `${baseUrl}${apiConfig.routes.api.checkResponseFromServer}`;
 
 		// Выполняем запрос без использования флагов загрузки
 		await fetchWithRetry(url, {

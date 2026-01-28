@@ -1,5 +1,5 @@
 import styles from "../../../styles/components/Authorization.module.scss";
-import React, { useState } from "react";
+import React from "react";
 import { LoginForm } from "./Login/loginForm";
 import { ActivateForm } from "./Activation/activateForm";
 import { useAppContext } from "../../../context/Context";

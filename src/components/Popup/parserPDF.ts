@@ -20,6 +20,7 @@ function initParserPDF(event: any) {
 	progressText.textContent = `Файл загружен, идет обработка: ${file.name}`;
 
 	const reader = new FileReader();
+	console.log("Будем искать отчет с номером: ", window.appVariables.prevSurveyNumber);
 	reader.onload = function (e) {
 		if (e.target?.result) {
 			chrome.runtime.sendMessage({

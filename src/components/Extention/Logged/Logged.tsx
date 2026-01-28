@@ -20,7 +20,7 @@ export const Logged = () => {
 
 				if (isLogged) return;
 
-				if (result[baseUrl].currentFio && result[baseUrl].currentLogin) {
+				if (result[baseUrl] && result[baseUrl].currentFio && result[baseUrl].currentLogin) {
 					console.log("✅ Пользователь найден в storage, авторизация подтверждена.");
 					setIsLogged(true);
 					setUserData({ fio: result[baseUrl].currentFio, login: result[baseUrl].currentLogin });
@@ -30,6 +30,7 @@ export const Logged = () => {
 				}
 			});
 		}, 300);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [userData]);
 
 	// Функция выхода из профиля

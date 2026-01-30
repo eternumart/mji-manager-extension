@@ -9,8 +9,10 @@ export const LoginForm = () => {
 	const { setIsLogged, setUserData, serverState, setLoading } = useAppContext();
 	const [errorMessage, setErrorMessage] = useState("");
 
-	const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
-	const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
+	const baseUrl =
+		serverState === "prod"
+			? `${apiConfig.address.protocol}${apiConfig.address.ip}`
+			: `${apiConfig.address.protocol}${apiConfig.address.devHost}:${apiConfig.address.devPort}`;
 
 	const logIn = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();

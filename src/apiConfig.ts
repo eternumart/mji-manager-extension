@@ -2,7 +2,8 @@ export const apiConfig = {
 	address: {
 		protocol: "http://",
 		ip: "mjimanager.ru",
-		devPort: 3000, 
+		devHost: "localhost",
+		devPort: 3000,
 		prodPort: 80,
 	},
 	routes: {
@@ -29,7 +30,8 @@ export const apiConfig = {
             getAppData: "/api/get-app-data",
 			checkResponseFromServer: "/api/check-response-from-server",
 			getScripts: "/api/get-scripts",
-			uploadPDF: '/api/upload-pdf'
+			uploadPDF: "/api/upload-pdf",
+			rephraseDefectsBlock: "/api/rephrase-defects-block",
 		},
 	},
 };

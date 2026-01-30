@@ -4,48 +4,258 @@ import { pdfParserListener } from "../components/Extention/utils/messageUtils";
 
 console.log("DOMEvaluator.ts loaded");
 
-export let baseUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`; // По умолчанию выбран сервер Prod
+const STORAGE_KEY_API_BASE_URL = "apiBaseUrl";
+const defaultBaseUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
+export let baseUrl = defaultBaseUrl;
 const loadingFlags = new Map<string, boolean>();
 
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-	if (message.type === "UPLOAD_PDF") {
-		pdfParserListener(); // Подписываемся на события парсинга PDF
+/** Всегда возвращает актуальный baseUrl: при перезапуске service worker читает из storage. */
+function getBaseUrl(): Promise<string> {
+	return new Promise((resolve) => {
+		chrome.storage.local.get([STORAGE_KEY_API_BASE_URL], (result) => {
+			const stored = result[STORAGE_KEY_API_BASE_URL];
+			if (stored && typeof stored === "string") {
+				baseUrl = stored;
+			} else {
+				baseUrl = defaultBaseUrl;
+			}
+			resolve(baseUrl);
+		});
+	});
+}
+
+// Восстановить выбранный сервер при старте service worker
+chrome.storage.local.get([STORAGE_KEY_API_BASE_URL], (result) => {
+	if (result[STORAGE_KEY_API_BASE_URL]) {
+		baseUrl = result[STORAGE_KEY_API_BASE_URL];
+		console.log("🛠 Восстановлен сервер из storage:", baseUrl);
+	}
+});
+
+pdfParserListener();
+
+// Порт "pdf-upload" держим открытым во время запроса, чтобы service worker не засыпал. Закрываем после доставки результата.
+let pdfUploadPort: chrome.runtime.Port | null = null;
+chrome.runtime.onConnect.addListener((port) => {
+	if (port.name === "pdf-upload") {
+		pdfUploadPort = port;
+		port.onDisconnect.addListener(() => {
+			pdfUploadPort = null;
+		});
+	}
+});
+
+function closePdfUploadPort() {
+	if (pdfUploadPort) {
 		try {
-			console.log(`Получен PDF-файл: ${message.fileName}`);
-			if(message.useAI){
-				console.log("PDF будет обработан через AI")
+			pdfUploadPort.disconnect();
+		} catch (_) {}
+		pdfUploadPort = null;
+	}
+}
+
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+	if (message.type === "REPHRASE_DEFECTS_BLOCK") {
+		const REPHRASE_TIMEOUT_MS = 120000; // 2 минуты — перефразирование может долго выполняться
+		const tabId = sender.tab?.id;
+		const frameId = sender.frameId ?? 0;
+
+		const deliverRephraseResponse = (data: any, error: string | null) => {
+			// Доставляем ответ в тот же таб/фрейм, откуда пришёл запрос (попап может быть в iframe — sendMessage туда не доходит)
+			if (tabId != null) {
+				chrome.scripting.executeScript(
+					{
+						target: { tabId, frameIds: [frameId] },
+						func: (responseData: any, responseError: string | null) => {
+							if (typeof (window as any).handleRephraseResponse === "function") {
+								(window as any).handleRephraseResponse(responseData, responseError);
+							}
+						},
+						args: [data, error],
+					},
+					() => {
+						if (chrome.runtime.lastError) {
+							console.warn("[MJI] executeScript handleRephraseResponse:", chrome.runtime.lastError.message);
+						}
+					}
+				);
 			}
-			// 🔹 Декодируем base64 (убираем префикс `data:application/pdf;base64,`)
-			const base64Data = message.fileData.split(",")[1]; // Убираем префикс
-			const binaryData = atob(base64Data);
-			const uint8Array = new Uint8Array(binaryData.length);
+			// Дублируем через sendMessage для попапа в main frame и моста
+			chrome.runtime.sendMessage({
+				type: "REPHRASE_DEFECTS_BLOCK_RESPONSE",
+				data,
+				error,
+			}).catch((err) => {
+				if (!String(err?.message || err).includes("Receiving end does not exist")) {
+					console.warn("[MJI] sendMessage REPHRASE_DEFECTS_BLOCK_RESPONSE:", err);
+				}
+			});
+		};
+		try {
+			const apiBase = await getBaseUrl();
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), REPHRASE_TIMEOUT_MS);
+			const response = await fetch(
+				`${apiBase}${apiConfig.routes.api.rephraseDefectsBlock}`,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ results: message.results }),
+					signal: controller.signal,
+				},
+			);
+			clearTimeout(timeoutId);
+			const result = await response.json();
+			deliverRephraseResponse(result.success ? result.data : null, result.error || null);
+		} catch (error: any) {
+			deliverRephraseResponse(null, error?.message || String(error));
+		}
+		return;
+	}
+	// Инжект панели на целевую вкладку. Если форма в iframe — инжектируем в тот фрейм, иначе в main.
+	if (message.type === "INJECT_POPUP") {
+		const data = message.data;
+		const tabId = message.tabId;
+		if (!data?.appData || !data.currentFio || !data.currentLogin) {
+			console.error("❌ INJECT_POPUP: неполные данные");
+			return;
+		}
+		if (!tabId) {
+			console.error("❌ INJECT_POPUP: не передан tabId");
+			return;
+		}
+		console.log("📌 [background] Инжект в вкладку:", tabId);
 
-			for (let i = 0; i < binaryData.length; i++) {
-				uint8Array[i] = binaryData.charCodeAt(i);
+		const injectIntoFrame = (frameId: number) => {
+			chrome.scripting.executeScript(
+				{ target: { tabId, frameIds: [frameId] }, files: ["static/js/popup.js"] },
+				() => {
+					if (chrome.runtime.lastError) {
+						console.error("❌ Инжект popup.js:", chrome.runtime.lastError.message);
+						return;
+					}
+					setTimeout(() => {
+						chrome.scripting.executeScript(
+							{
+								target: { tabId, frameIds: [frameId] },
+								func: (currentFio: string, login: string, loginIsPossible: boolean, launchStatus: boolean, appData: unknown) => {
+									if (typeof (window as any).runApp === "function") {
+										(window as any).runApp(currentFio, login, loginIsPossible, launchStatus, appData);
+									} else {
+										console.error("runApp не найден на странице");
+									}
+								},
+								args: [data.currentFio, data.currentLogin, data.loginIsPossible, false, data.appData],
+							},
+							() => {
+								if (chrome.runtime.lastError) {
+									console.error("❌ Вызов runApp:", chrome.runtime.lastError.message);
+								}
+							}
+						);
+					}, 100);
+				}
+			);
+		};
+
+		// Определить фрейм, в котором есть форма МЖИ (#formData107 или #formData181)
+		chrome.scripting.executeScript(
+			{
+				target: { tabId, allFrames: true },
+				func: () => !!(document.querySelector("#formData107") || document.querySelector("#formData181")),
+			},
+			(results) => {
+				if (chrome.runtime.lastError) {
+					console.error("❌ Поиск фрейма с формой:", chrome.runtime.lastError.message);
+					injectIntoFrame(0);
+					return;
+				}
+				const frameWithForm = results?.find((r: { result?: boolean }) => r.result === true);
+				const frameId = frameWithForm && "frameId" in frameWithForm ? (frameWithForm as { frameId: number }).frameId : 0;
+				console.log("📌 [background] Фрейм с формой:", frameId, frameId === 0 ? "(main)" : "(iframe)");
+				injectIntoFrame(frameId);
 			}
-
-			// Подготавливаем base64 для отправки
-			const fileBase64 = message.fileData; // Передаем полностью base64 строку
-
-			// Теперь отправляем base64 строку как JSON
+		);
+		return;
+	}
+	// Загрузка PDF на бэкенд: парсинг в DeepSeek, ответ доставляем во фрейм с формой (попап может быть в iframe; отправитель — мост в main frame).
+	if (message.type === "UPLOAD_PDF") {
+		const tabId = sender.tab?.id;
+		const deliverPdfResult = (data: any, error: string | null) => {
+			// Запускаем во всех фреймах таба: во фрейме с формой есть handleParsedPdfResult — он вызовется там.
+			const runInAllFrames = () => {
+				chrome.scripting.executeScript(
+					{
+						target: { tabId: tabId!, allFrames: true },
+						func: (payload: any, err: string | null) => {
+							if (err) {
+								if (typeof (window as any).handlePdfFailed === "function") {
+									(window as any).handlePdfFailed(err);
+								}
+								return;
+							}
+							if (typeof (window as any).handleParsedPdfResult === "function") {
+								(window as any).handleParsedPdfResult(payload);
+							}
+						},
+						args: [data, error],
+					},
+					() => {
+						if (chrome.runtime.lastError) {
+							console.warn("[MJI] executeScript handleParsedPdfResult:", chrome.runtime.lastError.message);
+						}
+						closePdfUploadPort();
+					}
+				);
+			};
+			if (tabId != null) {
+				runInAllFrames();
+			} else {
+				closePdfUploadPort();
+			}
+			chrome.runtime.sendMessage({ type: "UPLOAD_COMPLETE", data, error }).catch(() => {});
+		};
+		try {
+			const apiBase = await getBaseUrl();
+			console.log(`PDF для анализа в DeepSeek: ${message.fileName} → ${apiBase}`);
+			if (message.useAI) {
+				console.log("Включено перефразирование дефектов через AI");
+			}
+			const fileBase64 = message.fileData;
 			const payload = {
 				fileName: message.fileName,
 				fileData: fileBase64,
 				useAI: message.useAI,
-				prevSurveyNumber: message.prevSurveyNumber,
+				address: message.address || "",
+				registrationNumber: message.registrationNumber || "",
 			};
 
-			const response = await fetch(`${baseUrl}${apiConfig.routes.api.uploadPDF}`, {
+			const response = await fetch(`${apiBase}${apiConfig.routes.api.uploadPDF}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(payload),
 			});
 
-			const result = await response.json();
-			chrome.runtime.sendMessage({ type: "UPLOAD_COMPLETE", data: result });
+			const text = await response.text();
+			console.log(`[MJI] PDF ответ получен: status=${response.status}, длина=${text?.length ?? 0}`);
+			let result: any;
+			try {
+				result = text ? JSON.parse(text) : {};
+			} catch {
+				console.error("[MJI] Ответ бэкенда не JSON:", text?.slice(0, 200));
+				deliverPdfResult(null, "Ответ сервера не JSON");
+				return;
+			}
+			if (!response.ok) {
+				deliverPdfResult(null, result?.message || result?.error || `HTTP ${response.status}`);
+				return;
+			}
+			const parsedData = result?.data ?? result;
+			deliverPdfResult(parsedData, result?.error ?? null);
 		} catch (error: any) {
 			console.error("Ошибка загрузки PDF:", error);
-			chrome.runtime.sendMessage({ type: "UPLOAD_FAILED", error: error.message });
+			deliverPdfResult(null, error?.message ?? "Ошибка загрузки");
+			chrome.runtime.sendMessage({ type: "UPLOAD_FAILED", error: error.message }).catch(() => {});
 		}
 	}
 });
@@ -91,13 +301,17 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 			break;
 		}
 		case "enviromentSwitch-request": {
-			console.log(`🛠 Запросы пойдут на ${request.enviroment} сервер.`);
 			baseUrl = request.baseUrl;
+			chrome.storage.local.set({ [STORAGE_KEY_API_BASE_URL]: request.baseUrl }, () => {
+				console.log(`🛠 Сервер сохранён в storage: ${request.baseUrl}`);
+			});
+			console.log(`🛠 Запросы пойдут на ${request.enviroment} сервер: ${request.baseUrl}`);
 			checkResponseFromServer(request);
 			break;
 		}
 		case "app-loaded-response": {
 			baseUrl = request.baseUrl;
+			chrome.storage.local.set({ [STORAGE_KEY_API_BASE_URL]: request.baseUrl });
 			break;
 		}
 		case "enviroment-check-request": {
@@ -192,24 +406,24 @@ async function fetchWithRetry(url: string, options: RequestInit, retries: number
 }
 
 async function getCurrentEnviroment() {
+	const apiBase = await getBaseUrl();
 	chrome.runtime.sendMessage({
 		contentScriptQuery: "enviroment-check-response",
-		enviroment: baseUrl,
+		enviroment: apiBase,
 	});
 }
 
 async function checkResponseFromServer(request: any) {
 	console.log("⏳ Проверка ответа сервера DOMEvaluator.ts");
 	try {
-		const url = `${baseUrl}${apiConfig.routes.api.checkResponseFromServer}`;
+		const url = `${request.baseUrl}${apiConfig.routes.api.checkResponseFromServer}`;
 
 		// Выполняем запрос без использования флагов загрузки
 		await fetchWithRetry(url, {
 			method: "GET",
 			headers: { "Content-Type": "application/json" },
 		}).then((res) => {
-			console.log(`🟢 Сервер ${request.enviroment} доступен`);
-			baseUrl = request.baseUrl;
+			console.log(`🟢 Сервер ${request.enviroment} доступен: ${request.baseUrl}`);
 		});
 	} catch (error) {
 		console.error(`🔴 Сервер ${request.enviroment} не доступен`, error);
@@ -217,8 +431,9 @@ async function checkResponseFromServer(request: any) {
 }
 
 async function activation(request: any) {
-	console.log("⏳ Начат процесс активации через расширение...");
-	const url = `${baseUrl}${apiConfig.routes.api.activation}`;
+	const apiBase = await getBaseUrl();
+	console.log("⏳ Начат процесс активации через расширение...", apiBase);
+	const url = `${apiBase}${apiConfig.routes.api.activation}`;
 
 	try {
 		// ✅ Отправляем запрос на сервер
@@ -249,7 +464,8 @@ async function activation(request: any) {
 }
 
 async function login(request: any) {
-	const url = `${baseUrl}${apiConfig.routes.api.login}`;
+	const apiBase = await getBaseUrl();
+	const url = `${apiBase}${apiConfig.routes.api.login}`;
 
 	try {
 		const data = await fetchWithRetry(
@@ -275,7 +491,8 @@ async function login(request: any) {
 }
 
 async function saveFio(request: any) {
-	const url = `${baseUrl}${apiConfig.routes.api.saveFio}`;
+	const apiBase = await getBaseUrl();
+	const url = `${apiBase}${apiConfig.routes.api.saveFio}`;
 	try {
 		const data = await fetchWithRetry(url, {
 			method: "POST",
@@ -292,8 +509,9 @@ async function saveFio(request: any) {
 	}
 }
 async function appData(request: any) {
-	console.log("8! ⏳ Получение данных приложения напрямую с сервера.");
-	const url = `${baseUrl}${apiConfig.routes.api.getAppData}`;
+	const apiBase = await getBaseUrl();
+	console.log("8! ⏳ Получение данных приложения с сервера:", apiBase);
+	const url = `${apiBase}${apiConfig.routes.api.getAppData}`;
 
 	try {
 		// ✅ Запрашиваем `appData` с сервера
@@ -312,14 +530,14 @@ async function appData(request: any) {
 		chrome.runtime.sendMessage({
 			contentScriptQuery: "appData-response",
 			data: data,
-			baseUrl: baseUrl,
+			baseUrl: apiBase,
 		});
 	} catch (error: any) {
 		console.warn("❌ Ошибка запроса `appData`, отправляем `empty` в `appData-response`...");
 		chrome.runtime.sendMessage({
 			contentScriptQuery: "appData-response",
 			data: "empty",
-			baseUrl: baseUrl,
+			baseUrl: apiBase,
 		});
 	}
 }

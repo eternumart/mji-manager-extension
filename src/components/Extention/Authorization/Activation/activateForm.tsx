@@ -8,8 +8,10 @@ export const ActivateForm = () => {
 	const [errorMessage, setErrorMessage] = useState("");
 	const [login, setLogin] = useState(""); // ✅ Используем `useState` вместо `useRef`
 
-	const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
-	const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
+	const baseUrl =
+		serverState === "prod"
+			? `${apiConfig.address.protocol}${apiConfig.address.ip}`
+			: `${apiConfig.address.protocol}${apiConfig.address.devHost}:${apiConfig.address.devPort}`;
 
 	const activateAccount = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();

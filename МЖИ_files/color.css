@@ -1,0 +1,184 @@
+.canvasBGcolor {
+  background-color:#F5F5F5;
+}
+
+.panelBackground {
+/*  background-color: #CDCDCD;*/
+  background-color:#ebf2f9;
+}
+
+/*
+.panelBackgroundLight {
+  background-color: #EEEEEE;
+}
+*/
+.panelBackgroundEnd {
+/*  background-color: #EBF2F9;*/
+/*  background-color:#C8E2F2;*/
+/*  background-color:#DEEBF3;*/
+/*  background-color:#E2E2E2;*/
+/*  background-color:#CCCCCC;*/
+  background-color:#E0E0E0;
+}
+
+
+.selected {
+/*  background-color:#ffffbb;*/
+/*  background-color:#BDE0F2;*/
+/*  background-color:#90B2CF;*/
+  background-color:#EAF7FD;
+  box-shadow: 1px 1px 2px #777;
+}
+.selected a {
+/*  color:#FFF;*/
+  color:#000000;
+}
+
+/****************************************************/
+/*                                 button                                      */
+/****************************************************/
+.button, .button-b {
+  background-color: #F4F4F4;
+  background: -webkit-gradient(linear, left top, left bottom, from(#F4F4F4), to(#BBB) );
+  background: -moz-linear-gradient(-90deg, #F4F4F4, #BBB);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#F4F4F4', endColorstr='#b0b0b0');
+}
+.button:hover,.button:focus, .button-b:hover {
+  background-color: #F4F4F4;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#BBB), to(#F4F4F4) );
+  background-image: -moz-linear-gradient(-90deg, #BBB, #F4F4F4);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr="#b0b0b0", endColorstr="#F4F4F4");
+}
+.button.fixed, .button-b.fixed {
+  background-color: #FFF;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#BBB), to(#F5F5F5) );
+  background-image: -moz-linear-gradient(-90deg, #BBB, #F5F5F5);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr="#b0b0b0", endColorstr="#F5F5F5");
+}
+
+
+/*
+.button {
+  background-color: #F0F0F0;
+  background: -webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#CDCDCD) );
+  background: -moz-linear-gradient(-90deg, #FFFFFF, #CDCDCD);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#FFFFFF', endColorstr='#CDCDCD');
+}
+.button:hover,.button:focus {
+  background-color: #FFFFFF;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#CDCDCD), to(#FFFFFF) );
+  background-image: -moz-linear-gradient(-90deg, #CDCDCD, #FFFFFF);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr="#CDCDCD", endColorstr="#FFFFFF");
+}
+.button.fixed {
+  background-color: #FFFFFF;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#CDCDCD), to(#FFFFFF) );
+  background-image: -moz-linear-gradient(-90deg, #CDCDCD, #FFFFFF);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr="#CDCDCD", endColorstr="#FFFFFF");
+}
+*/
+
+
+/****************************************************/
+/*                                  top menu                               */
+/****************************************************/
+.hControlPanel {
+/*
+  background-color: #F0F0F0;
+  background: -webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE) );
+  background: -moz-linear-gradient(-90deg, #FFFFFF, #EEEEEE);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#FFFFFF', endColorstr='#EEEEEE');
+*/
+  background-color: #F5F5F5;
+  background: -webkit-gradient(linear, left top, left bottom, from(#F5F5F5), to(#E0E0E0) );
+  background: -moz-linear-gradient(-90deg, #F5F5F5, #E0E0E0);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#F5F5F5', endColorstr='#E0E0E0');
+}
+.hControlPanelBar {
+/*
+background-color: #ffffff;
+background: -moz-linear-gradient(left,  #ffffff 0%, #eeeeee 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, right top, color-stop(0%,#ffffff), color-stop(100%,#eeeeee)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(left,  #ffffff 0%, #eeeeee 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(left,  #ffffff 0%, #eeeeee 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(left,  #ffffff 0%, #eeeeee 100%); /* IE10+ */
+background: linear-gradient(left,  #ffffff 0%, #eeeeee 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=1 ); /* IE6-9 */
+*/
+background-color: #F5F5F5;
+background: -moz-linear-gradient(left,  #F5F5F5 0%, #E0E0E0 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, right top, color-stop(0%,#F5F5F5), color-stop(100%,#E0E0E0)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(left,  #F5F5F5 0%, #E0E0E0 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(left,  #F5F5F5 0%, #E0E0E0 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(left,  #F5F5F5 0%, #E0E0E0 100%); /* IE10+ */
+background: linear-gradient(left,  #F5F5F5 0%, #E0E0E0 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F5F5F5', endColorstr='#E0E0E0',GradientType=1 ); /* IE6-9 */
+}
+
+
+/****************************************************/
+/*                              vertical menu                           */
+/****************************************************/
+.vControlPanel {
+/*
+  background-color: #F0F0F0;
+  background: -webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE) );
+  background: -moz-linear-gradient(-90deg, #FFFFFF, #EEEEEE);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#FFFFFF', endColorstr='#EEEEEE');
+*/
+  background-color: #F0F0F0;
+  background: -webkit-gradient(linear, left top, left bottom, from(#F5F5F5), to(#E0E0E0) );
+  background: -moz-linear-gradient(-90deg, #F5F5F5, #E0E0E0);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#F5F5F5', endColorstr='#E0E0E0');
+}
+
+/****************************************************/
+/*                                  grid head                              */
+/****************************************************/
+th.grid {
+  background-color: #F0F0F0;
+  background: -webkit-gradient(linear, left top, left bottom, from(#D3D3D3), to(#F7F7F7) );
+  background: -moz-linear-gradient(-90deg, #D3D3D3, #F7F7F7);
+  filter:   progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#D3D3D3', endColorstr='#F7F7F7');
+}
+
+/****************************************************/
+/*                            grid sql head                             */
+/****************************************************/
+#gridSQL thead tr.title {
+  background-color: #F0F0F0;
+  background: -webkit-gradient(linear, left top, left bottom, from(#D3D3D3), to(#F7F7F7) );
+  background: -moz-linear-gradient(-90deg, #D3D3D3, #F7F7F7);
+  filter:   progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#D3D3D3', endColorstr='#F7F7F7');
+}
+#gridSQL thead tr.filter {
+  background-color: #F7F7F7;
+}
+#gridSQL .dataContainer tr.title td {
+  border-color:#EEEEEE;
+}
+#gridSQL .dataContainer tr.filter {
+  border-bottom: 1px solid #EEEEEE;
+}
+
+/****************************************************/
+/*                               tree view                                   */
+/****************************************************/
+/* выделенние текущей позиции */
+#treeView div.ContentSelected a {
+/*  color: #FFF;*/
+/*  background-color: #90B2CF;*/
+  background-color: #E5F7FF;
+  box-shadow: 1px 1px 3px #777;
+  outline: none;
+}
+
+/****************************************************/
+/*                         component                               */
+/****************************************************/
+.valueChanged {
+  background-color: #FFFFFF;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#EAF5FF), to(#FFFFFF) );
+  background-image: -moz-linear-gradient(-90deg, #EAF5FF, #FFFFFF);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr="#EAF5FF", endColorstr="#FFFFFF");
+}

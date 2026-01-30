@@ -1,11 +1,23 @@
+/* eslint-disable no-new-object, @typescript-eslint/no-array-constructor */
 export const searchAllInputs = () => {
     if (!window.appData.functions.searchAllInputs || window.appVariables.currentPage === "parser") {
         return;
     }
-    window.appVariables.area = window.appVariables.wholeAddress.split(",")[0];
-    window.appVariables.district = window.appVariables.wholeAddress.split(",")[1];
-    window.appVariables.address = window.appVariables.htmlBody.querySelector("#comboboxTextcomp_12339").value;
-    window.appVariables.repairProjectsTable = window.appVariables.form.querySelector("#group_22130");
+    const addressEl = window.appVariables.htmlBody?.querySelector("#comboboxTextcomp_12339");
+    const form = window.appVariables.form;
+    if (!form || !addressEl) {
+        return;
+    }
+    const addressFromInput = (addressEl as HTMLInputElement).value ?? "";
+    window.appVariables.address = addressFromInput;
+    const addrForParts = String(window.appVariables.wholeAddress || addressFromInput || "").trim();
+    const parts = addrForParts ? addrForParts.split(",").map((s: string) => s.trim()) : ["", "", ""];
+    window.appVariables.area = parts[0] ?? "";
+    window.appVariables.district = parts[1] ?? "";
+    window.appVariables.repairProjectsTable = form.querySelector("#group_22130");
+    if (!window.appVariables.repairProjectsTable) {
+        return;
+    }
     window.appVariables.repairProjectsTableRows = window.appVariables.repairProjectsTable.querySelectorAll("tr");
     window.appVariables.conclusionsPrevSurvey = window.appVariables.form.querySelector("#gridSql_22131").querySelector(".data");
     window.appVariables.conclusionsPrevSurveyRows = window.appVariables.conclusionsPrevSurvey.querySelectorAll("tr");
@@ -176,6 +188,16 @@ export const searchAllInputs = () => {
     }
 
     window.appVariables["vivodyPoRezultatam"][0]["number"] = window.appVariables.prevSurveyNumber;
+
+    // Регистрационный № (строка для бэкенда: PDF, выбор листов по дому)
+    const numberCell = window.appVariables.conclusionsPrevSurveyRows[0]?.querySelector?.("td:nth-child(3)");
+    if (numberCell) {
+        const input = numberCell.querySelector?.("input");
+        const raw = input?.value ?? (numberCell as HTMLElement)?.textContent ?? "";
+        window.appVariables.registrationNumber = (typeof raw === "string" ? raw : "").trim();
+    } else {
+        window.appVariables.registrationNumber = "";
+    }
 
     // РЕКОМЕНДАЦИИ ПО КАП РЕМОНТУ
     window.appVariables.recomend = new Object();

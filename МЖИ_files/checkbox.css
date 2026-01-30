@@ -1,0 +1,19 @@
+/*** BOX CHECK ***/
+#checkbox {
+  display:inline;
+  margin:0;
+  padding:0;
+}
+#checkbox a {
+  width:16px;
+  text-decoration:none; 
+}
+#checkbox a.checked {
+  background: url(../img/checkbox-selected.gif) no-repeat center center;
+}
+#checkbox a.unchecked {
+  background: url(../img/checkbox-none.gif) no-repeat center center;
+}
+#checkbox a.disabled {
+  background: url(../img/checkbox-disabled.gif) no-repeat center center;
+}

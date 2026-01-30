@@ -42,10 +42,10 @@ export const downloadPhotos = (evt: any) => {
         currentTextarea.value = downloadDate;
 
         // Копируем данные файла из расширения
-        interface fileObj {
+        interface IFileObj {
             [key: string]: any;
         }
-        const fileObj = {
+        const fileObj: IFileObj = {
             type: currentFile.type,
             size: currentFile.size,
             webkitRelativePath: currentFile.webkitRelativePath,

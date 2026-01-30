@@ -1,6 +1,11 @@
 import { searchAllInputs } from "./searchAllInputs";
 import { buttonError } from "./buttonError";
 
+/** Безопасное чтение textContent (элемент может быть не найден). */
+const safeText = (el: any): string => (el?.textContent != null ? String(el.textContent) : "");
+/** Безопасное чтение value у input/textarea. */
+const safeVal = (el: any): string => (el != null && "value" in el ? String((el as HTMLInputElement).value ?? "") : "");
+
 export const saveData = () => {
     if (!window.appData.functions.saveData || window.appVariables.currentPage === "parser") {
         return;
@@ -12,38 +17,38 @@ export const saveData = () => {
 
     // обновляем все значения объекта переменных
     searchAllInputs();
-    interface data {
+    interface ISaveDataPayload {
         [key: string]: any;
     }
-    const data: data = {
+    const data: ISaveDataPayload = {
         address: {
             area: window.appVariables.area,
             district: window.appVariables.district,
             address: window.appVariables.address,
         },
         "Паспортные данные": {
-            "Количество этажей": window.appVariables.passportDannye.etajei.value,
-            "Количество подъездов": window.appVariables.passportDannye.podjezdov.value,
-            "Строительный объем здания": window.appVariables.passportDannye.stroyObjem.value,
-            "Кол-во квартир": window.appVariables.passportDannye.kvartir.value,
-            "Площадь полезная": window.appVariables.passportDannye.poleznayaPloschad.value,
-            "Площадь в жилых помещениях": window.appVariables.passportDannye.jilayaPloschad.value,
-            "Площадь в нежилых помещениях": window.appVariables.passportDannye.neJilayaPloschad.value,
-            "Серия проекта": window.appVariables.passportDannye.seriyaProekta.value,
-            "Год постройки": window.appVariables.passportDannye.godPostrioki.value,
-            "Год реконструкции": window.appVariables.passportDannye.godRekonstrukcii.value,
-            "Класс энергетической эффективности здания": window.appVariables.passportDannye.klassEnergoeffectivnosti.value,
-            "Физический износ (%) по данным БТИ": window.appVariables.passportDannye.fizIznos.value,
-            "по данным БТИ на дату": window.appVariables.passportDannye.dannyeBtiData.value,
-            "Наличие встроенных инженерных сооружений": window.appVariables.passportDannye.nalichVstroenSooruj.value,
-            "Кол-во встроенных инженерных сооружений": window.appVariables.passportDannye.kolichVstroenSooruj.value,
-            "Кол-во надстроенных инженерных сооружений": window.appVariables.passportDannye.kolichNadstroenSooruj.value,
-            ТП: window.appVariables.passportDannye.tp.value,
-            "в т.ч. масляные ТП": window.appVariables.passportDannye.maslyanieTp.value,
-            "Магистрали транзитные": window.appVariables.passportDannye.magistraliTranzit.value,
-            "Факт. уд. потребление тепловой эн., Гкал/м²": window.appVariables.passportDannye.potreblenieTeplaFact.value,
-            "Проект. уд. потребление тепловой эн., кДж/(м²×град.×сут.)": window.appVariables.passportDannye.potreblenieTeplaProekt.value,
-            "Величина отклонения (%)": window.appVariables.passportDannye.potreblenieTeplaOtklonenie.value,
+            "Количество этажей": safeVal(window.appVariables.passportDannye?.etajei),
+            "Количество подъездов": safeVal(window.appVariables.passportDannye?.podjezdov),
+            "Строительный объем здания": safeVal(window.appVariables.passportDannye?.stroyObjem),
+            "Кол-во квартир": safeVal(window.appVariables.passportDannye?.kvartir),
+            "Площадь полезная": safeVal(window.appVariables.passportDannye?.poleznayaPloschad),
+            "Площадь в жилых помещениях": safeVal(window.appVariables.passportDannye?.jilayaPloschad),
+            "Площадь в нежилых помещениях": safeVal(window.appVariables.passportDannye?.neJilayaPloschad),
+            "Серия проекта": safeVal(window.appVariables.passportDannye?.seriyaProekta),
+            "Год постройки": safeVal(window.appVariables.passportDannye?.godPostrioki),
+            "Год реконструкции": safeVal(window.appVariables.passportDannye?.godRekonstrukcii),
+            "Класс энергетической эффективности здания": safeVal(window.appVariables.passportDannye?.klassEnergoeffectivnosti),
+            "Физический износ (%) по данным БТИ": safeVal(window.appVariables.passportDannye?.fizIznos),
+            "по данным БТИ на дату": safeVal(window.appVariables.passportDannye?.dannyeBtiData),
+            "Наличие встроенных инженерных сооружений": safeVal(window.appVariables.passportDannye?.nalichVstroenSooruj),
+            "Кол-во встроенных инженерных сооружений": safeVal(window.appVariables.passportDannye?.kolichVstroenSooruj),
+            "Кол-во надстроенных инженерных сооружений": safeVal(window.appVariables.passportDannye?.kolichNadstroenSooruj),
+            ТП: safeVal(window.appVariables.passportDannye?.tp),
+            "в т.ч. масляные ТП": safeVal(window.appVariables.passportDannye?.maslyanieTp),
+            "Магистрали транзитные": safeVal(window.appVariables.passportDannye?.magistraliTranzit),
+            "Факт. уд. потребление тепловой эн., Гкал/м²": safeVal(window.appVariables.passportDannye?.potreblenieTeplaFact),
+            "Проект. уд. потребление тепловой эн., кДж/(м²×град.×сут.)": safeVal(window.appVariables.passportDannye?.potreblenieTeplaProekt),
+            "Величина отклонения (%)": safeVal(window.appVariables.passportDannye?.potreblenieTeplaOtklonenie),
         },
         "Технические заключения и проекты ремонтов": {
             1: {
@@ -124,7 +129,7 @@ export const saveData = () => {
                 "Треб. объем, %": window.appVariables.recomend.fasad.trebObjom.value,
                 "Выполнен, год": window.appVariables.recomend.fasad.vypolnenGod.value,
                 "Факт. объем, %": window.appVariables.recomend.fasad.factObjom.value,
-                "Остекление оконных заполнений фасада": window.appVariables.recomendationsDone.querySelector("#lookupTextcomp_12601").value,
+                "Остекление оконных заполнений фасада": safeVal(window.appVariables.recomendationsDone?.querySelector("#lookupTextcomp_12601")),
             },
             Балконы: {
                 Балконы: {
@@ -474,37 +479,37 @@ export const saveData = () => {
                 "Площадь кровли, м²": window.appVariables.roofSquare.value,
                 Кровля: {
                     "Выявленные дефекты": window.appVariables.krovlyaDefecty.value,
-                    "Оценка пред.": window.appVariables.krovlyaProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.krovlyaProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.krovlyaPercent.value,
                     Оценка: window.appVariables.krovlyaOcenka.value,
                 },
                 Свесы: {
                     "Выявленные дефекты": window.appVariables.svesyDefecty.value,
-                    "Оценка пред.": window.appVariables.svesyProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.svesyProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.svesyPercent.value,
                     Оценка: window.appVariables.svesyOcenka.value,
                 },
                 "Стропильная система": {
                     "Выявленные дефекты": window.appVariables.stropilnayaSistemaDefecty.value,
-                    "Оценка пред.": window.appVariables.stropilnayaSistemaProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.stropilnayaSistemaProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.stropilnayaSistemaPercent.value,
                     Оценка: window.appVariables.stropilnayaSistemaOcenka.value,
                 },
                 Чердак: {
                     "Выявленные дефекты": window.appVariables.cherdakDefecty.value,
-                    "Оценка пред.": window.appVariables.cherdakProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.cherdakProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.cherdakPercent.value,
                     Оценка: window.appVariables.cherdakOcenka.value,
                 },
                 "Покрытие ж/б": {
                     "Выявленные дефекты": window.appVariables.pokritieJBDefecty.value,
-                    "Оценка пред.": window.appVariables.pokritieJBProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.pokritieJBProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.pokritieJBPercent.value,
                     Оценка: window.appVariables.pokritieJBOcenka.value,
                 },
                 "Все элементы": {
                     "Выявленные дефекты": window.appVariables.vsyaKrishaDefecty.value,
-                    "Оценка пред.": window.appVariables.vsyaKrishaProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.vsyaKrishaProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.vsyaKrishaPercent.value,
                     Оценка: window.appVariables.vsyaKrishaOcenka.value,
                 },
@@ -513,14 +518,14 @@ export const saveData = () => {
                 "Тип водоотвода": window.appVariables.vodootvodType.value,
                 "Материал водоотвода": window.appVariables.vodootvodMaterial.value,
                 "Выявленные дефекты": window.appVariables.vodootvodDefecty.value,
-                "Оценка пред.": window.appVariables.vodootvodProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.vodootvodProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.vodootvodPercent.value,
                 Оценка: window.appVariables.vodootvodOcenka.value,
             },
             "Межпанельные стыки": {
                 "Тип стыков": window.appVariables.majpanelnyeStykiType.value,
                 "Выявленные дефекты": window.appVariables.majpanelnyeStykiDefecty.value,
-                "Оценка пред.": window.appVariables.majpanelnyeStykiProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.majpanelnyeStykiProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.majpanelnyeStykiPercent.value,
                 Оценка: window.appVariables.majpanelnyeStykiOcenka.value,
             },
@@ -530,7 +535,7 @@ export const saveData = () => {
                 "Отделка цоколя": window.appVariables.fasadOblicovkaTsokolya.value,
                 "Оконные заполнения": window.appVariables.fasadOkonnyeZapolneniya.value,
                 "Выявленные дефекты": window.appVariables.fasadDefecty.value,
-                "Оценка пред.": window.appVariables.fasadProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.fasadProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.fasadPercent.value,
                 Оценка: window.appVariables.fasadOcenka.value,
             },
@@ -544,31 +549,31 @@ export const saveData = () => {
 
                 Балконы: {
                     "Выявленные дефекты": window.appVariables.balkonyDefecty.value,
-                    "Оценка пред.": window.appVariables.balkonyProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.balkonyProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.balkonyPercent.value,
                     Оценка: window.appVariables.balkonyOcenka.value,
                 },
                 Лоджии: {
                     "Выявленные дефекты": window.appVariables.lodjiiDefecty.value,
-                    "Оценка пред.": window.appVariables.lodjiiProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.lodjiiProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.lodjiiPercent.value,
                     Оценка: window.appVariables.lodjiiOcenka.value,
                 },
                 Козырьки: {
                     "Выявленные дефекты": window.appVariables.kozirkiDefecty.value,
-                    "Оценка пред.": window.appVariables.kozirkiProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.kozirkiProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.kozirkiPercent.value,
                     Оценка: window.appVariables.kozirkiOcenka.value,
                 },
                 Эркеры: {
                     "Выявленные дефекты": window.appVariables.erkeryDefecty.value,
-                    "Оценка пред.": window.appVariables.erkeryProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.erkeryProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.erkeryPercent.value,
                     Оценка: window.appVariables.erkeryOcenka.value,
                 },
                 "Все элементы": {
                     "Выявленные дефекты": window.appVariables.vseBalkonyDefecty.value,
-                    "Оценка пред.": window.appVariables.vseBalkonyProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.vseBalkonyProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.vseBalkonyPercent.value,
                     Оценка: window.appVariables.vseBalkonyOcenka.value,
                 },
@@ -578,7 +583,7 @@ export const saveData = () => {
                 "Теплофизические свойства": window.appVariables.stenyTeploFizSvoistva.value,
 
                 "Выявленные дефекты": window.appVariables.stenyDefecty.value,
-                "Оценка пред.": window.appVariables.stenyProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.stenyProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.stenyPercent.value,
                 Оценка: window.appVariables.stenyOcenka.value,
             },
@@ -587,7 +592,7 @@ export const saveData = () => {
                 "Площадь, м²": window.appVariables.podvalSquare.value,
 
                 "Выявленные дефекты": window.appVariables.podvalDefecty.value,
-                "Оценка пред.": window.appVariables.podvalProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.podvalProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.podvalPercent.value,
                 Оценка: window.appVariables.podvalOcenka.value,
             },
@@ -595,7 +600,7 @@ export const saveData = () => {
                 "Наличие тех.подполья": window.appVariables.techPodpolieNalichie.value,
 
                 "Выявленные дефекты": window.appVariables.techPodpolieDefecty.value,
-                "Оценка пред.": window.appVariables.techPodpolieProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.techPodpolieProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.techPodpoliePercent.value,
                 Оценка: window.appVariables.techPodpolieOcenka.value,
             },
@@ -604,7 +609,7 @@ export const saveData = () => {
                 "Местонахождение, этаж": window.appVariables.techEtajMesto.value,
 
                 "Выявленные дефекты": window.appVariables.techEtajDefecty.value,
-                "Оценка пред.": window.appVariables.techEtajProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.techEtajProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.techEtajPercent.value,
                 Оценка: window.appVariables.techEtajOcenka.value,
             },
@@ -615,7 +620,7 @@ export const saveData = () => {
                 "Количество маш.мест, шт": window.appVariables.garageKolichestvoMashin.value,
 
                 "Выявленные дефекты": window.appVariables.garageDefecty.value,
-                "Оценка пред.": window.appVariables.garageProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.garageProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.garagePercent.value,
                 Оценка: window.appVariables.garageOcenka.value,
             },
@@ -626,49 +631,49 @@ export const saveData = () => {
 
                 Вестибюли: {
                     "Выявленные дефекты": window.appVariables.mopVestibuliDefecty.value,
-                    "Оценка пред.": window.appVariables.mopVestibuliProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.mopVestibuliProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.mopVestibuliPercent.value,
                     Оценка: window.appVariables.mopVestibuliOcenka.value,
                 },
                 Крыльца: {
                     "Выявленные дефекты": window.appVariables.mopKrilcaDefecty.value,
-                    "Оценка пред.": window.appVariables.mopKrilcaProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.mopKrilcaProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.mopKrilcaPercent.value,
                     Оценка: window.appVariables.mopKrilcaOcenka.value,
                 },
                 "Пандусы наружные": {
                     "Выявленные дефекты": window.appVariables.mopPandusyNaruzhnieDefecty.value,
-                    "Оценка пред.": window.appVariables.mopPandusyNaruzhnieProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.mopPandusyNaruzhnieProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.mopPandusyNaruzhniePercent.value,
                     Оценка: window.appVariables.mopPandusyNaruzhnieOcenka.value,
                 },
                 "Пандусы внутри-подъездные": {
                     "Выявленные дефекты": window.appVariables.mopPandusyVnutrennieDefecty.value,
-                    "Оценка пред.": window.appVariables.mopPandusyVnutrennieProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.mopPandusyVnutrennieProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.mopPandusyVnutrenniePercent.value,
                     Оценка: window.appVariables.mopPandusyVnutrennieOcenka.value,
                 },
                 "Сходы/съезды": {
                     "Выявленные дефекты": window.appVariables.mopShodySiezdyDefecty.value,
-                    "Оценка пред.": window.appVariables.mopShodySiezdyProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.mopShodySiezdyProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.mopShodySiezdyPercent.value,
                     Оценка: window.appVariables.mopShodySiezdyOcenka.value,
                 },
                 "Окна, двери": {
                     "Выявленные дефекты": window.appVariables.mopOknaDveriDefecty.value,
-                    "Оценка пред.": window.appVariables.mopOknaDveriProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.mopOknaDveriProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.mopOknaDveriPercent.value,
                     Оценка: window.appVariables.mopOknaDveriOcenka.value,
                 },
                 "Внутренняя отделка помещений": {
                     "Выявленные дефекты": window.appVariables.mopVnOtdelkaPomeshDefecty.value,
-                    "Оценка пред.": window.appVariables.mopVnOtdelkaPomeshProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.mopVnOtdelkaPomeshProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.mopVnOtdelkaPomeshPercent.value,
                     Оценка: window.appVariables.mopVnOtdelkaPomeshOcenka.value,
                 },
                 "Все элементы": {
                     "Выявленные дефекты": window.appVariables.mopVseElementyDefecty.value,
-                    "Оценка пред.": window.appVariables.mopVseElementyProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.mopVseElementyProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.mopVseElementyPercent.value,
                     Оценка: window.appVariables.mopVseElementyOcenka.value,
                 },
@@ -677,7 +682,7 @@ export const saveData = () => {
                 Конструкция: window.appVariables.lestnicyConstruction.value,
 
                 "Выявленные дефекты": window.appVariables.lestnicyDefecty.value,
-                "Оценка пред.": window.appVariables.lestnicyProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.lestnicyProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.lestnicyPercent.value,
                 Оценка: window.appVariables.lestnicyOcenka.value,
             },
@@ -685,7 +690,7 @@ export const saveData = () => {
                 "Материал перекрытия": window.appVariables.perekrityaMaterial.value,
 
                 "Выявленные дефекты": window.appVariables.perekrityaDefecty.value,
-                "Оценка пред.": window.appVariables.perekrityaProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.perekrityaProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.perekrityaPercent.value,
                 Оценка: window.appVariables.perekrityaOcenka.value,
             },
@@ -702,31 +707,31 @@ export const saveData = () => {
 
                 "Тех.подполье/тех.этаж": {
                     "Выявленные дефекты": window.appVariables.otopleniyeTehPodpolieDefecty.value,
-                    "Оценка пред.": window.appVariables.otopleniyeTehPodpolieProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.otopleniyeTehPodpolieProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.otopleniyeTehPodpoliePercent.value,
                     Оценка: window.appVariables.otopleniyeTehPodpolieOcenka.value,
                 },
                 "Транзит питающий": {
                     "Выявленные дефекты": window.appVariables.otopleniyeTranzitPitaushDefecty.value,
-                    "Оценка пред.": window.appVariables.otopleniyeTranzitPitaushProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.otopleniyeTranzitPitaushProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.otopleniyeTranzitPitaushPercent.value,
                     Оценка: window.appVariables.otopleniyeTranzitPitaushOcenka.value,
                 },
                 Чердак: {
                     "Выявленные дефекты": window.appVariables.otopleniyeCherdakDefecty.value,
-                    "Оценка пред.": window.appVariables.otopleniyeCherdakProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.otopleniyeCherdakProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.otopleniyeCherdakPercent.value,
                     Оценка: window.appVariables.otopleniyeCherdakOcenka.value,
                 },
                 Этажи: {
                     "Выявленные дефекты": window.appVariables.otopleniyeEtajiDefecty.value,
-                    "Оценка пред.": window.appVariables.otopleniyeEtajiProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.otopleniyeEtajiProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.otopleniyeEtajiPercent.value,
                     Оценка: window.appVariables.otopleniyeEtajiOcenka.value,
                 },
                 "Вся система": {
                     "Выявленные дефекты": window.appVariables.vseOtopleniyeDefecty.value,
-                    "Оценка пред.": window.appVariables.vseOtopleniyeProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.vseOtopleniyeProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.vseOtopleniyePercent.value,
                     Оценка: window.appVariables.vseOtopleniyeOcenka.value,
                 },
@@ -739,31 +744,31 @@ export const saveData = () => {
 
                 "Тех.подполье/тех.этаж": {
                     "Выявленные дефекты": window.appVariables.gvsTehPodpolieDefecty.value,
-                    "Оценка пред.": window.appVariables.gvsTehPodpolieProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.gvsTehPodpolieProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.gvsTehPodpoliePercent.value,
                     Оценка: window.appVariables.gvsTehPodpolieOcenka.value,
                 },
                 "Транзит питающий": {
                     "Выявленные дефекты": window.appVariables.gvsTranzitPitaushDefecty.value,
-                    "Оценка пред.": window.appVariables.gvsTranzitPitaushProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.gvsTranzitPitaushProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.gvsTranzitPitaushPercent.value,
                     Оценка: window.appVariables.gvsTranzitPitaushOcenka.value,
                 },
                 Чердак: {
                     "Выявленные дефекты": window.appVariables.gvsCherdakDefecty.value,
-                    "Оценка пред.": window.appVariables.gvsCherdakProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.gvsCherdakProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.gvsCherdakPercent.value,
                     Оценка: window.appVariables.gvsCherdakOcenka.value,
                 },
                 Этажи: {
                     "Выявленные дефекты": window.appVariables.gvsEtajiDefecty.value,
-                    "Оценка пред.": window.appVariables.gvsEtajiProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.gvsEtajiProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.gvsEtajiPercent.value,
                     Оценка: window.appVariables.gvsEtajiOcenka.value,
                 },
                 "Вся система": {
                     "Выявленные дефекты": window.appVariables.vseGvsDefecty.value,
-                    "Оценка пред.": window.appVariables.vseGvsProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.vseGvsProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.vseGvsPercent.value,
                     Оценка: window.appVariables.vseGvsOcenka.value,
                 },
@@ -775,31 +780,31 @@ export const saveData = () => {
 
                 "Тех.подполье/тех.этаж": {
                     "Выявленные дефекты": window.appVariables.hvsTehPodpolieDefecty.value,
-                    "Оценка пред.": window.appVariables.hvsTehPodpolieProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.hvsTehPodpolieProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.hvsTehPodpoliePercent.value,
                     Оценка: window.appVariables.hvsTehPodpolieOcenka.value,
                 },
                 "Транзит питающий": {
                     "Выявленные дефекты": window.appVariables.hvsTranzitPitaushDefecty.value,
-                    "Оценка пред.": window.appVariables.hvsTranzitPitaushProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.hvsTranzitPitaushProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.hvsTranzitPitaushPercent.value,
                     Оценка: window.appVariables.hvsTranzitPitaushOcenka.value,
                 },
                 "Внутренний пожарный водопровод": {
                     "Выявленные дефекты": window.appVariables.hvsVnPozharProvodDefecty.value,
-                    "Оценка пред.": window.appVariables.hvsVnPozharProvodProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.hvsVnPozharProvodProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.hvsVnPozharProvodPercent.value,
                     Оценка: window.appVariables.hvsVnPozharProvodOcenka.value,
                 },
                 Этажи: {
                     "Выявленные дефекты": window.appVariables.hvsEtajiDefecty.value,
-                    "Оценка пред.": window.appVariables.hvsEtajiProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.hvsEtajiProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.hvsEtajiPercent.value,
                     Оценка: window.appVariables.hvsEtajiOcenka.value,
                 },
                 "Вся система": {
                     "Выявленные дефекты": window.appVariables.vseHvsDefecty.value,
-                    "Оценка пред.": window.appVariables.vseHvsProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.vseHvsProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.vseHvsPercent.value,
                     Оценка: window.appVariables.vseHvsOcenka.value,
                 },
@@ -810,19 +815,19 @@ export const saveData = () => {
 
                 "Тех.подполье/тех.этаж": {
                     "Выявленные дефекты": window.appVariables.kanalizaciaTehPodpolieDefecty.value,
-                    "Оценка пред.": window.appVariables.kanalizaciaTehPodpolieProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.kanalizaciaTehPodpolieProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.kanalizaciaTehPodpoliePercent.value,
                     Оценка: window.appVariables.kanalizaciaTehPodpolieOcenka.value,
                 },
                 Этажи: {
                     "Выявленные дефекты": window.appVariables.kanalizaciaEtajiDefecty.value,
-                    "Оценка пред.": window.appVariables.kanalizaciaEtajiProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.kanalizaciaEtajiProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.kanalizaciaEtajiPercent.value,
                     Оценка: window.appVariables.kanalizaciaEtajiOcenka.value,
                 },
                 "Вся система": {
                     "Выявленные дефекты": window.appVariables.vseKanalizaciaDefecty.value,
-                    "Оценка пред.": window.appVariables.vseKanalizaciaProshlOcenka.textContent,
+                    "Оценка пред.": window.appVariables.vseKanalizaciaProshlOcenka?.textContent ?? "",
                     "% деф. части": window.appVariables.vseKanalizaciaPercent.value,
                     Оценка: window.appVariables.vseKanalizaciaOcenka.value,
                 },
@@ -832,7 +837,7 @@ export const saveData = () => {
                 Мусорокамеры: window.appVariables.musoroprovodyKamery.value,
 
                 "Выявленные дефекты": window.appVariables.musoroprovodyDefecty.value,
-                "Оценка пред.": window.appVariables.musoroprovodyProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.musoroprovodyProshlOcenka?.textContent ?? "",
                 "% деф. части": window.appVariables.musoroprovodyPercent.value,
                 Оценка: window.appVariables.musoroprovodyOcenka.value,
             },
@@ -843,7 +848,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.odsDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.odsPosledneeObsled.value,
                 "Специализированная организация": window.appVariables.odsOrganizacia.value,
-                "Оценка пред.": window.appVariables.odsProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.odsProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.odsOcenka.value,
             },
             Вентиляция: {
@@ -852,7 +857,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.ventilaciaDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.ventilaciaPosledneeObsled.value,
                 "Специализированная организация": window.appVariables.ventilaciaOrganizacia.value,
-                "Оценка пред.": window.appVariables.ventilaciaProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.ventilaciaProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.ventilaciaOcenka.value,
             },
             "Система промывки и прочистки стволов мусоропроводов": {
@@ -862,7 +867,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.musoroChistSistemaDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.musoroChistSistemaPosledObsled.value,
                 "Специализированная организация": window.appVariables.musoroChistSistemaOrganizacia.value,
-                "Оценка пред.": window.appVariables.musoroChistSistemaProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.musoroChistSistemaProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.musoroChistSistemaOcenka.value,
             },
             "ОЗДС (охранно-защитная дератизационная система)": {
@@ -872,7 +877,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.ozdsDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.ozdsPosledObsled.value,
                 "Специализированная организация": window.appVariables.ozdsOrganizacia.value,
-                "Оценка пред.": window.appVariables.ozdsProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.ozdsProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.ozdsOcenka.value,
             },
             Газоходы: {
@@ -882,7 +887,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.gazohodyDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.gazohodyPosledObsled.value,
                 "Специализированная организация": window.appVariables.gazohodyOrganizacia.value,
-                "Оценка пред.": window.appVariables.gazohodyProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.gazohodyProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.gazohodyOcenka.value,
             },
             Лифты: {
@@ -894,7 +899,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.liftyDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.liftyPosledObsled.value,
                 "Специализированная организация": window.appVariables.liftyOrganizacia.value,
-                "Оценка пред.": window.appVariables.liftyProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.liftyProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.liftyOcenka.value,
             },
             "Подъёмное устройство для маломобильной группы населения": {
@@ -904,7 +909,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.podyomnikDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.podyomnikPosledObsled.value,
                 "Специализированная организация": window.appVariables.podyomnikOrganizacia.value,
-                "Оценка пред.": window.appVariables.podyomnikProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.podyomnikProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.podyomnikOcenka.value,
             },
             "Устройство для автоматического опускания лифта": {
@@ -914,7 +919,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.autoSpuskLiftDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.autoSpuskLiftPosledObsled.value,
                 "Специализированная организация": window.appVariables.autoSpuskLiftOrganizacia.value,
-                "Оценка пред.": window.appVariables.autoSpuskLiftProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.autoSpuskLiftProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.autoSpuskLiftOcenka.value,
             },
             "Система ЭС": {
@@ -925,7 +930,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.systemEsDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.systemEsPosledObsled.value,
                 "Специализированная организация": window.appVariables.systemEsOrganizacia.value,
-                "Оценка пред.": window.appVariables.systemEsProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.systemEsProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.systemEsOcenka.value,
             },
             "ВКВ (второй кабельный ввод)": {
@@ -935,7 +940,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.vkvDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.vkvPosledObsled.value,
                 "Специализированная организация": window.appVariables.vkvOrganizacia.value,
-                "Оценка пред.": window.appVariables.vkvProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.vkvProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.vkvOcenka.value,
             },
             "АВР (автоматическое включение резервного питания)": {
@@ -945,7 +950,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.avrDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.avrPosledObsled.value,
                 "Специализированная организация": window.appVariables.avrOrganizacia.value,
-                "Оценка пред.": window.appVariables.avrProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.avrProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.avrOcenka.value,
             },
             ППАиДУ: {
@@ -955,7 +960,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.ppaiduDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.ppaiduPosledObsled.value,
                 "Специализированная организация": window.appVariables.ppaiduOrganizacia.value,
-                "Оценка пред.": window.appVariables.ppaiduProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.ppaiduProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.ppaiduOcenka.value,
             },
             "Система оповещения о пожаре": {
@@ -965,7 +970,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.pozharOpoveshenDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.pozharOpoveshenPosledObsled.value,
                 "Специализированная организация": window.appVariables.pozharOpoveshenOrganizacia.value,
-                "Оценка пред.": window.appVariables.pozharOpoveshenProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.pozharOpoveshenProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.pozharOpoveshenOcenka.value,
             },
             "Система ГС": {
@@ -976,7 +981,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.sistemaGsDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.sistemaGsPosledObsled.value,
                 "Специализированная организация": window.appVariables.sistemaGsOrganizacia.value,
-                "Оценка пред.": window.appVariables.sistemaGsProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.sistemaGsProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.sistemaGsOcenka.value,
             },
             "Система видеонаблюдения": {
@@ -986,7 +991,7 @@ export const saveData = () => {
                 "Выявленные дефекты": window.appVariables.sistemaVideonabDefecty.value,
                 "№ и дата последнего обслед.": window.appVariables.sistemaVideonabPosledObsled.value,
                 "Специализированная организация": window.appVariables.sistemaVideonabOrganizacia.value,
-                "Оценка пред.": window.appVariables.sistemaVideonabProshlOcenka.textContent,
+                "Оценка пред.": window.appVariables.sistemaVideonabProshlOcenka?.textContent ?? "",
                 Оценка: window.appVariables.sistemaVideonabOcenka.value,
             },
             "Дополнительные данные": window.appVariables.dopolnitDannye.value,
@@ -1033,11 +1038,12 @@ export const saveData = () => {
 
     // Для выводов по результатам пред. обследования
     for (let key in window.appVariables.vivodyPoRezultatam) {
-        data["Выводы по результатам предыдущего обследования"][key] = new Object();
-        data["Выводы по результатам предыдущего обследования"][key]["id"] = window.appVariables["vivodyPoRezultatam"][key]["id"].textContent;
-        data["Выводы по результатам предыдущего обследования"][key]["Дата"] = window.appVariables["vivodyPoRezultatam"][key]["data"].textContent;
-        data["Выводы по результатам предыдущего обследования"][key]["№"] = window.appVariables["vivodyPoRezultatam"][key]["number"].textContent;
-        data["Выводы по результатам предыдущего обследования"][key]["Техническое состояние здания в целом"] = window.appVariables["vivodyPoRezultatam"][key]["tehSostoyanie"].textContent;
+        data["Выводы по результатам предыдущего обследования"][key] = {};
+        const row = window.appVariables["vivodyPoRezultatam"]?.[key];
+        data["Выводы по результатам предыдущего обследования"][key]["id"] = safeText(row?.id);
+        data["Выводы по результатам предыдущего обследования"][key]["Дата"] = safeText(row?.data);
+        data["Выводы по результатам предыдущего обследования"][key]["№"] = safeText(row?.number);
+        data["Выводы по результатам предыдущего обследования"][key]["Техническое состояние здания в целом"] = safeText(row?.tehSostoyanie);
     }
 
     // РЕКОМЕНДАЦИИ ПО КАП РЕМОНТУ
@@ -1107,10 +1113,10 @@ export const saveData = () => {
 
     localStorage.setItem("MJIDATA", JSON.stringify(data));
 
-    window.appVariables.copyButton.textContent = "Скопировано";
+    if (window.appVariables.copyButton) window.appVariables.copyButton.textContent = "Скопировано";
     window.appVariables.copyButton.classList.add("main__button_done");
     setTimeout(() => {
-        window.appVariables.copyButton.textContent = "Копирование отчета";
+        if (window.appVariables.copyButton) window.appVariables.copyButton.textContent = "Копирование отчета";
         window.appVariables.copyButton.classList.remove("main__button_done");
     }, 1500);
 }

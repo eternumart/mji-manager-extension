@@ -1,4 +1,5 @@
 export const clickGenerator = (ocenkaInput: any, value: any, load: any) => {
+    if (!ocenkaInput) return;
     if (load && value === "-") {
         return;
     }

@@ -1,0 +1,159 @@
+/*** TREE VIEW ***/
+.treeViewCanvas{
+  background-color:#FFF;
+  border: 2px inset #eee;
+  border-radius:6px;
+  line-height:18px;
+  padding: 2px;
+  margin: 4px 0px 2px 0px;
+  text-align:left;
+}
+#frameTreeView div.treeViewCanvas {
+  border:none;
+}
+#treeView {
+  font-family: Tahoma, sans-serif, Times New Roman;
+/*  font-size:0.8em;*/
+  font-size: 11px;
+}
+#treeView .Container {
+  padding: 0px;
+  margin: 0px;
+}
+#treeView .Container li {
+  list-style-type: none;
+}
+/* indent for all tree children excepts root */
+#treeView .Node {
+  background-image : url(../img/treeview/i.gif);
+  background-position : top left;
+  background-repeat : repeat-y;
+  margin-left: 18px;
+  zoom: 1;
+  clear:left;
+  outline:none;
+}
+#treeView .IsRoot {
+  margin-left: 0;
+}
+/* left vertical line (grid) for all nodes */
+#treeView .IsLast {
+  background-image: url(../img/treeview/i_half.gif);
+  background-repeat : no-repeat;
+}
+#treeView .ExpandOpen .Expand {
+  background-image: url(../img/treeview/expand_minus.gif);
+}
+/* closed is higher priority than open */
+#treeView .ExpandClosed .Expand {
+  background-image: url(../img/treeview/expand_plus.gif);
+}
+/* highest priority */
+#treeView .ExpandLeaf .Expand {
+  background-image: url(../img/treeview/expand_leaf.gif);
+}
+#treeView .Content {
+  min-height: 18px;
+  margin-left:18px;
+/*  line-height: 18px;*/
+  display:block;
+  line-height: 1.5
+}
+* html .Content {
+  height: 18px;
+}
+/*
+#treeView .ContentSelected {
+  min-height: 18px;
+  margin-left:18px;
+  color:red;
+}
+* html .ContentSelected {
+  height: 18px;
+  color:red;
+}
+*/
+#treeView .Expand {
+  width: 18px;
+  height: 18px;
+  float: left;
+}
+#treeView .ExpandOpen .Container {
+  display: block;
+}
+#treeView .ExpandClosed .Container {
+  display: none;
+}
+#treeView .ExpandOpen .Expand, .ExpandClosed .Expand {
+  cursor: pointer;
+}
+#treeView .ExpandLeaf .Expand {
+  cursor: auto;
+}
+#treeView .Node .CheckboxSelected {
+  background-image: url(../img/treeview/checkbox-selected.gif);
+}
+#treeView .Node .CheckboxHighlightSelected {
+  background-image: url(../img/treeview/checkbox-selected-red.gif);
+}
+#treeView .Node .CheckboxNone {
+  background-image: url(../img/treeview/checkbox-none.gif);
+}
+#treeView input.Control {
+  padding:0px;
+  border: 2px #ffffff outset;
+  vertical-align:top;
+  width:15px;
+  height:15px;
+  background-repeat: no-repeat;
+/*  background-position: -4px -5px;*/
+}
+#treeView input.Plus {
+  background-image: url(../img/treeview/p-plus.gif);
+}
+#treeView input.Minus {
+  background-image: url(../img/treeview/p-minus.gif);
+}
+#treeView input.Check-all {
+/*  background-position: -3px -5px;*/
+  background-image: url(../img/treeview/p-checkbox-selected.gif);
+}
+#treeView input.Uncheck-all {
+/*  background-position: -3px -5px;*/
+  background-image: url(../img/treeview/p-checkbox-none.gif);
+}
+#treeView input.Check-locate {
+/*  background-position: -3px -5px;*/
+  background-image: url(../img/treeview/p-checkbox-selected-red.gif);
+}
+
+/* ссылка опции */
+#treeView div a {
+  color:#484848;
+  text-decoration:none;
+/*  padding-left:2px;*/
+/*  padding-right:2px;*/
+  padding: 2px;
+}
+
+#___treeView div.ContentSelected a {
+/*
+  color:#000;
+  background-color: #ffffbb;
+*/
+  color:#FFF;
+  background-color: #90b2cf;
+}
+
+#treeView div a:hover {
+/*  
+color:#808080;
+color:#E60000 
+*/
+  color:#000;
+  text-decoration:underline;
+}
+#treeView div a:visited {
+  color:#484848;
+  text-decoration:none;
+}

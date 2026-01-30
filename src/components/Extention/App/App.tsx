@@ -11,11 +11,28 @@ import { apiConfig } from "../../../apiConfig";
 import { getAppData } from "../utils/launchApp";
 import { Errors } from "../Errors/Errors";
 
-function App() {
-	const { isLogged, setIsLogged, setUserData, serverState, errorText, setErrors, isLoading, setLoading } = useAppContext();
+/* eslint-disable react-hooks/exhaustive-deps */
 
-	const prodUrl = `${apiConfig.address.protocol}${apiConfig.address.ip}`;
-	const baseUrl = serverState === "prod" ? prodUrl : `${prodUrl}:${apiConfig.address.devPort}`;
+function App() {
+	const { isLogged, setIsLogged, setUserData, serverState, setServerState, errorText, setErrors, isLoading, setLoading } = useAppContext();
+
+	const baseUrl =
+		serverState === "prod"
+			? `${apiConfig.address.protocol}${apiConfig.address.ip}`
+			: `${apiConfig.address.protocol}${apiConfig.address.devHost}:${apiConfig.address.devPort}`;
+
+	// Восстановить положение свичера сервера из storage (service worker сохраняет apiBaseUrl)
+	useEffect(() => {
+		const devUrl = `${apiConfig.address.protocol}${apiConfig.address.devHost}:${apiConfig.address.devPort}`;
+		chrome.storage.local.get(["apiBaseUrl"], (result: { apiBaseUrl?: string }) => {
+			if (result.apiBaseUrl === devUrl) {
+				setServerState("test");
+			} else if (result.apiBaseUrl) {
+				setServerState("prod");
+			}
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	useEffect(() => {
 		setLoading(true);
@@ -69,6 +86,7 @@ function App() {
 		return () => {
 			chrome.runtime.onMessage.removeListener(handleMessage);
 		};
+		// setErrors stable, no need in deps
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

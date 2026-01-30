@@ -1,0 +1,131 @@
+#calendar .containerEdit {
+/*  border:1px solid #ccc; 
+  border:0px solid #ccc; */
+}
+
+#calendar div.edit {
+  border:1px solid #D0D0D0;
+  border-radius:3px;
+/*  background-color:#fff;*/
+}
+#calendar div.dataMarker {
+  border-color: red;
+}
+#calendar input.data {
+  margin:0px;
+  padding:0px;
+  border:0px;
+  width:65px;
+  text-align:center;
+  outline:none;
+}
+#calendar div.containerData {
+  position:absolute;
+  z-index:101;
+}
+#calendar a {
+/*  line-height:16px;*/  /* height */
+  color: #000;
+  text-decoration:none;
+/*  outline:none;*/
+}
+#calendar div.edit a {
+  margin:0 0 0 2px;
+  border-radius: 4px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  outline: none;
+}
+#calendar div.edit a:hover, #calendar div.edit a:active, #calendar div.edit a:focus {
+/*  background-color: #E5FFFF;*/
+  background-color: #FFFFD0;
+  box-shadow: 0px 0px 6px yellow;
+  transition: 1.0s;
+}
+#calendar div.edit a.hide {
+  background-image: url("../img/lookupDown.gif");
+}
+#calendar div.edit a.show {
+  background-image: url("../img/lookupUp.gif");
+}
+#calendar div.edit a.disable {
+  background-image: url("../img/lookupDownDisable.gif");
+}
+
+/* body */
+
+#calendarCanvas {
+  border: 4px ridge #ccc;
+  background-color:#f7f7f7;
+  font-size:80%;
+  border-radius: 6px;
+  box-shadow: 0px 4px 10px #B9B9B9;
+}
+#calendarCanvas input, select {
+  font-size:11px;
+}
+/* панель День недели */
+#calendarCanvas tr th {
+/*
+  font-size:12px;
+  background-color:#ccc;
+  border:none;
+  cursor:default;
+*/
+/*  font-family: Arial,Tahoma,sans-serif,Times New Roman;*/
+  color:#FFFFCC;
+  background-color:#4477a1;
+}
+
+#boxAlert .titlebar {font-family: Arial,Tahoma,sans-serif,Times New Roman; color:#FFFFCC; background: #4477a1; font-size: 12px; font-weight: bold;}
+
+#calendarCanvas #calendarPanelDay td {
+/*  font-family:   Sans-Serif, Helvetica, Arial, Arial Cyr, Verdana;*/
+  font-size:     11px;
+  padding-left:  1px;
+  padding-right: 1px;
+  text-align:    center;
+  border:        4px solid transparent;
+  cursor:        default;
+}
+#calendarCanvas #calendarPanelDay td.selected {
+/*  border: 8px ridge red; */
+  border-color: red;
+  border-style: ridge;
+}
+#calendarCanvas #calendarPanelDay td.vseparator {
+  line-height: 4px; 
+  border:      none;
+}
+#calendarCanvas img.arrowChange {
+  cursor: hand;
+  border: none;
+}
+#calendarCanvas input.year {
+  border:       1px solid #ccc;
+  text-align:   center;
+  margin-left:  2px;
+  margin-right: 2px;
+}
+
+#calendarCanvas button.button {
+  font-size: 11px;
+  margin:0;
+  padding:2px;
+}
+/*** interval ***/
+#interval #calendar .edit {
+  border:none;
+  height: 16px;
+}
+#interval #calendar .data {
+  height: 16px !important;
+}
+#interval #calendar.top table {
+  border-bottom: 1px solid #eee;
+}
+#interval .containerEdit.date td {
+  padding: 0;
+  margin-left: 2px;
+}
+

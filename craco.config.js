@@ -25,6 +25,7 @@ module.exports = {
 				entry: {
 					main: [env === "development" && require.resolve("react-dev-utils/webpackHotDevClient"), paths.appIndexJs].filter(Boolean),
 					content: "./src/chromeServices/DOMEvaluator.ts",
+					bridge: "./src/chromeServices/bridge.ts",
 					popup: "./src/components/Popup/index.ts",
 				},
 				output: {

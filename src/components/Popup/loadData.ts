@@ -16,6 +16,8 @@ export const loadData = () => {
         return;
     }
 
+    if (!window.appVariables.pasteButton) return;
+
     // Если никаких данных в localStorage нет - выходим из функции
     if (localStorage.getItem("MJIDATA") === null) {
         window.appVariables.pasteButton.classList.add("main__button_error");
@@ -26,349 +28,356 @@ export const loadData = () => {
         }, 1500);
         return;
     }
-    const loadData = JSON.parse(localStorage.getItem("MJIDATA")!);
+    let loadData: any;
+    try {
+        loadData = JSON.parse(localStorage.getItem("MJIDATA")!);
+    } catch {
+        window.appVariables.pasteButton.classList.add("main__button_error");
+        window.appVariables.pasteButton.textContent = "Ошибка данных";
+        setTimeout(() => {
+            window.appVariables.pasteButton.textContent = "Вставка отчета";
+            window.appVariables.pasteButton.classList.remove("main__button_error");
+        }, 1500);
+        return;
+    }
+    const rez = loadData["Результаты выборочного обследования"] ?? {};
+    const vyvody = loadData["Выводы по результатам обследования"] ?? {};
+    const setVal = (el: HTMLInputElement | HTMLTextAreaElement | null | undefined, v: string) => {
+        if (el) el.value = (v ?? "");
+    };
 
     // РЕЗУЛЬТАТЫ ВЫБОРОЧНОГО ОБСЛЕДОВАНИЯ
     // Крыша
     // Кровля
-    window.appVariables.krovlyaDefecty.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.krovlyaName]["Выявленные дефекты"];
-    window.appVariables.krovlyaPercent.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.krovlyaName]["% деф. части"];
-    clickGenerator(window.appVariables.krovlyaOcenka, loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.krovlyaName]["Оценка"], true);
+    setVal(window.appVariables.krovlyaDefecty, rez["Крыша"]?.[window.appVariables.krovlyaName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.krovlyaPercent, rez["Крыша"]?.[window.appVariables.krovlyaName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.krovlyaOcenka, rez["Крыша"]?.[window.appVariables.krovlyaName]?.["Оценка"] ?? "-", true);
 
     // Свесы
-    window.appVariables.svesyDefecty.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.svesyName]["Выявленные дефекты"];
-    window.appVariables.svesyPercent.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.svesyName]["% деф. части"];
-    clickGenerator(window.appVariables.svesyOcenka, loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.svesyName]["Оценка"], true);
+    setVal(window.appVariables.svesyDefecty, rez["Крыша"]?.[window.appVariables.svesyName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.svesyPercent, rez["Крыша"]?.[window.appVariables.svesyName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.svesyOcenka, rez["Крыша"]?.[window.appVariables.svesyName]?.["Оценка"] ?? "-", true);
 
     // Стропильная система
-    window.appVariables.stropilnayaSistemaDefecty.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.stropilnayaSistemaName]["Выявленные дефекты"];
-    window.appVariables.stropilnayaSistemaPercent.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.stropilnayaSistemaName]["% деф. части"];
-    clickGenerator(window.appVariables.stropilnayaSistemaOcenka, loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.stropilnayaSistemaName]["Оценка"], true);
+    setVal(window.appVariables.stropilnayaSistemaDefecty, rez["Крыша"]?.[window.appVariables.stropilnayaSistemaName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.stropilnayaSistemaPercent, rez["Крыша"]?.[window.appVariables.stropilnayaSistemaName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.stropilnayaSistemaOcenka, rez["Крыша"]?.[window.appVariables.stropilnayaSistemaName]?.["Оценка"] ?? "-", true);
 
     // Чердак
-    window.appVariables.cherdakDefecty.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.cherdakName]["Выявленные дефекты"];
-    window.appVariables.cherdakPercent.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.cherdakName]["% деф. части"];
-    clickGenerator(window.appVariables.cherdakOcenka, loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.cherdakName]["Оценка"], true);
+    setVal(window.appVariables.cherdakDefecty, rez["Крыша"]?.[window.appVariables.cherdakName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.cherdakPercent, rez["Крыша"]?.[window.appVariables.cherdakName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.cherdakOcenka, rez["Крыша"]?.[window.appVariables.cherdakName]?.["Оценка"] ?? "-", true);
 
     // Покрытие ж/б
-    window.appVariables.pokritieJBDefecty.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.pokritieJBName]["Выявленные дефекты"];
-    window.appVariables.pokritieJBPercent.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.pokritieJBName]["% деф. части"];
-    clickGenerator(window.appVariables.pokritieJBOcenka, loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.pokritieJBName]["Оценка"], true);
+    setVal(window.appVariables.pokritieJBDefecty, rez["Крыша"]?.[window.appVariables.pokritieJBName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.pokritieJBPercent, rez["Крыша"]?.[window.appVariables.pokritieJBName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.pokritieJBOcenka, rez["Крыша"]?.[window.appVariables.pokritieJBName]?.["Оценка"] ?? "-", true);
 
     // Все элементы
-    window.appVariables.vsyaKrishaDefecty.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.vsyaKrishaName]["Выявленные дефекты"];
-    window.appVariables.vsyaKrishaPercent.value = loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.vsyaKrishaName]["% деф. части"];
-    clickGenerator(window.appVariables.vsyaKrishaOcenka, loadData["Результаты выборочного обследования"]["Крыша"][window.appVariables.vsyaKrishaName]["Оценка"], true);
+    setVal(window.appVariables.vsyaKrishaDefecty, rez["Крыша"]?.[window.appVariables.vsyaKrishaName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.vsyaKrishaPercent, rez["Крыша"]?.[window.appVariables.vsyaKrishaName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.vsyaKrishaOcenka, rez["Крыша"]?.[window.appVariables.vsyaKrishaName]?.["Оценка"] ?? "-", true);
 
     // Водоотвод
-    window.appVariables.vodootvodDefecty.value = loadData["Результаты выборочного обследования"]["Водоотвод"]["Выявленные дефекты"];
-    window.appVariables.vodootvodPercent.value = loadData["Результаты выборочного обследования"]["Водоотвод"]["% деф. части"];
-    clickGenerator(window.appVariables.vodootvodOcenka, loadData["Результаты выборочного обследования"]["Водоотвод"]["Оценка"], true);
+    setVal(window.appVariables.vodootvodDefecty, rez["Водоотвод"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.vodootvodPercent, rez["Водоотвод"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.vodootvodOcenka, rez["Водоотвод"]?.["Оценка"] ?? "-", true);
 
     // Межпанельные стыки
-    window.appVariables.majpanelnyeStykiDefecty.value = loadData["Результаты выборочного обследования"]["Межпанельные стыки"]["Выявленные дефекты"];
-    window.appVariables.majpanelnyeStykiPercent.value = loadData["Результаты выборочного обследования"]["Межпанельные стыки"]["% деф. части"];
-    clickGenerator(window.appVariables.majpanelnyeStykiOcenka, loadData["Результаты выборочного обследования"]["Межпанельные стыки"]["Оценка"], true);
+    setVal(window.appVariables.majpanelnyeStykiDefecty, rez["Межпанельные стыки"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.majpanelnyeStykiPercent, rez["Межпанельные стыки"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.majpanelnyeStykiOcenka, rez["Межпанельные стыки"]?.["Оценка"] ?? "-", true);
 
     // Фасад
-    window.appVariables.fasadDefecty.value = loadData["Результаты выборочного обследования"]["Фасад"]["Выявленные дефекты"];
-    window.appVariables.fasadPercent.value = loadData["Результаты выборочного обследования"]["Фасад"]["% деф. части"];
-    clickGenerator(window.appVariables.fasadOcenka, loadData["Результаты выборочного обследования"]["Фасад"]["Оценка"], true);
+    setVal(window.appVariables.fasadDefecty, rez["Фасад"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.fasadPercent, rez["Фасад"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.fasadOcenka, rez["Фасад"]?.["Оценка"] ?? "-", true);
 
     // Балконы
     // Балконы
-    window.appVariables.balkonyDefecty.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.balkonyName]["Выявленные дефекты"];
-    window.appVariables.balkonyPercent.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.balkonyName]["% деф. части"];
-    clickGenerator(window.appVariables.balkonyOcenka, loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.balkonyName]["Оценка"], true);
+    setVal(window.appVariables.balkonyDefecty, rez["Балконы"]?.[window.appVariables.balkonyName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.balkonyPercent, rez["Балконы"]?.[window.appVariables.balkonyName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.balkonyOcenka, rez["Балконы"]?.[window.appVariables.balkonyName]?.["Оценка"] ?? "-", true);
 
     // Лоджии
-    window.appVariables.lodjiiDefecty.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.lodjiiName]["Выявленные дефекты"];
-    window.appVariables.lodjiiPercent.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.lodjiiName]["% деф. части"];
-    clickGenerator(window.appVariables.lodjiiOcenka, loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.lodjiiName]["Оценка"], true);
+    setVal(window.appVariables.lodjiiDefecty, rez["Балконы"]?.[window.appVariables.lodjiiName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.lodjiiPercent, rez["Балконы"]?.[window.appVariables.lodjiiName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.lodjiiOcenka, rez["Балконы"]?.[window.appVariables.lodjiiName]?.["Оценка"] ?? "-", true);
 
     // Козырьки
-    window.appVariables.kozirkiDefecty.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.kozirkiName]["Выявленные дефекты"];
-    window.appVariables.kozirkiPercent.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.kozirkiName]["% деф. части"];
-    clickGenerator(window.appVariables.kozirkiOcenka, loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.kozirkiName]["Оценка"], true);
+    setVal(window.appVariables.kozirkiDefecty, rez["Балконы"]?.[window.appVariables.kozirkiName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.kozirkiPercent, rez["Балконы"]?.[window.appVariables.kozirkiName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.kozirkiOcenka, rez["Балконы"]?.[window.appVariables.kozirkiName]?.["Оценка"] ?? "-", true);
 
     // Эркеры
-    window.appVariables.erkeryDefecty.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.erkeryName]["Выявленные дефекты"];
-    window.appVariables.erkeryPercent.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.erkeryName]["% деф. части"];
-    clickGenerator(window.appVariables.erkeryOcenka, loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.erkeryName]["Оценка"], true);
+    setVal(window.appVariables.erkeryDefecty, rez["Балконы"]?.[window.appVariables.erkeryName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.erkeryPercent, rez["Балконы"]?.[window.appVariables.erkeryName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.erkeryOcenka, rez["Балконы"]?.[window.appVariables.erkeryName]?.["Оценка"] ?? "-", true);
 
     // Все элементы
-    window.appVariables.vseBalkonyDefecty.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.vseBalkonyName]["Выявленные дефекты"];
-    window.appVariables.vseBalkonyPercent.value = loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.vseBalkonyName]["% деф. части"];
-    clickGenerator(window.appVariables.vseBalkonyOcenka, loadData["Результаты выборочного обследования"]["Балконы"][window.appVariables.vseBalkonyName]["Оценка"], true);
+    setVal(window.appVariables.vseBalkonyDefecty, rez["Балконы"]?.[window.appVariables.vseBalkonyName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.vseBalkonyPercent, rez["Балконы"]?.[window.appVariables.vseBalkonyName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.vseBalkonyOcenka, rez["Балконы"]?.[window.appVariables.vseBalkonyName]?.["Оценка"] ?? "-", true);
 
     // Стены
-    window.appVariables.stenyDefecty.value = loadData["Результаты выборочного обследования"]["Стены"]["Выявленные дефекты"];
-    window.appVariables.stenyPercent.value = loadData["Результаты выборочного обследования"]["Стены"]["% деф. части"];
-    clickGenerator(window.appVariables.stenyOcenka, loadData["Результаты выборочного обследования"]["Стены"]["Оценка"], true);
+    setVal(window.appVariables.stenyDefecty, rez["Стены"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.stenyPercent, rez["Стены"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.stenyOcenka, rez["Стены"]?.["Оценка"] ?? "-", true);
 
     // Подвал
-    window.appVariables.podvalDefecty.value = loadData["Результаты выборочного обследования"]["Подвал"]["Выявленные дефекты"];
-    window.appVariables.podvalPercent.value = loadData["Результаты выборочного обследования"]["Подвал"]["% деф. части"];
-    clickGenerator(window.appVariables.podvalOcenka, loadData["Результаты выборочного обследования"]["Подвал"]["Оценка"], true);
+    setVal(window.appVariables.podvalDefecty, rez["Подвал"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.podvalPercent, rez["Подвал"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.podvalOcenka, rez["Подвал"]?.["Оценка"] ?? "-", true);
 
     // Тех.подполье
-    window.appVariables.techPodpolieDefecty.value = loadData["Результаты выборочного обследования"]["Тех.подполье"]["Выявленные дефекты"];
-    window.appVariables.techPodpoliePercent.value = loadData["Результаты выборочного обследования"]["Тех.подполье"]["% деф. части"];
-    clickGenerator(window.appVariables.techPodpolieOcenka, loadData["Результаты выборочного обследования"]["Тех.подполье"]["Оценка"], true);
+    setVal(window.appVariables.techPodpolieDefecty, rez["Тех.подполье"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.techPodpoliePercent, rez["Тех.подполье"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.techPodpolieOcenka, rez["Тех.подполье"]?.["Оценка"] ?? "-", true);
 
     // Тех.этаж
-    window.appVariables.techEtajDefecty.value = loadData["Результаты выборочного обследования"]["Тех.этаж"]["Выявленные дефекты"];
-    window.appVariables.techEtajPercent.value = loadData["Результаты выборочного обследования"]["Тех.этаж"]["% деф. части"];
-    clickGenerator(window.appVariables.techEtajOcenka, loadData["Результаты выборочного обследования"]["Тех.этаж"]["Оценка"], true);
+    setVal(window.appVariables.techEtajDefecty, rez["Тех.этаж"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.techEtajPercent, rez["Тех.этаж"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.techEtajOcenka, rez["Тех.этаж"]?.["Оценка"] ?? "-", true);
 
     // Гараж стоянка (подземный)
-    window.appVariables.garageDefecty.value = loadData["Результаты выборочного обследования"]["Гараж стоянка (подземный)"]["Выявленные дефекты"];
-    window.appVariables.garagePercent.value = loadData["Результаты выборочного обследования"]["Гараж стоянка (подземный)"]["% деф. части"];
-    clickGenerator(window.appVariables.garageOcenka, loadData["Результаты выборочного обследования"]["Гараж стоянка (подземный)"]["Оценка"], true);
+    setVal(window.appVariables.garageDefecty, rez["Гараж стоянка (подземный)"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.garagePercent, rez["Гараж стоянка (подземный)"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.garageOcenka, rez["Гараж стоянка (подземный)"]?.["Оценка"] ?? "-", true);
 
     // Места общего пользования
+    const mop = rez["Места общего пользования"];
     // Вестибюли
-    window.appVariables.mopVestibuliDefecty.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopVestibuliName]["Выявленные дефекты"];
-    window.appVariables.mopVestibuliPercent.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopVestibuliName]["% деф. части"];
-    clickGenerator(window.appVariables.mopVestibuliOcenka, loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopVestibuliName]["Оценка"], true);
+    setVal(window.appVariables.mopVestibuliDefecty, mop?.[window.appVariables.mopVestibuliName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.mopVestibuliPercent, mop?.[window.appVariables.mopVestibuliName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.mopVestibuliOcenka, mop?.[window.appVariables.mopVestibuliName]?.["Оценка"] ?? "-", true);
 
     // Крыльца
-    window.appVariables.mopKrilcaDefecty.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopKrilcaName]["Выявленные дефекты"];
-    window.appVariables.mopKrilcaPercent.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopKrilcaName]["% деф. части"];
-    clickGenerator(window.appVariables.mopKrilcaOcenka, loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopKrilcaName]["Оценка"], true);
+    setVal(window.appVariables.mopKrilcaDefecty, mop?.[window.appVariables.mopKrilcaName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.mopKrilcaPercent, mop?.[window.appVariables.mopKrilcaName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.mopKrilcaOcenka, mop?.[window.appVariables.mopKrilcaName]?.["Оценка"] ?? "-", true);
 
     // Пандусы наружные
-    window.appVariables.mopPandusyNaruzhnieDefecty.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopPandusyNaruzhnieName]["Выявленные дефекты"];
-    window.appVariables.mopPandusyNaruzhniePercent.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopPandusyNaruzhnieName]["% деф. части"];
-    clickGenerator(window.appVariables.mopPandusyNaruzhnieOcenka, loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopPandusyNaruzhnieName]["Оценка"], true);
+    setVal(window.appVariables.mopPandusyNaruzhnieDefecty, mop?.[window.appVariables.mopPandusyNaruzhnieName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.mopPandusyNaruzhniePercent, mop?.[window.appVariables.mopPandusyNaruzhnieName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.mopPandusyNaruzhnieOcenka, mop?.[window.appVariables.mopPandusyNaruzhnieName]?.["Оценка"] ?? "-", true);
 
     // Пандусы внутри-подъездные
-    window.appVariables.mopPandusyVnutrennieDefecty.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopPandusyVnutrennieName]["Выявленные дефекты"];
-    window.appVariables.mopPandusyVnutrenniePercent.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopPandusyVnutrennieName]["% деф. части"];
-    clickGenerator(window.appVariables.mopPandusyVnutrennieOcenka, loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopPandusyVnutrennieName]["Оценка"], true);
+    setVal(window.appVariables.mopPandusyVnutrennieDefecty, mop?.[window.appVariables.mopPandusyVnutrennieName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.mopPandusyVnutrenniePercent, mop?.[window.appVariables.mopPandusyVnutrennieName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.mopPandusyVnutrennieOcenka, mop?.[window.appVariables.mopPandusyVnutrennieName]?.["Оценка"] ?? "-", true);
 
     // Сходы/съезды
-    window.appVariables.mopShodySiezdyDefecty.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopShodySiezdyName]["Выявленные дефекты"];
-    window.appVariables.mopShodySiezdyPercent.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopShodySiezdyName]["% деф. части"];
-    clickGenerator(window.appVariables.mopShodySiezdyOcenka, loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopShodySiezdyName]["Оценка"], true);
+    setVal(window.appVariables.mopShodySiezdyDefecty, mop?.[window.appVariables.mopShodySiezdyName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.mopShodySiezdyPercent, mop?.[window.appVariables.mopShodySiezdyName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.mopShodySiezdyOcenka, mop?.[window.appVariables.mopShodySiezdyName]?.["Оценка"] ?? "-", true);
 
     // Окна, двери
-    window.appVariables.mopOknaDveriDefecty.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopOknaDveriName]["Выявленные дефекты"];
-    window.appVariables.mopOknaDveriPercent.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopOknaDveriName]["% деф. части"];
-    clickGenerator(window.appVariables.mopOknaDveriOcenka, loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopOknaDveriName]["Оценка"], true);
+    setVal(window.appVariables.mopOknaDveriDefecty, mop?.[window.appVariables.mopOknaDveriName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.mopOknaDveriPercent, mop?.[window.appVariables.mopOknaDveriName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.mopOknaDveriOcenka, mop?.[window.appVariables.mopOknaDveriName]?.["Оценка"] ?? "-", true);
 
     // Внутренняя отделка помещений
-    window.appVariables.mopVnOtdelkaPomeshDefecty.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopVnOtdelkaPomeshName]["Выявленные дефекты"];
-    window.appVariables.mopVnOtdelkaPomeshPercent.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopVnOtdelkaPomeshName]["% деф. части"];
-    clickGenerator(window.appVariables.mopVnOtdelkaPomeshOcenka, loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopVnOtdelkaPomeshName]["Оценка"], true);
+    setVal(window.appVariables.mopVnOtdelkaPomeshDefecty, mop?.[window.appVariables.mopVnOtdelkaPomeshName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.mopVnOtdelkaPomeshPercent, mop?.[window.appVariables.mopVnOtdelkaPomeshName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.mopVnOtdelkaPomeshOcenka, mop?.[window.appVariables.mopVnOtdelkaPomeshName]?.["Оценка"] ?? "-", true);
 
     // Все элементы
-    window.appVariables.mopVseElementyDefecty.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopVseElementyName]["Выявленные дефекты"];
-    window.appVariables.mopVseElementyPercent.value = loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopVseElementyName]["% деф. части"];
-    clickGenerator(window.appVariables.mopVseElementyOcenka, loadData["Результаты выборочного обследования"]["Места общего пользования"][window.appVariables.mopVseElementyName]["Оценка"], true);
+    setVal(window.appVariables.mopVseElementyDefecty, mop?.[window.appVariables.mopVseElementyName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.mopVseElementyPercent, mop?.[window.appVariables.mopVseElementyName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.mopVseElementyOcenka, mop?.[window.appVariables.mopVseElementyName]?.["Оценка"] ?? "-", true);
 
     // Лестницы
-    window.appVariables.lestnicyDefecty.value = loadData["Результаты выборочного обследования"]["Лестницы"]["Выявленные дефекты"];
-    window.appVariables.lestnicyPercent.value = loadData["Результаты выборочного обследования"]["Лестницы"]["% деф. части"];
-    clickGenerator(window.appVariables.lestnicyOcenka, loadData["Результаты выборочного обследования"]["Лестницы"]["Оценка"], true);
+    setVal(window.appVariables.lestnicyDefecty, rez["Лестницы"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.lestnicyPercent, rez["Лестницы"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.lestnicyOcenka, rez["Лестницы"]?.["Оценка"] ?? "-", true);
 
     // Перекрытия
-    window.appVariables.perekrityaDefecty.value = loadData["Результаты выборочного обследования"]["Перекрытия"]["Выявленные дефекты"];
-    window.appVariables.perekrityaPercent.value = loadData["Результаты выборочного обследования"]["Перекрытия"]["% деф. части"];
-    clickGenerator(window.appVariables.perekrityaOcenka, loadData["Результаты выборочного обследования"]["Перекрытия"]["Оценка"], true);
+    setVal(window.appVariables.perekrityaDefecty, rez["Перекрытия"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.perekrityaPercent, rez["Перекрытия"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.perekrityaOcenka, rez["Перекрытия"]?.["Оценка"] ?? "-", true);
 
     // Система отопления
-    // Тех.подполье/тех.этаж
-    window.appVariables.otopleniyeTehPodpolieDefecty.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeTehPodpolieName]["Выявленные дефекты"];
-    window.appVariables.otopleniyeTehPodpoliePercent.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeTehPodpolieName]["% деф. части"];
-    clickGenerator(window.appVariables.otopleniyeTehPodpolieOcenka, loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeTehPodpolieName]["Оценка"], true);
+    const otop = rez["Система отопления"];
+    setVal(window.appVariables.otopleniyeTehPodpolieDefecty, otop?.[window.appVariables.otopleniyeTehPodpolieName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.otopleniyeTehPodpoliePercent, otop?.[window.appVariables.otopleniyeTehPodpolieName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.otopleniyeTehPodpolieOcenka, otop?.[window.appVariables.otopleniyeTehPodpolieName]?.["Оценка"] ?? "-", true);
 
-    // Транзит питающий
-    window.appVariables.otopleniyeTranzitPitaushDefecty.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeTranzitPitaushName]["Выявленные дефекты"];
-    window.appVariables.otopleniyeTranzitPitaushPercent.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeTranzitPitaushName]["% деф. части"];
-    clickGenerator(window.appVariables.otopleniyeTranzitPitaushOcenka, loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeTranzitPitaushName]["Оценка"], true);
+    setVal(window.appVariables.otopleniyeTranzitPitaushDefecty, otop?.[window.appVariables.otopleniyeTranzitPitaushName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.otopleniyeTranzitPitaushPercent, otop?.[window.appVariables.otopleniyeTranzitPitaushName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.otopleniyeTranzitPitaushOcenka, otop?.[window.appVariables.otopleniyeTranzitPitaushName]?.["Оценка"] ?? "-", true);
 
-    // Чердак
-    window.appVariables.otopleniyeCherdakDefecty.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeCherdakName]["Выявленные дефекты"];
-    window.appVariables.otopleniyeCherdakPercent.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeCherdakName]["% деф. части"];
-    clickGenerator(window.appVariables.otopleniyeCherdakOcenka, loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeCherdakName]["Оценка"], true);
+    setVal(window.appVariables.otopleniyeCherdakDefecty, otop?.[window.appVariables.otopleniyeCherdakName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.otopleniyeCherdakPercent, otop?.[window.appVariables.otopleniyeCherdakName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.otopleniyeCherdakOcenka, otop?.[window.appVariables.otopleniyeCherdakName]?.["Оценка"] ?? "-", true);
 
-    // Этажи
-    window.appVariables.otopleniyeEtajiDefecty.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeEtajiName]["Выявленные дефекты"];
-    window.appVariables.otopleniyeEtajiPercent.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeEtajiName]["% деф. части"];
-    clickGenerator(window.appVariables.otopleniyeEtajiOcenka, loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.otopleniyeEtajiName]["Оценка"], true);
+    setVal(window.appVariables.otopleniyeEtajiDefecty, otop?.[window.appVariables.otopleniyeEtajiName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.otopleniyeEtajiPercent, otop?.[window.appVariables.otopleniyeEtajiName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.otopleniyeEtajiOcenka, otop?.[window.appVariables.otopleniyeEtajiName]?.["Оценка"] ?? "-", true);
 
-    // Вся система
-    window.appVariables.vseOtopleniyeDefecty.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.vseOtopleniyeName]["Выявленные дефекты"];
-    window.appVariables.vseOtopleniyePercent.value = loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.vseOtopleniyeName]["% деф. части"];
-    clickGenerator(window.appVariables.vseOtopleniyeOcenka, loadData["Результаты выборочного обследования"]["Система отопления"][window.appVariables.vseOtopleniyeName]["Оценка"], true);
+    setVal(window.appVariables.vseOtopleniyeDefecty, otop?.[window.appVariables.vseOtopleniyeName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.vseOtopleniyePercent, otop?.[window.appVariables.vseOtopleniyeName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.vseOtopleniyeOcenka, otop?.[window.appVariables.vseOtopleniyeName]?.["Оценка"] ?? "-", true);
 
     // ГВС
-    // Тех.подполье/тех.этаж
-    window.appVariables.gvsTehPodpolieDefecty.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsTehPodpolieName]["Выявленные дефекты"];
-    window.appVariables.gvsTehPodpoliePercent.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsTehPodpolieName]["% деф. части"];
-    clickGenerator(window.appVariables.gvsTehPodpolieOcenka, loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsTehPodpolieName]["Оценка"], true);
+    const gvs = rez["ГВС"];
+    setVal(window.appVariables.gvsTehPodpolieDefecty, gvs?.[window.appVariables.gvsTehPodpolieName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.gvsTehPodpoliePercent, gvs?.[window.appVariables.gvsTehPodpolieName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.gvsTehPodpolieOcenka, gvs?.[window.appVariables.gvsTehPodpolieName]?.["Оценка"] ?? "-", true);
 
-    // Транзит питающий
-    window.appVariables.gvsTranzitPitaushDefecty.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsTranzitPitaushName]["Выявленные дефекты"];
-    window.appVariables.gvsTranzitPitaushPercent.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsTranzitPitaushName]["% деф. части"];
-    clickGenerator(window.appVariables.gvsTranzitPitaushOcenka, loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsTranzitPitaushName]["Оценка"], true);
+    setVal(window.appVariables.gvsTranzitPitaushDefecty, gvs?.[window.appVariables.gvsTranzitPitaushName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.gvsTranzitPitaushPercent, gvs?.[window.appVariables.gvsTranzitPitaushName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.gvsTranzitPitaushOcenka, gvs?.[window.appVariables.gvsTranzitPitaushName]?.["Оценка"] ?? "-", true);
 
-    // Чердак
-    window.appVariables.gvsCherdakDefecty.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsCherdakName]["Выявленные дефекты"];
-    window.appVariables.gvsCherdakPercent.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsCherdakName]["% деф. части"];
-    clickGenerator(window.appVariables.gvsCherdakOcenka, loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsCherdakName]["Оценка"], true);
+    setVal(window.appVariables.gvsCherdakDefecty, gvs?.[window.appVariables.gvsCherdakName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.gvsCherdakPercent, gvs?.[window.appVariables.gvsCherdakName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.gvsCherdakOcenka, gvs?.[window.appVariables.gvsCherdakName]?.["Оценка"] ?? "-", true);
 
-    // Этажи
-    window.appVariables.gvsEtajiDefecty.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsEtajiName]["Выявленные дефекты"];
-    window.appVariables.gvsEtajiPercent.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsEtajiName]["% деф. части"];
-    clickGenerator(window.appVariables.gvsEtajiOcenka, loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.gvsEtajiName]["Оценка"], true);
+    setVal(window.appVariables.gvsEtajiDefecty, gvs?.[window.appVariables.gvsEtajiName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.gvsEtajiPercent, gvs?.[window.appVariables.gvsEtajiName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.gvsEtajiOcenka, gvs?.[window.appVariables.gvsEtajiName]?.["Оценка"] ?? "-", true);
 
-    // Вся система
-    window.appVariables.vseGvsDefecty.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.vseGvsName]["Выявленные дефекты"];
-    window.appVariables.vseGvsPercent.value = loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.vseGvsName]["% деф. части"];
-    clickGenerator(window.appVariables.vseGvsOcenka, loadData["Результаты выборочного обследования"]["ГВС"][window.appVariables.vseGvsName]["Оценка"], true);
+    setVal(window.appVariables.vseGvsDefecty, gvs?.[window.appVariables.vseGvsName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.vseGvsPercent, gvs?.[window.appVariables.vseGvsName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.vseGvsOcenka, gvs?.[window.appVariables.vseGvsName]?.["Оценка"] ?? "-", true);
 
     // ХВС
-    // Тех.подполье/тех.этаж
-    window.appVariables.hvsTehPodpolieDefecty.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsTehPodpolieName]["Выявленные дефекты"];
-    window.appVariables.hvsTehPodpoliePercent.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsTehPodpolieName]["% деф. части"];
-    clickGenerator(window.appVariables.hvsTehPodpolieOcenka, loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsTehPodpolieName]["Оценка"], true);
+    const hvs = rez["ХВС"];
+    setVal(window.appVariables.hvsTehPodpolieDefecty, hvs?.[window.appVariables.hvsTehPodpolieName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.hvsTehPodpoliePercent, hvs?.[window.appVariables.hvsTehPodpolieName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.hvsTehPodpolieOcenka, hvs?.[window.appVariables.hvsTehPodpolieName]?.["Оценка"] ?? "-", true);
 
-    // Транзит питающий
-    window.appVariables.hvsTranzitPitaushDefecty.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsTranzitPitaushName]["Выявленные дефекты"];
-    window.appVariables.hvsTranzitPitaushPercent.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsTranzitPitaushName]["% деф. части"];
-    clickGenerator(window.appVariables.hvsTranzitPitaushOcenka, loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsTranzitPitaushName]["Оценка"], true);
+    setVal(window.appVariables.hvsTranzitPitaushDefecty, hvs?.[window.appVariables.hvsTranzitPitaushName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.hvsTranzitPitaushPercent, hvs?.[window.appVariables.hvsTranzitPitaushName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.hvsTranzitPitaushOcenka, hvs?.[window.appVariables.hvsTranzitPitaushName]?.["Оценка"] ?? "-", true);
 
-    // Этажи
-    window.appVariables.hvsEtajiDefecty.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsEtajiName]["Выявленные дефекты"];
-    window.appVariables.hvsEtajiPercent.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsEtajiName]["% деф. части"];
-    clickGenerator(window.appVariables.hvsEtajiOcenka, loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsEtajiName]["Оценка"], true);
+    setVal(window.appVariables.hvsEtajiDefecty, hvs?.[window.appVariables.hvsEtajiName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.hvsEtajiPercent, hvs?.[window.appVariables.hvsEtajiName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.hvsEtajiOcenka, hvs?.[window.appVariables.hvsEtajiName]?.["Оценка"] ?? "-", true);
 
-    // Внутренний пожарный водопровод
-    window.appVariables.hvsVnPozharProvodDefecty.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsVnPozharProvodName]["Выявленные дефекты"];
-    window.appVariables.hvsVnPozharProvodPercent.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsVnPozharProvodName]["% деф. части"];
-    clickGenerator(window.appVariables.hvsVnPozharProvodOcenka, loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.hvsVnPozharProvodName]["Оценка"], true);
+    setVal(window.appVariables.hvsVnPozharProvodDefecty, hvs?.[window.appVariables.hvsVnPozharProvodName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.hvsVnPozharProvodPercent, hvs?.[window.appVariables.hvsVnPozharProvodName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.hvsVnPozharProvodOcenka, hvs?.[window.appVariables.hvsVnPozharProvodName]?.["Оценка"] ?? "-", true);
 
-    // Вся система
-    window.appVariables.vseHvsDefecty.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.vseHvsName]["Выявленные дефекты"];
-    window.appVariables.vseHvsPercent.value = loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.vseHvsName]["% деф. части"];
-    clickGenerator(window.appVariables.vseHvsOcenka, loadData["Результаты выборочного обследования"]["ХВС"][window.appVariables.vseHvsName]["Оценка"], true);
+    setVal(window.appVariables.vseHvsDefecty, hvs?.[window.appVariables.vseHvsName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.vseHvsPercent, hvs?.[window.appVariables.vseHvsName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.vseHvsOcenka, hvs?.[window.appVariables.vseHvsName]?.["Оценка"] ?? "-", true);
 
     // Канализация
-    // Тех.подполье/тех.этаж
-    window.appVariables.kanalizaciaTehPodpolieDefecty.value = loadData["Результаты выборочного обследования"]["Канализация"][window.appVariables.kanalizaciaTehPodpolieName]["Выявленные дефекты"];
-    window.appVariables.kanalizaciaTehPodpoliePercent.value = loadData["Результаты выборочного обследования"]["Канализация"][window.appVariables.kanalizaciaTehPodpolieName]["% деф. части"];
-    clickGenerator(window.appVariables.kanalizaciaTehPodpolieOcenka, loadData["Результаты выборочного обследования"]["Канализация"][window.appVariables.kanalizaciaTehPodpolieName]["Оценка"], true);
+    const kan = rez["Канализация"];
+    setVal(window.appVariables.kanalizaciaTehPodpolieDefecty, kan?.[window.appVariables.kanalizaciaTehPodpolieName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.kanalizaciaTehPodpoliePercent, kan?.[window.appVariables.kanalizaciaTehPodpolieName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.kanalizaciaTehPodpolieOcenka, kan?.[window.appVariables.kanalizaciaTehPodpolieName]?.["Оценка"] ?? "-", true);
 
-    // Этажи
-    window.appVariables.kanalizaciaEtajiDefecty.value = loadData["Результаты выборочного обследования"]["Канализация"][window.appVariables.kanalizaciaEtajiName]["Выявленные дефекты"];
-    window.appVariables.kanalizaciaEtajiPercent.value = loadData["Результаты выборочного обследования"]["Канализация"][window.appVariables.kanalizaciaEtajiName]["% деф. части"];
-    clickGenerator(window.appVariables.kanalizaciaEtajiOcenka, loadData["Результаты выборочного обследования"]["Канализация"][window.appVariables.kanalizaciaEtajiName]["Оценка"], true);
+    setVal(window.appVariables.kanalizaciaEtajiDefecty, kan?.[window.appVariables.kanalizaciaEtajiName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.kanalizaciaEtajiPercent, kan?.[window.appVariables.kanalizaciaEtajiName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.kanalizaciaEtajiOcenka, kan?.[window.appVariables.kanalizaciaEtajiName]?.["Оценка"] ?? "-", true);
 
-    // Вся система
-    window.appVariables.vseKanalizaciaDefecty.value = loadData["Результаты выборочного обследования"]["Канализация"][window.appVariables.vseKanalizaciaName]["Выявленные дефекты"];
-    window.appVariables.vseKanalizaciaPercent.value = loadData["Результаты выборочного обследования"]["Канализация"][window.appVariables.vseKanalizaciaName]["% деф. части"];
-    clickGenerator(window.appVariables.vseKanalizaciaOcenka, loadData["Результаты выборочного обследования"]["Канализация"][window.appVariables.vseKanalizaciaName]["Оценка"], true);
+    setVal(window.appVariables.vseKanalizaciaDefecty, kan?.[window.appVariables.vseKanalizaciaName]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.vseKanalizaciaPercent, kan?.[window.appVariables.vseKanalizaciaName]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.vseKanalizaciaOcenka, kan?.[window.appVariables.vseKanalizaciaName]?.["Оценка"] ?? "-", true);
 
     // Мусоропроводы
-    window.appVariables.musoroprovodyDefecty.value = loadData["Результаты выборочного обследования"]["Мусоропроводы"]["Выявленные дефекты"];
-    window.appVariables.musoroprovodyPercent.value = loadData["Результаты выборочного обследования"]["Мусоропроводы"]["% деф. части"];
-    clickGenerator(window.appVariables.musoroprovodyOcenka, loadData["Результаты выборочного обследования"]["Мусоропроводы"]["Оценка"], true);
+    setVal(window.appVariables.musoroprovodyDefecty, rez["Мусоропроводы"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.musoroprovodyPercent, rez["Мусоропроводы"]?.["% деф. части"] ?? "");
+    clickGenerator(window.appVariables.musoroprovodyOcenka, rez["Мусоропроводы"]?.["Оценка"] ?? "-", true);
 
     // Связь с ОДС
-    window.appVariables.odsDefecty.value = loadData["Результаты выборочного обследования"]["Связь с ОДС"]["Выявленные дефекты"];
-    window.appVariables.odsPosledneeObsled.value = loadData["Результаты выборочного обследования"]["Связь с ОДС"]["№ и дата последнего обслед."];
-    window.appVariables.odsOrganizacia.value = loadData["Результаты выборочного обследования"]["Связь с ОДС"]["Специализированная организация"];
-    clickGenerator(window.appVariables.odsOcenka, loadData["Результаты выборочного обследования"]["Связь с ОДС"]["Оценка"], true);
+    setVal(window.appVariables.odsDefecty, rez["Связь с ОДС"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.odsPosledneeObsled, rez["Связь с ОДС"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.odsOrganizacia, rez["Связь с ОДС"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.odsOcenka, rez["Связь с ОДС"]?.["Оценка"] ?? "-", true);
 
     // Вентиляция
-    window.appVariables.ventilaciaDefecty.value = loadData["Результаты выборочного обследования"]["Вентиляция"]["Выявленные дефекты"];
-    window.appVariables.ventilaciaPosledneeObsled.value = loadData["Результаты выборочного обследования"]["Вентиляция"]["№ и дата последнего обслед."];
-    window.appVariables.ventilaciaOrganizacia.value = loadData["Результаты выборочного обследования"]["Вентиляция"]["Специализированная организация"];
-    clickGenerator(window.appVariables.ventilaciaOcenka, loadData["Результаты выборочного обследования"]["Вентиляция"]["Оценка"], true);
+    setVal(window.appVariables.ventilaciaDefecty, rez["Вентиляция"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.ventilaciaPosledneeObsled, rez["Вентиляция"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.ventilaciaOrganizacia, rez["Вентиляция"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.ventilaciaOcenka, rez["Вентиляция"]?.["Оценка"] ?? "-", true);
 
     // Система промывки и прочистки стволов мусоропроводов
-    window.appVariables.musoroChistSistemaDefecty.value = loadData["Результаты выборочного обследования"]["Система промывки и прочистки стволов мусоропроводов"]["Выявленные дефекты"];
-    window.appVariables.musoroChistSistemaPosledObsled.value = loadData["Результаты выборочного обследования"]["Система промывки и прочистки стволов мусоропроводов"]["№ и дата последнего обслед."];
-    window.appVariables.musoroChistSistemaOrganizacia.value = loadData["Результаты выборочного обследования"]["Система промывки и прочистки стволов мусоропроводов"]["Специализированная организация"];
-    clickGenerator(window.appVariables.musoroChistSistemaOcenka, loadData["Результаты выборочного обследования"]["Система промывки и прочистки стволов мусоропроводов"]["Оценка"], true);
+    const musorChist = rez["Система промывки и прочистки стволов мусоропроводов"];
+    setVal(window.appVariables.musoroChistSistemaDefecty, musorChist?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.musoroChistSistemaPosledObsled, musorChist?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.musoroChistSistemaOrganizacia, musorChist?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.musoroChistSistemaOcenka, musorChist?.["Оценка"] ?? "-", true);
 
     // ОЗДС (охранно-защитная дератизационная система)
-    window.appVariables.ozdsDefecty.value = loadData["Результаты выборочного обследования"]["ОЗДС (охранно-защитная дератизационная система)"]["Выявленные дефекты"];
-    window.appVariables.ozdsPosledObsled.value = loadData["Результаты выборочного обследования"]["ОЗДС (охранно-защитная дератизационная система)"]["№ и дата последнего обслед."];
-    window.appVariables.ozdsOrganizacia.value = loadData["Результаты выборочного обследования"]["ОЗДС (охранно-защитная дератизационная система)"]["Специализированная организация"];
-    clickGenerator(window.appVariables.ozdsOcenka, loadData["Результаты выборочного обследования"]["ОЗДС (охранно-защитная дератизационная система)"]["Оценка"], true);
+    const ozds = rez["ОЗДС (охранно-защитная дератизационная система)"];
+    setVal(window.appVariables.ozdsDefecty, ozds?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.ozdsPosledObsled, ozds?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.ozdsOrganizacia, ozds?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.ozdsOcenka, ozds?.["Оценка"] ?? "-", true);
 
     // Газоходы
-    window.appVariables.gazohodyDefecty.value = loadData["Результаты выборочного обследования"]["Газоходы"]["Выявленные дефекты"];
-    window.appVariables.gazohodyPosledObsled.value = loadData["Результаты выборочного обследования"]["Газоходы"]["№ и дата последнего обслед."];
-    window.appVariables.gazohodyOrganizacia.value = loadData["Результаты выборочного обследования"]["Газоходы"]["Специализированная организация"];
-    clickGenerator(window.appVariables.gazohodyOcenka, loadData["Результаты выборочного обследования"]["Газоходы"]["Оценка"], true);
+    setVal(window.appVariables.gazohodyDefecty, rez["Газоходы"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.gazohodyPosledObsled, rez["Газоходы"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.gazohodyOrganizacia, rez["Газоходы"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.gazohodyOcenka, rez["Газоходы"]?.["Оценка"] ?? "-", true);
 
     // Лифты
-    window.appVariables.liftyDefecty.value = loadData["Результаты выборочного обследования"]["Лифты"]["Выявленные дефекты"];
-    window.appVariables.liftyPosledObsled.value = loadData["Результаты выборочного обследования"]["Лифты"]["№ и дата последнего обслед."];
-    window.appVariables.liftyOrganizacia.value = loadData["Результаты выборочного обследования"]["Лифты"]["Специализированная организация"];
-    clickGenerator(window.appVariables.liftyOcenka, loadData["Результаты выборочного обследования"]["Лифты"]["Оценка"], true);
+    setVal(window.appVariables.liftyDefecty, rez["Лифты"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.liftyPosledObsled, rez["Лифты"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.liftyOrganizacia, rez["Лифты"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.liftyOcenka, rez["Лифты"]?.["Оценка"] ?? "-", true);
 
     // Подъёмное устройство для маломобильной группы населения
-    window.appVariables.podyomnikDefecty.value = loadData["Результаты выборочного обследования"]["Подъёмное устройство для маломобильной группы населения"]["Выявленные дефекты"];
-    window.appVariables.podyomnikPosledObsled.value = loadData["Результаты выборочного обследования"]["Подъёмное устройство для маломобильной группы населения"]["№ и дата последнего обслед."];
-    window.appVariables.podyomnikOrganizacia.value = loadData["Результаты выборочного обследования"]["Подъёмное устройство для маломобильной группы населения"]["Специализированная организация"];
-    clickGenerator(window.appVariables.podyomnikOcenka, loadData["Результаты выборочного обследования"]["Подъёмное устройство для маломобильной группы населения"]["Оценка"], true);
+    const podyom = rez["Подъёмное устройство для маломобильной группы населения"];
+    setVal(window.appVariables.podyomnikDefecty, podyom?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.podyomnikPosledObsled, podyom?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.podyomnikOrganizacia, podyom?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.podyomnikOcenka, podyom?.["Оценка"] ?? "-", true);
 
     // Устройство для автоматического опускания лифта
-    window.appVariables.autoSpuskLiftDefecty.value = loadData["Результаты выборочного обследования"]["Устройство для автоматического опускания лифта"]["Выявленные дефекты"];
-    window.appVariables.autoSpuskLiftPosledObsled.value = loadData["Результаты выборочного обследования"]["Устройство для автоматического опускания лифта"]["№ и дата последнего обслед."];
-    window.appVariables.autoSpuskLiftOrganizacia.value = loadData["Результаты выборочного обследования"]["Устройство для автоматического опускания лифта"]["Специализированная организация"];
-    clickGenerator(window.appVariables.autoSpuskLiftOcenka, loadData["Результаты выборочного обследования"]["Устройство для автоматического опускания лифта"]["Оценка"], true);
+    const autoSpusk = rez["Устройство для автоматического опускания лифта"];
+    setVal(window.appVariables.autoSpuskLiftDefecty, autoSpusk?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.autoSpuskLiftPosledObsled, autoSpusk?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.autoSpuskLiftOrganizacia, autoSpusk?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.autoSpuskLiftOcenka, autoSpusk?.["Оценка"] ?? "-", true);
 
     // Система ЭС
-    window.appVariables.systemEsDefecty.value = loadData["Результаты выборочного обследования"]["Система ЭС"]["Выявленные дефекты"];
-    window.appVariables.systemEsPosledObsled.value = loadData["Результаты выборочного обследования"]["Система ЭС"]["№ и дата последнего обслед."];
-    window.appVariables.systemEsOrganizacia.value = loadData["Результаты выборочного обследования"]["Система ЭС"]["Специализированная организация"];
-    clickGenerator(window.appVariables.systemEsOcenka, loadData["Результаты выборочного обследования"]["Система ЭС"]["Оценка"], true);
+    setVal(window.appVariables.systemEsDefecty, rez["Система ЭС"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.systemEsPosledObsled, rez["Система ЭС"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.systemEsOrganizacia, rez["Система ЭС"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.systemEsOcenka, rez["Система ЭС"]?.["Оценка"] ?? "-", true);
 
     // ВКВ (второй кабельный ввод)
-    window.appVariables.vkvDefecty.value = loadData["Результаты выборочного обследования"]["ВКВ (второй кабельный ввод)"]["Выявленные дефекты"];
-    window.appVariables.vkvPosledObsled.value = loadData["Результаты выборочного обследования"]["ВКВ (второй кабельный ввод)"]["№ и дата последнего обслед."];
-    window.appVariables.vkvOrganizacia.value = loadData["Результаты выборочного обследования"]["ВКВ (второй кабельный ввод)"]["Специализированная организация"];
-    clickGenerator(window.appVariables.vkvOcenka, loadData["Результаты выборочного обследования"]["ВКВ (второй кабельный ввод)"]["Оценка"], true);
+    setVal(window.appVariables.vkvDefecty, rez["ВКВ (второй кабельный ввод)"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.vkvPosledObsled, rez["ВКВ (второй кабельный ввод)"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.vkvOrganizacia, rez["ВКВ (второй кабельный ввод)"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.vkvOcenka, rez["ВКВ (второй кабельный ввод)"]?.["Оценка"] ?? "-", true);
 
     // АВР (автоматическое включение резервного питания)
-    window.appVariables.avrDefecty.value = loadData["Результаты выборочного обследования"]["АВР (автоматическое включение резервного питания)"]["Выявленные дефекты"];
-    window.appVariables.avrPosledObsled.value = loadData["Результаты выборочного обследования"]["АВР (автоматическое включение резервного питания)"]["№ и дата последнего обслед."];
-    window.appVariables.avrOrganizacia.value = loadData["Результаты выборочного обследования"]["АВР (автоматическое включение резервного питания)"]["Специализированная организация"];
-    clickGenerator(window.appVariables.avrOcenka, loadData["Результаты выборочного обследования"]["АВР (автоматическое включение резервного питания)"]["Оценка"], true);
+    setVal(window.appVariables.avrDefecty, rez["АВР (автоматическое включение резервного питания)"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.avrPosledObsled, rez["АВР (автоматическое включение резервного питания)"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.avrOrganizacia, rez["АВР (автоматическое включение резервного питания)"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.avrOcenka, rez["АВР (автоматическое включение резервного питания)"]?.["Оценка"] ?? "-", true);
 
     // ППАиДУ
-    window.appVariables.ppaiduDefecty.value = loadData["Результаты выборочного обследования"]["ППАиДУ"]["Выявленные дефекты"];
-    window.appVariables.ppaiduPosledObsled.value = loadData["Результаты выборочного обследования"]["ППАиДУ"]["№ и дата последнего обслед."];
-    window.appVariables.ppaiduOrganizacia.value = loadData["Результаты выборочного обследования"]["ППАиДУ"]["Специализированная организация"];
-    clickGenerator(window.appVariables.ppaiduOcenka, loadData["Результаты выборочного обследования"]["ППАиДУ"]["Оценка"], true);
+    setVal(window.appVariables.ppaiduDefecty, rez["ППАиДУ"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.ppaiduPosledObsled, rez["ППАиДУ"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.ppaiduOrganizacia, rez["ППАиДУ"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.ppaiduOcenka, rez["ППАиДУ"]?.["Оценка"] ?? "-", true);
 
     // Система оповещения о пожаре
-    window.appVariables.pozharOpoveshenDefecty.value = loadData["Результаты выборочного обследования"]["Система оповещения о пожаре"]["Выявленные дефекты"];
-    window.appVariables.pozharOpoveshenPosledObsled.value = loadData["Результаты выборочного обследования"]["Система оповещения о пожаре"]["№ и дата последнего обслед."];
-    window.appVariables.pozharOpoveshenOrganizacia.value = loadData["Результаты выборочного обследования"]["Система оповещения о пожаре"]["Специализированная организация"];
-    clickGenerator(window.appVariables.pozharOpoveshenOcenka, loadData["Результаты выборочного обследования"]["Система оповещения о пожаре"]["Оценка"], true);
+    setVal(window.appVariables.pozharOpoveshenDefecty, rez["Система оповещения о пожаре"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.pozharOpoveshenPosledObsled, rez["Система оповещения о пожаре"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.pozharOpoveshenOrganizacia, rez["Система оповещения о пожаре"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.pozharOpoveshenOcenka, rez["Система оповещения о пожаре"]?.["Оценка"] ?? "-", true);
 
     // Система ГС
-    window.appVariables.sistemaGsDefecty.value = loadData["Результаты выборочного обследования"]["Система ГС"]["Выявленные дефекты"];
-    window.appVariables.sistemaGsPosledObsled.value = loadData["Результаты выборочного обследования"]["Система ГС"]["№ и дата последнего обслед."];
-    window.appVariables.sistemaGsOrganizacia.value = loadData["Результаты выборочного обследования"]["Система ГС"]["Специализированная организация"];
-    clickGenerator(window.appVariables.sistemaGsOcenka, loadData["Результаты выборочного обследования"]["Система ГС"]["Оценка"], true);
+    setVal(window.appVariables.sistemaGsDefecty, rez["Система ГС"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.sistemaGsPosledObsled, rez["Система ГС"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.sistemaGsOrganizacia, rez["Система ГС"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.sistemaGsOcenka, rez["Система ГС"]?.["Оценка"] ?? "-", true);
 
     // Система видеонаблюдения
-    window.appVariables.sistemaVideonabDefecty.value = loadData["Результаты выборочного обследования"]["Система видеонаблюдения"]["Выявленные дефекты"];
-    window.appVariables.sistemaVideonabPosledObsled.value = loadData["Результаты выборочного обследования"]["Система видеонаблюдения"]["№ и дата последнего обслед."];
-    window.appVariables.sistemaVideonabOrganizacia.value = loadData["Результаты выборочного обследования"]["Система видеонаблюдения"]["Специализированная организация"];
-    clickGenerator(window.appVariables.sistemaVideonabOcenka, loadData["Результаты выборочного обследования"]["Система видеонаблюдения"]["Оценка"], true);
+    setVal(window.appVariables.sistemaVideonabDefecty, rez["Система видеонаблюдения"]?.["Выявленные дефекты"] ?? "");
+    setVal(window.appVariables.sistemaVideonabPosledObsled, rez["Система видеонаблюдения"]?.["№ и дата последнего обслед."] ?? "");
+    setVal(window.appVariables.sistemaVideonabOrganizacia, rez["Система видеонаблюдения"]?.["Специализированная организация"] ?? "");
+    clickGenerator(window.appVariables.sistemaVideonabOcenka, rez["Система видеонаблюдения"]?.["Оценка"] ?? "-", true);
 
-    window.appVariables.dopolnitDannye.value = loadData["Результаты выборочного обследования"]["Дополнительные данные"];
-    clickGenerator(window.appVariables.recomendatciiPoUtepleniuSten, loadData["Результаты выборочного обследования"]["Рекомендации по утеплению стен"], true);
-    window.appVariables.recomendatciiPoDopRabotam.value = loadData["Выводы по результатам обследования"]["РЕКОМЕНДАЦИИ по ремонтно-восстановительным работам"];
+    setVal(window.appVariables.dopolnitDannye, rez["Дополнительные данные"] ?? "");
+    clickGenerator(window.appVariables.recomendatciiPoUtepleniuSten, rez["Рекомендации по утеплению стен"] ?? "-", true);
+    setVal(window.appVariables.recomendatciiPoDopRabotam, vyvody["РЕКОМЕНДАЦИИ по ремонтно-восстановительным работам"] ?? "");
 
     // Подписывающие лица
     // for (let i = 1; i < window.appVariables.signatoriesRows.length; i++) {
@@ -380,12 +389,16 @@ export const loadData = () => {
     // 	window.appVariables[i]["licaFio"].value = loadData["Подписывающие лица"]["ФИО должностного лица"][i];
     // }
 
-    localStorage.setItem("DataLoaded", JSON.stringify({ address: loadData.address.address }));
+    localStorage.setItem("DataLoaded", JSON.stringify({ address: loadData?.address?.address ?? "" }));
 
-    window.appVariables.pasteButton.textContent = "Вставлено";
-    window.appVariables.pasteButton.classList.add("main__button_done");
-    setTimeout(() => {
-        window.appVariables.pasteButton.textContent = "Вставка отчета";
-        window.appVariables.pasteButton.classList.remove("main__button_done");
-    }, 1500);
+    if (window.appVariables.pasteButton) {
+        window.appVariables.pasteButton.textContent = "Вставлено";
+        window.appVariables.pasteButton.classList.add("main__button_done");
+        setTimeout(() => {
+            if (window.appVariables.pasteButton) {
+                window.appVariables.pasteButton.textContent = "Вставка отчета";
+                window.appVariables.pasteButton.classList.remove("main__button_done");
+            }
+        }, 1500);
+    }
 }

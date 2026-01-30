@@ -1,4 +1,5 @@
-export const buttonError = (button: HTMLElement, currentPage: string, needPage: string, stdValue: string) => {
+export const buttonError = (button: HTMLElement | null, currentPage: string, needPage: string, stdValue: string) => {
+    if (!button) return false;
     if (currentPage !== needPage) {
         button.classList.add("main__button_error");
         button.textContent = "Ошибка!";

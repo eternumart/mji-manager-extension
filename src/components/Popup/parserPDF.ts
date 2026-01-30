@@ -1,12 +1,20 @@
+import { sendToBackground } from "./popupBridge";
+import { searchAllInputs } from "./searchAllInputs";
+import { renderPdfSteps } from "./pdfSteps";
+
+/**
+ * Загрузка PDF на сервер для анализа в DeepSeek.
+ * Бэкенду передаём адрес и регистрационный № — чтобы выбирать только листы по этому дому, а не весь файл.
+ * Запрос идёт через background (CORS), связь попап–background — через chrome.runtime или мост (postMessage).
+ */
 function initParserPDF(event: any) {
 	event.preventDefault();
 
 	const fileInput = window.appVariables.formParserPDFInput;
-	const progressText = window.appVariables.loaderPDFText;
 	const loader = window.appVariables.loaderPDF;
 
-	if (!fileInput || !progressText || !loader) {
-		console.error("Не найдены элементы для парсинга PDF");
+	if (!fileInput || !loader) {
+		console.error("Не найдены элементы загрузки PDF");
 		return;
 	}
 
@@ -16,19 +24,32 @@ function initParserPDF(event: any) {
 		return;
 	}
 
+	const useAI = !!window.appVariables.aiswicherState;
+	window.appVariables.pdfUseAI = useAI;
+
+	// Обновляем данные формы: адрес и регистрационный № для выбора листов в PDF
+	searchAllInputs();
+	const address =
+		(window.appVariables.address && String(window.appVariables.address).trim()) ||
+		(window.appVariables.wholeAddress && String(window.appVariables.wholeAddress).trim()) ||
+		"";
+	const registrationNumber =
+		(window.appVariables.registrationNumber && String(window.appVariables.registrationNumber).trim()) || "";
+
+	renderPdfSteps(loader, useAI);
 	loader.style.display = "block";
-	progressText.textContent = `Файл загружен, идет обработка: ${file.name}`;
 
 	const reader = new FileReader();
-	console.log("Будем искать отчет с номером: ", window.appVariables.prevSurveyNumber);
+	console.log("Бэкенду передаём адрес / регистрационный №:", address || registrationNumber || "(не заданы)");
 	reader.onload = function (e) {
 		if (e.target?.result) {
-			chrome.runtime.sendMessage({
+			sendToBackground({
 				type: "UPLOAD_PDF",
 				fileName: file.name,
 				fileData: e.target.result,
-				useAI: window.appVariables.aiswicherState,
-				prevSurveyNumber: window.appVariables.prevSurveyNumber,
+				useAI,
+				address,
+				registrationNumber,
 			});
 		}
 	};

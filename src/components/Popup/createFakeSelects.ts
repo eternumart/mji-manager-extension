@@ -2,6 +2,30 @@ import { buttonError } from "./buttonError";
 import { searchAllInputs } from "./searchAllInputs";
 import { openFakeSelect, closeFakeSelect } from "./openCloseFakeSelect";
 
+/** Нормализация для сопоставления названий (пробелы, переносы слов, скобки). */
+function normalizeRowKey(s: string): string {
+	return (s ?? "")
+		.replace(/\s+/g, " ")
+		.replace(/\u00AD/g, "")
+		.replace(/\s*-\s*/g, "")
+		.replace(/\s*\(\s*/g, "(")
+		.replace(/\s*\)\s*/g, ")")
+		.trim()
+		.toLowerCase();
+}
+
+/** Найти ключ в группе по нормализованному совпадению с rowName. */
+function findRowData(groupData: Record<string, any> | undefined, rowName: string): any {
+	if (!groupData || !rowName) return undefined;
+	const exact = groupData[rowName];
+	if (exact !== undefined) return exact;
+	const normalized = normalizeRowKey(rowName);
+	for (const key of Object.keys(groupData)) {
+		if (normalizeRowKey(key) === normalized) return groupData[key];
+	}
+	return undefined;
+}
+
 export const createFakeSelects = () => {
 	if (!window.appData.functions.createFakeSelects || window.appVariables.currentPage === "parser") {
 		return;
@@ -12,20 +36,31 @@ export const createFakeSelects = () => {
 
 	const fakeSelectList = window.appData.appLayout.fakeSelectList;
 	const selectsValues = window.appData.defectsData;
+	const doc = window.appVariables.htmlBody?.ownerDocument ?? document;
 
-	// Поиск полей отчета
+	// Каждый раз заново собираем поля текущего документа (актуальные ссылки на узлы)
+	window.resultsDefectsInputs.inputs = [];
+	window.resultsDefectsInputs.empty = true;
 	searchAllInputs();
 
-	let counterItems = 1;
+	const inputs = (window.resultsDefectsInputs.inputs || []).filter(
+		(el: any) => el && typeof el.closest === "function" && doc.contains(el)
+	);
 
-	window.resultsDefectsInputs.inputs.forEach((input: any) => {
+	let counterItems = 1;
+	let insertedCount = 0;
+
+	inputs.forEach((input: any) => {
 		const groupTable = input.closest(".groupBorder");
 		if (!groupTable) return;
 
 		const container = input.parentElement;
-		if (!container) return;
+		if (!container || !doc.contains(container)) return;
 
-		const rowNameElem = container.previousElementSibling?.querySelector("span");
+		// Имя строки: предыдущая ячейка (колонка «Элементы») или вторая ячейка строки в гриде
+		const rowNameElem =
+			container.previousElementSibling?.querySelector("span") ||
+			container.closest("tr")?.querySelector("td:nth-child(2) span");
 		const groupNameElem = groupTable.querySelector("legend");
 
 		if (!rowNameElem || !groupNameElem) return;
@@ -35,10 +70,14 @@ export const createFakeSelects = () => {
 
 		console.log(`Обрабатываем поле: ${rowName} в группе ${groupName}`);
 
-		if (!selectsValues[groupName] || rowName === "Все элементы" || rowName === "Вся система") return;
+		const groupData = selectsValues[groupName];
+		if (!groupData || rowName === "Все элементы" || rowName === "Вся система") return;
+
+		const rowData = findRowData(groupData, rowName);
 
 		if (!container.querySelector(".fakeSelect")) {
 			container.style.position = "relative";
+			container.style.overflow = "visible";
 			container.insertAdjacentHTML("afterBegin", fakeSelectList);
 
 			const currentSelect = container.querySelector(".fakeSelect");
@@ -48,32 +87,30 @@ export const createFakeSelects = () => {
 			const currentSelectOpenButton = container.querySelector(".fakeSelect__selector");
 			const currentSelectCloseBtn = currentSelect.querySelector(".fakeSelect__close-selector");
 
-			if (!currentSelectOpenButton || !currentSelectCloseBtn) return;
+			if (!currentSelectList || !currentSelectOpenButton || !currentSelectCloseBtn) return;
 
 			currentSelectOpenButton.addEventListener("click", () => openFakeSelect(currentSelect));
 			currentSelectCloseBtn.addEventListener("click", () => closeFakeSelect(currentSelect));
 
-			let listOptions = [];
+			let listOptions: string[] = [];
 
 			// Проверяем, есть ли `conditionNode` и его значения
-			let conditionNode, objAddress, objAddressOpt, objAddressGroup, objAddressRow;
-			try {
-				objAddress = selectsValues[groupName][rowName]?.conditionNode?.appVariables || selectsValues[groupName][rowName]?.conditionNode;
-				objAddressOpt = objAddress[0];
-				objAddressGroup = objAddress[1];
-				objAddressRow = objAddress[2];
+			let conditionNode: any = null;
+			const objAddress = rowData?.conditionNode?.appVariables ?? rowData?.conditionNode;
+			if (Array.isArray(objAddress) && objAddress.length >= 3) {
+				const objAddressOpt = objAddress[0];
+				const objAddressGroup = objAddress[1];
+				const objAddressRow = objAddress[2];
 				conditionNode = window.appVariables[objAddressOpt]?.[objAddressGroup]?.[objAddressRow];
-			} catch (error) {
-				console.log(`⚠️ Ошибка получения conditionNode для ${groupName} - ${rowName}`, error);
 			}
 
 			// Если найден `conditionNode`, берем данные по его значению
 			if (conditionNode) {
 				const conditionValue = `${conditionNode.value}`;
-				listOptions = selectsValues[groupName][rowName]?.conditions?.[conditionValue] || [];
+				listOptions = rowData?.conditions?.[conditionValue] ?? [];
 			} else {
 				console.log(`${groupName}: ${rowName} - безусловно`);
-				listOptions = selectsValues[groupName][rowName]?.conditions?.["Безусловно"] || [];
+				listOptions = rowData?.conditions?.["Безусловно"] ?? [];
 			}
 
 			if (!listOptions.length) {
@@ -101,10 +138,12 @@ export const createFakeSelects = () => {
 				input.value = selectedValues.join(", ");
 				console.log(`Выбрано: ${input.value}`);
 			});
+			insertedCount += 1;
 		}
 	});
 
-	window.appVariables.fakeSelectsButton.textContent = "Создано!";
+	console.log("[MJI] Всплывающие поля: обработано", inputs.length, "вставлено", insertedCount);
+	window.appVariables.fakeSelectsButton.textContent = insertedCount ? `Создано (${insertedCount})!` : "Создано!";
 	window.appVariables.fakeSelectsButton.classList.add("main__button_done");
 	setTimeout(() => {
 		window.appVariables.fakeSelectsButton.textContent = "Всплывающие поля";

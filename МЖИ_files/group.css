@@ -1,0 +1,546 @@
+/* ¬арианты стилей дл€ представлени€ групп формы */
+
+/*===============================================*/
+/*= ”ƒјЋ»“№        Bookmark Panel in Memory           =*/
+/*===============================================*/
+/*
+================================================
+#bmPanelTabs {
+  width:100%;
+  border-collapse:collapse;
+  border:none;
+}
+#bmPanelTabs tr {
+  background:#DAE0D2 url("../img/bmPanelBg.gif") repeat-x bottom;
+}
+#bmPanelTabs td {
+  padding:8px 0px 0px 0px;
+}
+#bmPanelTabs td a {
+  display:inline-block;
+  padding:0px 0px 0px 5px;
+  background:url("../img/bmPanelLeft.png") no-repeat left top;
+  text-decoration:none;
+  outline:none;
+  cursor:pointer;
+}
+#bmPanelTabs td span {
+  display:inline-block;
+  padding:5px 15px 5px 8px;
+  background:url("../img/bmPanelRight.png") no-repeat left top;
+  color:#DDD;
+  text-align: left;
+}
+#bmPanelTabs td a:hover, #bmPanelTabs a:focus, #bmPanelTabs a:active {
+  outline:none;
+  color: #EEE;
+/*outline: 2px solid #ff0;*/
+}
+#bmPanelTabs td a:hover span {
+  color:#EEE;
+}
+#bmPanelTabs a:visited {
+  outline:none;
+  color:#DDD;
+}
+#bmPanelTabs #bmPanelSelected a {
+  background-image:url("../img/bmPanelLeftOn.gif");
+}
+#bmPanelTabs #bmPanelSelected a span {
+  background-image:url("../img/bmPanelRightOn.gif");
+  color:#333;
+}
+=========================================
+*/
+
+
+/*===============================================*/
+/*=           Expand/Collapse Group             =*/
+/*===============================================*/
+#groupExpand div {
+  padding:0px 0px 0px 0px; /* заголовок группы: отступ слева */
+}
+#groupExpand a {
+  display:inline-block;
+  text-decoration:none;
+  outline:none;
+/*  color:#92A38B;*/
+}
+#groupExpand a:hover, #groupExpand a:focus, #groupExpand a:active {
+/*  color:#92A38B; */
+}
+#groupExpand a.expand {
+  background:url("../img/btnPlus.gif") no-repeat left top;
+}
+#groupExpand a.collapse {
+  background:url("../img/btnMinus.gif") no-repeat left top;
+}
+#groupExpand a span {
+/*  padding-left:20px;*/
+}
+#groupExpand #lookup ul {
+  text-indent:-0.5em;
+}
+
+/*===============================================*/
+/*                 Grid Group                    */
+/*===============================================*/
+/* GRID */
+table.grid {
+  border-spacing:0;
+  border-collapse:collapse;
+  text-align: left;
+/*
+  border:1px solid #eee;
+  border-top:2px solid #eee;
+*/
+  border:1px solid #e2e2e2;
+  border-top:2px solid #e2e2e2;
+}
+
+table.grid thead tr {
+/*  border:1px solid #eee;*/
+  border:1px solid #e2e2e2;
+}
+
+
+/* GRID: заголовки колонок */
+th.grid {
+/*  font: bold 80% "Georgia", sans-serif;*/
+  font: bold 90% "Times New Roman", Georgia, serif;
+
+  text-align:center;
+  border-style:none; 
+  border-right-style:solid; 
+  border-right-width:1px; 
+  border-right-color:#eee;
+
+  padding:4px 3px;
+  cursor: default;
+
+  color: #747474;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+}
+
+/* GRID: данные */
+td.gridData {
+  padding:1px;
+  padding-left:3px;
+  padding-right:3px;
+  font-weight:normal; 
+/*  border:1px solid #eee; */
+  border:1px solid #e2e2e2;
+  border-left:none;
+  border-top:none;
+  cursor:default;
+}
+tr.gridBGTotal {
+  background-color:#f8f8f8;
+}
+td.gridCellTotal {
+/*
+  border:1px solid #ccc;
+  border-top:2px ridge #eee;
+  border-bottom:2px ridge #eee;
+*/
+  border:1px solid #ccc;
+}
+td.gridCellHidden {
+  display:none;
+}
+td.gridCellIndicator {
+  width:2px;
+/*  background-color: #F2F3F6;*/
+  border-right:none;
+  cursor:pointer;
+}
+td.gridCellIndicatorSelect {
+/*
+  background-color: #90b2cf;
+  background-color: #ffffb0;
+  background-image: url("../img/indicatorGridRow.gif");
+*/
+  background-image: url("../img/arrowRight.png");
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-right:none;
+  cursor:pointer;
+}
+/* row drag container */
+div.gridRowDragCont {
+  position:absolute;
+  border:1px solid #808080;
+  background-color:#FFFFB0;
+  font-size:85%;
+/*
+  text-align:left;
+  filter:alpha(opacity=50);
+  -moz-opacity:0.5;
+  -khtml-opacity: 0.5;
+  opacity: 0.5;
+*/
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";  /* IE 8 */
+  filter: alpha(opacity=40); /* IE 5-7 */
+  -moz-opacity: 0.4; /* Netscape */
+  -khtml-opacity: 0.4;  /* Safari 1.x */
+  opacity: 0.4; /* ƒл€ остальных браузеров */
+  color:#000;
+  cursor:move;
+}
+
+/*===============================================*/
+/*                                     Grid SQL Group                                */
+/*===============================================*/
+
+#boxAlertContent #gridSQL {
+  font-size:120%;
+}
+
+.gridSQLContainer {
+/*  position:absolute;*/
+/*  position:relative;*/
+  height:100%;
+  max-height:100%;
+  border:0px;
+  border-spacing:0px;
+  padding:0px;
+  margin:0px;
+  color:#616161;
+/*  background-color:#fff;*/
+}
+.gridSQLwait {
+  cursor:wait;
+  color:#A0A0A0;
+  background-color:#f9f9f9;
+}
+/* панель управлени€ */
+#gridSQL .bandContainer {
+  margin:0px;
+  padding:0px;
+  border:0px;
+  width:100%;
+}
+/* div-container дл€ таблицы с данными */
+#gridSQL div.dataContainer {
+  margin:0;
+  margin-top:1px;
+  padding:0;
+  border:none;
+  border-radius: 6px;
+/*  border-top:1px solid #eee;*/
+/*  overflow:auto;*/
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* table data */
+#gridSQL table.gridData {
+   border:none;
+/*   border-left:1px solid #eee;*/
+   border-left-width:1px;
+   border-left-style:solid;
+/*
+   border-bottom-width:1px;
+   border-bottom-style:solid;
+   border-color:#ececec;
+*/
+   border-color:#EEEEEE;
+   border-radius: 4px 0px 0px 0px;
+/*
+   border-collapse: separate;
+   border-spacing: 1px;
+   border-collapse: collapse;
+*/
+   border-spacing: 0px;
+}
+#gridSQL thead tr.title {
+  text-align: center;
+  font-weight:bold;
+  font-size:80%;
+  padding:4px 0px 2px 0px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+#gridSQL .dataContainer td {
+  border:none;
+  border-right:1px solid #eee;
+  border-bottom:1px solid #eee;
+  padding:2px 2px;
+}
+#gridSQL .dataContainer tr.filter td {
+  border-color:transparent;
+}
+#gridSQL .dataContainer thead tr.fixed {
+  position:fixed;
+/*
+  padding:0;
+  margin:0;
+*/
+}
+#gridSQL .dataContainer thead tr.absolute {
+  position:absolute;
+/*
+  padding:0;
+  margin:0;
+*/
+}
+
+#_gridSQL .dataContainer tbody td.lastRow {
+  border-bottom:1px solid #eee;
+}
+#gridSQL .dataContainer tbody td.selected {
+/*  color:#FFF;*/
+/*  color:#000000;*/
+  color:#8E0202;
+}
+
+/* индикаторы сортировки None/Asc/Desc */
+#gridSQL tr.title a {
+  display:block;
+  font-size:16px;
+  text-decoration:none;
+}
+#gridSQL tr.title a.orderNone {
+  background:url("../img/orderNone.gif") no-repeat center center;
+}
+#gridSQL tr.title a.orderAsc {
+  background:url("../img/orderAsc.gif") no-repeat center center;
+}
+#gridSQL tr.title a.orderDesc {
+  background:url("../img/orderDesc.gif") no-repeat center center;
+}
+
+/* panel filter */
+#gridSQL tr.filter {
+  text-align:center;
+}
+#gridSQL tr.filter input, tr.filter div.edit {
+  background-color:#fff;
+}
+#gridSQL tr.filter td.gridCell {
+  font-size:80%;
+}
+#_gridSQL tr.filter td {
+  border-top:0px;
+  border-right:1px solid transparent;
+}
+
+#gridSQL tr.filter #lookup ul {
+  background-color:#f7f7f7;
+}
+#gridSQL tbody td a.numRow {
+  color: #868686;
+  text-decoration:none;
+  outline:none;
+}
+#gridSQL tbody td #checkbox a {
+  outline:none;
+}
+
+
+/*===============================================*/
+/*               Grid Query Group                */
+/*===============================================*/
+.gridContainer {
+/*  font-size:80%;*/
+/*  position: relative;*/
+/*  border-bottom:1px solid #eee;*/
+
+  height:100%;
+/*  max-height:100%;*/
+  border:0px;
+  border-spacing:0px;
+  padding:0px;
+  margin:0px;
+  display:block;
+  cursor: default;
+}
+#gridQuery .bandContainer {
+  position:relative;
+  margin:0px;
+  border:0px;
+  width:100%;
+}
+
+
+#gridQuery table {
+  border-collapse:collapse;
+  border-spacing:0;
+  border-collapse:collapse;
+  border:0;
+}
+#gridQuery table thead  {
+  position:relative;
+}
+#gridQuery table thead.fixed  {
+  position:fixed;
+}
+#gridQuery table tr  {
+  width:100%;
+}
+#gridQuery table td {
+/*  font-size:85%;*/
+  border:0px;
+  border-right:1px solid #eee;
+  border-bottom:1px solid #eee;
+  padding:0px;
+  padding-left:2px;
+  padding-right:2px;
+}
+#gridControlPanel a {
+  font-size:90%;
+}
+/* индикаторы сортировки None/Asc/Desc */
+#gridQuery td.gridTitle a {
+  text-decoration:none;
+}
+#gridQuery td.gridTitle a.orderNone {
+  background:url("../img/orderNone.gif") no-repeat center center;
+}
+#gridQuery td.gridTitle a.orderAsc {
+  background:url("../img/orderAsc.gif") no-repeat center center;
+}
+#gridQuery td.gridTitle a.orderDesc {
+  background:url("../img/orderDesc.gif") no-repeat center center;
+}
+
+/* filter panel */
+#gridQuery tr.filter {
+  background: #f2f3ff;
+  text-align:center;
+}
+#gridQuery tr.filter td {
+  border:0px;
+/*
+  border-bottom:1px solid #eee;
+  padding-top:2px;
+  padding-bottom:2px;
+*/
+}
+#gridQuery #gridFilter input {
+  background-color:#fff;
+/*  font-size:90%;*/
+}
+
+
+/* фон дл€ фильтров */
+#gridQuery #lookup div.edit {
+  background-color:#fff;
+}
+#gridQuery #calendar div.edit {
+  background-color:#fff;
+}
+
+
+
+
+/*
+#gridQuery thead td.gridTitle {
+  padding-top:4px;
+  padding-bottom:4px;
+  border-top:1px solid #ccc;
+  border-left:1px solid #eee;
+  cursor: default;
+  background: #F2F3F6;
+  background: -webkit-gradient(linear, left top, left bottom, from(#C8D7DC), to(#F2F3F6) );
+  background: -moz-linear-gradient(-90deg, #C8D7DC, #F2F3F6);
+  filter:   progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#C8D7DC', endColorstr='#F2F3F6');
+}
+*/
+/*
+#gridQuery .titleHidden {
+  visibility:hidden;
+  height:0px;
+  line-height:0px;
+  border-top:0px solid transparent;
+  border-bottom:0px solid transparent;
+  color:transparent;
+}
+#gridQuery td.cellTitle {
+  font-size:80%;
+  text-align:center;
+  font-weight:bold;
+}
+#gridQuery .dataContainer {
+  margin-top:1px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  background-color:#fff;
+}
+#gridQuery .dataContainer td {
+  border-left:1px solid #eee;
+}
+*/
+
+
+
+
+#gridQuery tr.dataRow {
+  font-size:80%;
+  cursor:default;
+}
+
+#gridQuery a.numRow {
+  color: #868686;
+  text-decoration:none;
+}
+
+
+
+/*
+#gridQuery .fakeContainer {
+  visibility: hidden;
+  overflow: hidden;
+  overflow-y: scroll;
+  padding-bottom: 250px;
+  margin-bottom: -250px;
+}
+#gridQuery .fakeContainer .bandContainer {
+  z-index: 2;
+  visibility: visible;
+}
+*/
+
+
+
+
+/*===============================================*/
+/*                                 Grid Frame Group                                */
+/*===============================================*/
+
+table.gridFrame {
+  border-spacing:0px;
+  padding:0px;
+  margin:0px;
+  outline:none;
+  border-collapse:collapse;
+  border:0px;
+  width:100%;
+  height:100%;
+}
+
+table.gridFrame iframe.gridFrame {
+  height:100%;
+  max-height:100%;
+  border:0px;
+  border-spacing:0px;
+  padding:0px;
+  margin:0px;
+  display:block;
+}
+
+table.gridFrame td.menu {
+  height:24px;
+  padding:0px;
+  padding-left:4px;
+  vertical-align:top;
+}
+
+/*
+iframe.gridFrame {
+  margin:0;
+  padding:0;
+  border:1px solid #ccc;
+}
+*/
+

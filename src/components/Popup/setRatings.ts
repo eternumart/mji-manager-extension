@@ -12,14 +12,14 @@ export const setRatings = () => {
         if (key.includes("Ocenka") && !key.includes("Proshl")) {
             const name = key.replace("Ocenka", "");
             if (!window.allRatesPercentsInputs[name]) {
-                window.allRatesPercentsInputs[name] = new Object();
+                window.allRatesPercentsInputs[name] = {};
             }
             window.allRatesPercentsInputs[name]["Ocenka"] = window.appVariables[key];
         }
         if (key.includes("Percent")) {
             const name = key.replace("Percent", "");
             if (!window.allRatesPercentsInputs[name]) {
-                window.allRatesPercentsInputs[name] = new Object();
+                window.allRatesPercentsInputs[name] = {};
             }
             window.allRatesPercentsInputs[name]["Percent"] = window.appVariables[key];
             window.allRatesPercentsInputs[name]["Group"] = window.appVariables[key].closest(".groupBorder").querySelector("legend").textContent;
@@ -27,7 +27,7 @@ export const setRatings = () => {
         if (key.includes("Name")) {
             const name = key.replace("Name", "");
             if (!window.allRatesPercentsInputs[name]) {
-                window.allRatesPercentsInputs[name] = new Object();
+                window.allRatesPercentsInputs[name] = {};
             }
             window.allRatesPercentsInputs[name]["name"] = window.appVariables[key];
         }
@@ -79,7 +79,7 @@ export const setRatings = () => {
 
             for (let ocenka in conditions) {
                 try {
-                    validPercent = conditions[ocenka].find((num: any) => num == valueToNumber);}
+                    validPercent = conditions[ocenka].find((num: any) => num === valueToNumber);}
                 catch {
                     console.info("valid percent not found")
                 }

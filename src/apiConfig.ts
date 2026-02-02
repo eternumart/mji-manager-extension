@@ -1,10 +1,11 @@
 export const apiConfig = {
 	address: {
 		protocol: "http://",
-		ip: "mjimanager.ru",
+		/** Основной сервер: API по IP без домена */
+		ip: "200.0.0.100:2010",
 		devHost: "localhost",
 		devPort: 3000,
-		prodPort: 80,
+		prodPort: 2010,
 	},
 	routes: {
 		pages: {

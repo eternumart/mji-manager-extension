@@ -11,15 +11,15 @@ const STEP_LABELS = [
 ];
 
 function spinnerHtml(): string {
-	return '<div class="loader" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px"></div>';
+	return '<div class="loader loader_spinner"></div>';
 }
 
 function checkHtml(): string {
-	return '<span style="color:var(--done-color,#0a0);font-weight:bold;margin-right:6px">✓</span>';
+	return '<span class="pdf-step-icon_done">✓</span>';
 }
 
 function errorHtml(): string {
-	return '<span style="color:var(--error-color,#c00);margin-right:6px">✗</span>';
+	return '<span class="pdf-step-icon_error">✗</span>';
 }
 
 export function renderPdfSteps(container: HTMLElement, useAI: boolean): void {
@@ -27,8 +27,8 @@ export function renderPdfSteps(container: HTMLElement, useAI: boolean): void {
 	container.innerHTML = steps
 		.map(
 			(i) =>
-				`<div class="pdf-step" data-step="${i}" style="margin:6px 0;display:flex;align-items:center">
-  <span class="pdf-step-icon" style="min-width:28px">${i === 0 ? checkHtml() : spinnerHtml()}</span>
+				`<div class="pdf-step" data-step="${i}">
+  <span class="pdf-step-icon">${i === 0 ? checkHtml() : spinnerHtml()}</span>
   <span class="pdf-step-label">${STEP_LABELS[i]}</span>
 </div>`
 		)
@@ -56,9 +56,11 @@ export function updatePdfStep(stepIndex: number, status: "done" | "pending" | "e
 
 export function hidePdfSteps(container: HTMLElement, finalText?: string): void {
 	if (finalText && container) {
-		container.innerHTML = `<div style="padding:8px 0;color:var(--text-color,#333)">${finalText}</div>`;
+		container.innerHTML = `<div class="pdf-steps-result">${finalText}</div>`;
 	}
 	setTimeout(() => {
-		if (container) (container as HTMLElement).style.display = "none";
+		if (container) {
+			container.classList.remove("form__loader_visible", "form__loader_visible_flex");
+		}
 	}, 1500);
 }

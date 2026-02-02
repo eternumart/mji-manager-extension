@@ -37,7 +37,7 @@ function initParserPDF(event: any) {
 		(window.appVariables.registrationNumber && String(window.appVariables.registrationNumber).trim()) || "";
 
 	renderPdfSteps(loader, useAI);
-	loader.style.display = "block";
+	loader.classList.add("form__loader_visible");
 
 	const reader = new FileReader();
 	console.log("Бэкенду передаём адрес / регистрационный №:", address || registrationNumber || "(не заданы)");

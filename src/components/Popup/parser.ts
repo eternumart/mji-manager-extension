@@ -131,10 +131,7 @@ function showLoader(total: number) {
 		console.warn("⚠️ Лоадер или текст лоадера не найден.");
 		return;
 	}
-
-	window.appVariables.loader.style.display = "flex";
-	window.appVariables.formParser.style.display = "none";
-	window.appVariables.formParserButton.style.display = "none";
+	window.appVariables.formParser?.classList.add("form_parser_loading");
 	window.appVariables.loaderText.textContent = `Завершено: 0 / ${total}`;
 }
 
@@ -143,9 +140,7 @@ function hideLoader() {
 		console.warn("⚠️ Лоадер не найден.");
 		return;
 	}
-	window.appVariables.formParser.style.display = "block";
-	window.appVariables.formParserButton.style.display = "block";
-	window.appVariables.loader.style.display = "none";
+	window.appVariables.formParser?.classList.remove("form_parser_loading");
 }
 
 function updateLoader(processed: number, total: number) {

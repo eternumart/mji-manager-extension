@@ -10,6 +10,13 @@
 
 # production
 /build
+.7z
+.exe
+.zip
+.tar
+.gz
+.rar
+.sfx
 
 # misc
 .DS_Store

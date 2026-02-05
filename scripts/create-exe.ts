@@ -5,7 +5,8 @@ import * as path from "path";
 
 const execAsync = promisify(exec);
 
-const zipFile = path.join(__dirname, "../MJI-manager.sfx.zip");
+const buildDir = path.join(__dirname, "../build");
+const archive7z = path.join(__dirname, "../MJI-manager.7z");
 const exeFile = path.join(__dirname, "../MJI-manager.exe");
 const configFile = path.join(__dirname, "../sfx-config.txt");
 const iconFile = path.join(__dirname, "../public/ico16.ico");
@@ -185,9 +186,9 @@ async function replaceIcon(exePath: string, iconPath: string): Promise<boolean> 
 async function createExe(): Promise<void> {
   console.log("🔍 Проверяем наличие 7-Zip...");
 
-  if (!fs.existsSync(zipFile)) {
-    console.error(`❌ Файл ${zipFile} не найден!`);
-    console.error("💡 Сначала выполните: npm run postbuild");
+  if (!fs.existsSync(buildDir)) {
+    console.error(`❌ Папка ${buildDir} не найдена!`);
+    console.error("💡 Сначала выполните: npm run build");
     process.exit(1);
   }
 
@@ -197,9 +198,6 @@ async function createExe(): Promise<void> {
     console.warn("⚠️  7-Zip не найден в системе!");
     console.warn("📥 Для создания .exe файла установите 7-Zip:");
     console.warn("   https://www.7-zip.org/");
-    console.warn("");
-    console.warn(`✅ ZIP архив создан: ${zipFile}`);
-    console.warn("💡 Вы можете использовать его для установки расширения вручную.");
     process.exit(0);
   }
 
@@ -209,39 +207,40 @@ async function createExe(): Promise<void> {
   // Проверяем наличие иконки
   if (!fs.existsSync(iconFile)) {
     console.warn(`⚠️  Иконка не найдена: ${iconFile}`);
-    console.warn("💡 .exe файл будет создан с иконкой по умолчанию (7-Zip)");
   } else {
     console.log(`✅ Иконка найдена: ${iconFile}`);
   }
 
-  console.log("📦 Создаем .exe файл с GUI интерфейсом...");
+  console.log("📦 Создаем .exe файл (SFX ожидает формат .7z, не .zip)...");
 
   try {
-    // Создаем конфигурационный файл для SFX
+    // 1. Создаём архив .7z из папки build (7-Zip SFX понимает только .7z!)
+    console.log("📦 Создаём архив .7z из папки build...");
+    // Архивируем содержимое build/ в корень архива (manifest.json, index.html и т.д.)
+    const sevenZipExe = sevenZip.exe === "7z" ? "7z" : `"${sevenZip.exe}"`;
+    const archive7zAbs = path.resolve(archive7z);
+    const addCmd = `${sevenZipExe} a -t7z "${archive7zAbs}" *`;
+    await execAsync(addCmd, { cwd: buildDir });
+    if (!fs.existsSync(archive7zAbs)) {
+      throw new Error("Не удалось создать архив .7z");
+    }
+    console.log(`✅ Архив создан: ${archive7z}`);
+
+    // 2. Конфигурация SFX
     createSfxConfig();
     console.log("✅ Конфигурация SFX создана");
 
-    // Используем 7z для создания SFX с иконкой (если возможно)
-    // Если иконка найдена, пытаемся использовать параметр -i
-    if (fs.existsSync(iconFile)) {
-      try {
-        // Пытаемся создать SFX через 7z с иконкой
-        // Но 7z не поддерживает прямой параметр -i для SFX, поэтому создаем обычным способом
-        // и затем заменяем иконку
-        console.log("🎨 Применяем иконку...");
-      } catch (error) {
-        console.warn("⚠️  Не удалось применить иконку через 7z, создаем без иконки");
-      }
-    }
-
-    // Объединяем: SFX модуль + конфиг + архив = .exe
+    // 3. Объединяем: SFX модуль + конфиг + архив .7z = .exe
     const sfxBuffer = fs.readFileSync(sevenZip.sfx);
     const configBuffer = fs.readFileSync(configFile);
-    const zipBuffer = fs.readFileSync(zipFile);
-
-    // Записываем в правильном порядке: SFX + Config + Archive
-    const exeBuffer = Buffer.concat([sfxBuffer, configBuffer, zipBuffer]);
+    const archiveBuffer = fs.readFileSync(archive7zAbs);
+    const exeBuffer = Buffer.concat([sfxBuffer, configBuffer, archiveBuffer]);
     fs.writeFileSync(exeFile, exeBuffer);
+
+    // Удаляем временный .7z
+    if (fs.existsSync(archive7zAbs)) {
+      fs.unlinkSync(archive7zAbs);
+    }
 
     // Пытаемся заменить иконку после создания .exe
     if (fs.existsSync(iconFile)) {
@@ -264,10 +263,9 @@ async function createExe(): Promise<void> {
     console.log("🎉 Готово! Файл будет распаковываться с GUI интерфейсом.");
   } catch (error: any) {
     console.error("❌ Ошибка при создании .exe файла:", error.message);
-    // Удаляем конфиг файл в случае ошибки
-    if (fs.existsSync(configFile)) {
-      fs.unlinkSync(configFile);
-    }
+    if (fs.existsSync(configFile)) fs.unlinkSync(configFile);
+    const temp7z = path.resolve(__dirname, "../MJI-manager.7z");
+    if (fs.existsSync(temp7z)) fs.unlinkSync(temp7z);
     process.exit(1);
   }
 }

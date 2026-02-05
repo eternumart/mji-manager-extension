@@ -47,6 +47,7 @@ chrome.runtime.onMessage.addListener((message: any) => {
 		"REPHRASE_DEFECTS_BLOCK_RESPONSE",
 		"UPLOAD_COMPLETE",
 		"UPLOAD_FAILED",
+		"PDF_STEP_UPDATE",
 	];
 	if (message && forwardTypes.includes(message.type)) {
 		window.postMessage({ type: MJI_EXTENSION_RESPONSE, payload: message }, "*");

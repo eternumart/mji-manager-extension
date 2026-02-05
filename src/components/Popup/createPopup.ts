@@ -18,11 +18,40 @@ import { normalizeDeepSeekResults } from "./normalizePdfResults";
 export const createPopup = (currentPage: string) => {
 	console.log("[MJI] createPopup старт", { currentPage, hasAppData: !!window.appData, hasAppLayout: !!window.appData?.appLayout });
 
+	// Удаляем уже существующую панель, чтобы не было дубликата при повторном вызове runApp/INJECT_POPUP
+	const htmlBody = window.appVariables?.htmlBody ?? document.body;
+	const existing = htmlBody.querySelector(".mji-manager-app");
+	if (existing) {
+		existing.remove();
+	}
+
 	const popupLayout = window.appData.appLayout.popupLayout;
 	const stylesLayout = window.appData.appLayout.stylesLayout;
 
 	const htmlHead = window.appVariables.htmlHead ?? document.head;
-	const htmlBody = window.appVariables.htmlBody ?? document.body;
+
+	// Гарантированно подключаем шрифт Inter (как в расширении), если бэкенд не отдал его в stylesLayout
+	const INTER_FONT_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap";
+	if (!htmlHead.querySelector('link[href*="fonts.googleapis.com"]')) {
+		const fontLink = document.createElement("link");
+		fontLink.rel = "stylesheet";
+		fontLink.href = INTER_FONT_URL;
+		htmlHead.appendChild(fontLink);
+	}
+	// Базовые стили для шагов PDF и спиннера, если их нет в stylesLayout с бэкенда
+	if (!htmlHead.querySelector('style[data-mji-pdf-steps]')) {
+		const pdfStepsStyle = document.createElement("style");
+		pdfStepsStyle.setAttribute("data-mji-pdf-steps", "1");
+		pdfStepsStyle.textContent = `
+.mji-manager-app .pdf-step { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-family: Inter, Arial, sans-serif; font-size: 14px; }
+.mji-manager-app .pdf-step-icon { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; }
+.mji-manager-app .pdf-step-icon_done { color: #00931a; }
+.mji-manager-app .pdf-step-icon_error { color: #e2000f; }
+.mji-manager-app .loader_spinner { width: 16px; height: 16px; border: 2px solid #e9e9e9; border-top-color: #1f5473; border-radius: 50%; animation: mji-spin 0.8s linear infinite; }
+@keyframes mji-spin { to { transform: rotate(360deg); } }
+`;
+		htmlHead.appendChild(pdfStepsStyle);
+	}
 
 	console.log("[MJI] Вставка разметки в", { htmlHead: !!htmlHead, htmlBody: !!htmlBody, bodyFirstChild: htmlBody?.firstElementChild?.tagName });
 
@@ -165,10 +194,14 @@ export const createPopup = (currentPage: string) => {
 		}
 	};
 
-	// Ответы от background: перефразирование (AI) и PDF. Связь через chrome.runtime или через мост (postMessage).
+	// Ответы от background: перефразирование (AI), PDF и пошаговые статусы PDF. Связь через chrome.runtime или через мост (postMessage).
 	onBackgroundResponse((message: any) => {
 		if (message.type === "REPHRASE_DEFECTS_BLOCK_RESPONSE") {
 			(window as any).handleRephraseResponse?.(message.data, message.error ?? null);
+			return;
+		}
+		if (message.type === "PDF_STEP_UPDATE" && message.step !== undefined && message.status) {
+			updatePdfStep(Number(message.step), message.status);
 			return;
 		}
 		if (message.type === "UPLOAD_COMPLETE" && message.data && typeof (window as any).handleParsedPdfResult === "function") {
@@ -179,6 +212,11 @@ export const createPopup = (currentPage: string) => {
 			hidePdfSteps(window.appVariables.loaderPDF, "Ошибка: " + (message.error || "загрузка не удалась"));
 		}
 	});
+
+	// Пошаговые статусы PDF: бэкенд шлёт NDJSON с { step, status }, background вызывает через executeScript.
+	(window as any).handlePdfStepUpdate = function (stepIndex: number, status: "done" | "pending" | "error") {
+		updatePdfStep(stepIndex, status);
+	};
 
 	// Ошибка загрузки/парсинга PDF — вызывается из background через executeScript.
 	(window as any).handlePdfFailed = function (errorMessage: string) {

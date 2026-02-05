@@ -20,7 +20,7 @@
 	"content_scripts": [
 		{
 			"matches": ["http://185.173.2.132:7777/*"],
-			"js": ["./static/js/bridge.js", "./static/js/main.js"]
+			"js": ["./static/js/bridge.js"]
 		}
 	]
 }

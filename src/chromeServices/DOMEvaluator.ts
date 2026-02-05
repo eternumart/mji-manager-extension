@@ -179,10 +179,33 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 		return;
 	}
 	// Загрузка PDF на бэкенд: парсинг в DeepSeek, ответ доставляем во фрейм с формой (попап может быть в iframe; отправитель — мост в main frame).
+	// Поддержка пошаговых статусов: бэкенд может вернуть NDJSON (каждая строка — JSON с { step, status } или { done, data }).
 	if (message.type === "UPLOAD_PDF") {
 		const tabId = sender.tab?.id;
+
+		const deliverPdfStepUpdate = (stepIndex: number, status: "done" | "pending" | "error") => {
+			if (tabId != null) {
+				chrome.scripting.executeScript(
+					{
+						target: { tabId, allFrames: true },
+						func: (step: number, st: string) => {
+							if (typeof (window as any).handlePdfStepUpdate === "function") {
+								(window as any).handlePdfStepUpdate(step, st);
+							}
+						},
+						args: [stepIndex, status],
+					},
+					() => {
+						if (chrome.runtime.lastError) {
+							console.warn("[MJI] executeScript handlePdfStepUpdate:", chrome.runtime.lastError.message);
+						}
+					}
+				);
+			}
+			chrome.runtime.sendMessage({ type: "PDF_STEP_UPDATE", step: stepIndex, status }).catch(() => {});
+		};
+
 		const deliverPdfResult = (data: any, error: string | null) => {
-			// Запускаем во всех фреймах таба: во фрейме с формой есть handleParsedPdfResult — он вызовется там.
 			const runInAllFrames = () => {
 				chrome.scripting.executeScript(
 					{
@@ -215,6 +238,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 			}
 			chrome.runtime.sendMessage({ type: "UPLOAD_COMPLETE", data, error }).catch(() => {});
 		};
+
 		try {
 			const apiBase = await getBaseUrl();
 			console.log(`PDF для анализа в DeepSeek: ${message.fileName} → ${apiBase}`);
@@ -236,6 +260,70 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 				body: JSON.stringify(payload),
 			});
 
+			if (!response.ok) {
+				const text = await response.text();
+				let result: any;
+				try {
+					result = text ? JSON.parse(text) : {};
+				} catch {
+					result = {};
+				}
+				deliverPdfResult(null, result?.message || result?.error || `HTTP ${response.status}`);
+				return;
+			}
+
+			// Читаем ответ построчно: бэкенд может слать один JSON или NDJSON (каждая строка — { step, status } или в конце { done, data } / { data }).
+			const body = response.body;
+			if (body) {
+				const reader = body.getReader();
+				const decoder = new TextDecoder();
+				let buffer = "";
+				try {
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						buffer += decoder.decode(value, { stream: true });
+						const lines = buffer.split("\n");
+						buffer = lines.pop() || "";
+						for (const line of lines) {
+							const trimmed = line.trim();
+							if (!trimmed) continue;
+							try {
+								const obj = JSON.parse(trimmed);
+								if (obj.step !== undefined && obj.status) {
+									deliverPdfStepUpdate(Number(obj.step), obj.status);
+								} else if (obj.done && obj.data !== undefined) {
+									deliverPdfResult(obj.data, obj.error ?? null);
+									return;
+								} else if (obj.data !== undefined || obj.error !== undefined) {
+									deliverPdfResult(obj.data ?? null, obj.error ?? null);
+									return;
+								}
+							} catch (_) {
+								// не JSON — пропускаем строку
+							}
+						}
+					}
+					if (buffer.trim()) {
+						try {
+							const obj = JSON.parse(buffer.trim());
+							if (obj.done && obj.data !== undefined) {
+								deliverPdfResult(obj.data, obj.error ?? null);
+								return;
+							}
+							if (obj.data !== undefined || obj.error !== undefined) {
+								deliverPdfResult(obj.data ?? null, obj.error ?? null);
+								return;
+							}
+						} catch (_) {}
+					}
+				} finally {
+					reader.releaseLock();
+				}
+				return;
+			}
+
+			// Обычный JSON (один объект)
 			const text = await response.text();
 			console.log(`[MJI] PDF ответ получен: status=${response.status}, длина=${text?.length ?? 0}`);
 			let result: any;
@@ -244,10 +332,6 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 			} catch {
 				console.error("[MJI] Ответ бэкенда не JSON:", text?.slice(0, 200));
 				deliverPdfResult(null, "Ответ сервера не JSON");
-				return;
-			}
-			if (!response.ok) {
-				deliverPdfResult(null, result?.message || result?.error || `HTTP ${response.status}`);
 				return;
 			}
 			const parsedData = result?.data ?? result;

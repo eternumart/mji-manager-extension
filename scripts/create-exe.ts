@@ -127,60 +127,47 @@ ExecuteParameters=""
   fs.writeFileSync(configFile, config, "utf8");
 }
 
-async function replaceIcon(exePath: string, iconPath: string): Promise<boolean> {
-  // Сначала пытаемся использовать rcedit (если установлен через npm)
+/**
+ * Заменяет иконку в SFX-модуле (копия) и возвращает буфер.
+ * Важно: rcedit нельзя вызывать для готового .exe (SFX + конфиг + 7z), иначе он обрезает
+ * прикреплённый архив и файл перестаёт открываться как 7z. Меняем иконку только в копии SFX.
+ */
+async function getSfxBufferWithIcon(sfxPath: string, iconPath: string): Promise<Buffer> {
+  const tmpSfx = path.join(__dirname, "../7zSfx-tmp-icon.sfx");
   try {
-    // Проверяем наличие rcedit в node_modules
+    fs.copyFileSync(sfxPath, tmpSfx);
+  } catch (e) {
+    console.warn("⚠️ Не удалось создать копию SFX для иконки, используем оригинал");
+    return fs.readFileSync(sfxPath);
+  }
+
+  try {
     const rceditModulePath = path.join(__dirname, "../node_modules/rcedit/lib/rcedit.js");
     if (fs.existsSync(rceditModulePath)) {
-      // Используем rcedit через require
       const rcedit = require("rcedit");
-      await rcedit(exePath, {
-        icon: iconPath,
-      });
-      return true;
+      await rcedit(tmpSfx, { icon: iconPath });
+      const buf = fs.readFileSync(tmpSfx);
+      fs.unlinkSync(tmpSfx);
+      return buf;
     }
-    
-    // Пытаемся использовать rcedit через командную строку
     const rceditPath = path.join(__dirname, "../node_modules/.bin/rcedit");
-    if (fs.existsSync(rceditPath) || fs.existsSync(rceditPath + ".cmd")) {
-      const rcedit = fs.existsSync(rceditPath + ".cmd") ? rceditPath + ".cmd" : rceditPath;
-      const command = `"${rcedit}" "${exePath}" --set-icon "${iconPath}"`;
-      await execAsync(command);
-      return true;
+    const rceditBin = fs.existsSync(rceditPath + ".cmd") ? rceditPath + ".cmd" : rceditPath;
+    if (fs.existsSync(rceditBin) || fs.existsSync(rceditPath)) {
+      const cmd = `"${rceditBin}" "${tmpSfx}" --set-icon "${iconPath}"`;
+      await execAsync(cmd);
+      const buf = fs.readFileSync(tmpSfx);
+      fs.unlinkSync(tmpSfx);
+      return buf;
     }
   } catch (error: any) {
-    // rcedit не найден или не работает, продолжаем
-    console.warn(`⚠️  rcedit не доступен: ${error.message}`);
+    console.warn(`⚠️ rcedit не доступен или ошибка: ${error.message}, используем SFX без своей иконки`);
   }
-
-  // Пытаемся использовать Resource Hacker для замены иконки
-  const resourceHackerPaths = [
-    "C:\\Program Files\\Resource Hacker\\ResourceHacker.exe",
-    "C:\\Program Files (x86)\\Resource Hacker\\ResourceHacker.exe",
-    process.env["ProgramFiles"] + "\\Resource Hacker\\ResourceHacker.exe",
-    process.env["ProgramFiles(x86)"] + "\\Resource Hacker\\ResourceHacker.exe",
-  ];
-
-  for (const rhPath of resourceHackerPaths) {
-    if (rhPath && fs.existsSync(rhPath)) {
-      try {
-        // Resource Hacker команда для замены иконки
-        const command = `"${rhPath}" -open "${exePath}" -save "${exePath}.tmp" -action addoverwrite -res "${iconPath}" -mask ICONGROUP,MAINICON,`;
-        await execAsync(command);
-        // Заменяем оригинальный файл
-        if (fs.existsSync(exePath + ".tmp")) {
-          fs.unlinkSync(exePath);
-          fs.renameSync(exePath + ".tmp", exePath);
-          return true;
-        }
-      } catch (error) {
-        console.warn(`⚠️  Не удалось использовать Resource Hacker: ${error}`);
-      }
-    }
+  if (fs.existsSync(tmpSfx)) {
+    const buf = fs.readFileSync(tmpSfx);
+    fs.unlinkSync(tmpSfx);
+    return buf;
   }
-
-  return false;
+  return fs.readFileSync(sfxPath);
 }
 
 async function createExe(): Promise<void> {
@@ -230,8 +217,17 @@ async function createExe(): Promise<void> {
     createSfxConfig();
     console.log("✅ Конфигурация SFX создана");
 
-    // 3. Объединяем: SFX модуль + конфиг + архив .7z = .exe
-    const sfxBuffer = fs.readFileSync(sevenZip.sfx);
+    // 3. SFX с иконкой (меняем иконку в копии SFX, не в готовом .exe — иначе rcedit обрезает прикреплённый 7z)
+    let sfxBuffer: Buffer;
+    if (fs.existsSync(iconFile)) {
+      console.log("🎨 Подставляем иконку в SFX-модуль...");
+      sfxBuffer = await getSfxBufferWithIcon(sevenZip.sfx, iconFile);
+      console.log("✅ Иконка применена к SFX.");
+    } else {
+      sfxBuffer = fs.readFileSync(sevenZip.sfx);
+    }
+
+    // 4. Объединяем: SFX модуль + конфиг + архив .7z = .exe (один раз, без последующего rcedit!)
     const configBuffer = fs.readFileSync(configFile);
     const archiveBuffer = fs.readFileSync(archive7zAbs);
     const exeBuffer = Buffer.concat([sfxBuffer, configBuffer, archiveBuffer]);
@@ -240,20 +236,6 @@ async function createExe(): Promise<void> {
     // Удаляем временный .7z
     if (fs.existsSync(archive7zAbs)) {
       fs.unlinkSync(archive7zAbs);
-    }
-
-    // Пытаемся заменить иконку после создания .exe
-    if (fs.existsSync(iconFile)) {
-      console.log("🎨 Заменяем иконку в .exe файле...");
-      const iconReplaced = await replaceIcon(exeFile, iconFile);
-      if (iconReplaced) {
-        console.log("✅ Иконка успешно применена!");
-      } else {
-        console.warn("⚠️  Не удалось автоматически заменить иконку.");
-        console.warn("💡 Для замены иконки установите Resource Hacker:");
-        console.warn("   http://www.angusj.com/resourcehacker/");
-        console.warn(`   Затем откройте ${exeFile} и замените иконку вручную.`);
-      }
     }
 
     // Удаляем временный конфигурационный файл

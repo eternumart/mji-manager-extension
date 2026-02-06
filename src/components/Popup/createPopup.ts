@@ -204,8 +204,13 @@ export const createPopup = (currentPage: string) => {
 			updatePdfStep(Number(message.step), message.status);
 			return;
 		}
-		if (message.type === "UPLOAD_COMPLETE" && message.data && typeof (window as any).handleParsedPdfResult === "function") {
-			(window as any).handleParsedPdfResult(message.data);
+		if (message.type === "UPLOAD_COMPLETE") {
+			if (message.error && window.appVariables?.loaderPDF) {
+				updatePdfStep(1, "error");
+				hidePdfSteps(window.appVariables.loaderPDF, "Ошибка: " + (message.error || "загрузка не удалась"));
+			} else if (message.data && typeof (window as any).handleParsedPdfResult === "function") {
+				(window as any).handleParsedPdfResult(message.data);
+			}
 		}
 		if (message.type === "UPLOAD_FAILED" && window.appVariables?.loaderPDF) {
 			updatePdfStep(1, "error");

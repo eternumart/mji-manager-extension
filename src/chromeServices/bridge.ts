@@ -1,8 +1,9 @@
 /**
  * Content script-мост между попапом (целевая страница) и background расширения.
+ * Инжектируется во все фреймы (all_frames: true), чтобы работало и когда попап в iframe:
+ * запрос от попапа приходит в window того же фрейма, ответ уходит в тот же window.
  * Попап может не иметь доступа к chrome.* (контекст страницы), с сайта нельзя делать fetch из-за CORS.
- * Все запросы к API идут через background; попап общается с background через этот мост:
- * попап -> window.postMessage -> bridge (content script) -> chrome.runtime.sendMessage -> background.
+ * Запросы: попап -> window.postMessage -> bridge -> chrome.runtime.sendMessage -> background.
  * Ответы: background -> chrome.runtime.sendMessage -> bridge -> window.postMessage -> попап.
  */
 

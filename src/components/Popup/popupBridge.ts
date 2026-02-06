@@ -38,6 +38,7 @@ export function onBackgroundResponse(handler: (message: any) => void): () => voi
 		"REPHRASE_DEFECTS_BLOCK_RESPONSE",
 		"UPLOAD_COMPLETE",
 		"UPLOAD_FAILED",
+		"PDF_STEP_UPDATE",
 	];
 
 	const handleChromeMessage = (message: any) => {

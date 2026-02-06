@@ -35,23 +35,47 @@ chrome.storage.local.get([STORAGE_KEY_API_BASE_URL], (result) => {
 pdfParserListener();
 
 // Порт "pdf-upload" держим открытым во время запроса, чтобы service worker не засыпал. Закрываем после доставки результата.
+// Периодические пинги по порту не дают Chrome перевести worker в неактивное состояние при долгом fetch.
+const PDF_KEEPALIVE_INTERVAL_MS = 20000; // 20 сек — меньше типичного таймаута неактивности SW
 let pdfUploadPort: chrome.runtime.Port | null = null;
+let pdfUploadKeepAliveIntervalId: ReturnType<typeof setInterval> | null = null;
+
 chrome.runtime.onConnect.addListener((port) => {
 	if (port.name === "pdf-upload") {
 		pdfUploadPort = port;
 		port.onDisconnect.addListener(() => {
 			pdfUploadPort = null;
+			if (pdfUploadKeepAliveIntervalId) {
+				clearInterval(pdfUploadKeepAliveIntervalId);
+				pdfUploadKeepAliveIntervalId = null;
+			}
 		});
 	}
 });
 
 function closePdfUploadPort() {
+	if (pdfUploadKeepAliveIntervalId) {
+		clearInterval(pdfUploadKeepAliveIntervalId);
+		pdfUploadKeepAliveIntervalId = null;
+	}
 	if (pdfUploadPort) {
 		try {
 			pdfUploadPort.disconnect();
 		} catch (_) {}
 		pdfUploadPort = null;
 	}
+}
+
+/** Запуск периодических пингов по порту, чтобы service worker не уходил в неактивен во время долгого запроса. */
+function startPdfUploadKeepAlive() {
+	if (pdfUploadKeepAliveIntervalId) return;
+	pdfUploadKeepAliveIntervalId = setInterval(() => {
+		if (pdfUploadPort) {
+			try {
+				pdfUploadPort.postMessage({ type: "keepalive" });
+			} catch (_) {}
+		}
+	}, PDF_KEEPALIVE_INTERVAL_MS);
 }
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -106,7 +130,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 			);
 			clearTimeout(timeoutId);
 			const result = await response.json();
-			deliverRephraseResponse(result.success ? result.data : null, result.error || null);
+			deliverRephraseResponse(result.success ? result.data : null, result.error ?? result.message ?? null);
 		} catch (error: any) {
 			deliverRephraseResponse(null, error?.message || String(error));
 		}
@@ -182,6 +206,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 	// Поддержка пошаговых статусов: бэкенд может вернуть NDJSON (каждая строка — JSON с { step, status } или { done, data }).
 	if (message.type === "UPLOAD_PDF") {
 		const tabId = sender.tab?.id;
+		startPdfUploadKeepAlive();
 
 		const deliverPdfStepUpdate = (stepIndex: number, status: "done" | "pending" | "error") => {
 			if (tabId != null) {
@@ -290,6 +315,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 							if (!trimmed) continue;
 							try {
 								const obj = JSON.parse(trimmed);
+								if (obj.keepalive === true) continue; // пакет keep-alive от бэкенда — только чтобы соединение не засыпало
 								if (obj.step !== undefined && obj.status) {
 									deliverPdfStepUpdate(Number(obj.step), obj.status);
 								} else if (obj.done && obj.data !== undefined) {
@@ -307,11 +333,12 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 					if (buffer.trim()) {
 						try {
 							const obj = JSON.parse(buffer.trim());
-							if (obj.done && obj.data !== undefined) {
+							if (obj.keepalive === true) {
+								// только keepalive в остатке — ничего не делаем
+							} else if (obj.done && obj.data !== undefined) {
 								deliverPdfResult(obj.data, obj.error ?? null);
 								return;
-							}
-							if (obj.data !== undefined || obj.error !== undefined) {
+							} else if (obj.data !== undefined || obj.error !== undefined) {
 								deliverPdfResult(obj.data ?? null, obj.error ?? null);
 								return;
 							}

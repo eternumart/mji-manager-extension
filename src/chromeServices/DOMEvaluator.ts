@@ -34,29 +34,31 @@ chrome.storage.local.get([STORAGE_KEY_API_BASE_URL], (result) => {
 
 pdfParserListener();
 
-// Порт "pdf-upload" держим открытым во время запроса, чтобы service worker не засыпал. Закрываем после доставки результата.
-// Периодические пинги по порту не дают Chrome перевести worker в неактивное состояние при долгом fetch.
-const PDF_KEEPALIVE_INTERVAL_MS = 20000; // 20 сек — меньше типичного таймаута неактивности SW
+// Keep-alive для долгого PDF: частые события и вызовы API, чтобы SW не ушёл в сон (таймер 30s сбрасывается при событии/API).
+const PDF_KEEPALIVE_INTERVAL_MS = 300;
+const PDF_KEEPALIVE_STORAGE_KEY = "mjiPdfKeepAlive";
 let pdfUploadPort: chrome.runtime.Port | null = null;
-let pdfUploadKeepAliveIntervalId: ReturnType<typeof setInterval> | null = null;
+let pdfKeepAliveIntervalId: ReturnType<typeof setInterval> | null = null;
 
 chrome.runtime.onConnect.addListener((port) => {
 	if (port.name === "pdf-upload") {
 		pdfUploadPort = port;
+		port.onMessage.addListener(() => {});
 		port.onDisconnect.addListener(() => {
 			pdfUploadPort = null;
-			if (pdfUploadKeepAliveIntervalId) {
-				clearInterval(pdfUploadKeepAliveIntervalId);
-				pdfUploadKeepAliveIntervalId = null;
+			if (pdfKeepAliveIntervalId) {
+				clearInterval(pdfKeepAliveIntervalId);
+				pdfKeepAliveIntervalId = null;
 			}
+			chrome.storage.local.remove(PDF_KEEPALIVE_STORAGE_KEY, () => {});
 		});
 	}
 });
 
-function closePdfUploadPort() {
-	if (pdfUploadKeepAliveIntervalId) {
-		clearInterval(pdfUploadKeepAliveIntervalId);
-		pdfUploadKeepAliveIntervalId = null;
+function stopPdfKeepAlive() {
+	if (pdfKeepAliveIntervalId) {
+		clearInterval(pdfKeepAliveIntervalId);
+		pdfKeepAliveIntervalId = null;
 	}
 	if (pdfUploadPort) {
 		try {
@@ -64,18 +66,27 @@ function closePdfUploadPort() {
 		} catch (_) {}
 		pdfUploadPort = null;
 	}
+	chrome.storage.local.remove(PDF_KEEPALIVE_STORAGE_KEY, () => {});
 }
 
-/** Запуск периодических пингов по порту, чтобы service worker не уходил в неактивен во время долгого запроса. */
-function startPdfUploadKeepAlive() {
-	if (pdfUploadKeepAliveIntervalId) return;
-	pdfUploadKeepAliveIntervalId = setInterval(() => {
+/** Одно "касание" — сброс таймера неактивности (вызов API). Вызывать из цикла чтения потока и из тика. */
+function pdfKeepAliveTouch() {
+	chrome.storage.local.set({ [PDF_KEEPALIVE_STORAGE_KEY]: Date.now() }, () => {});
+}
+
+function startPdfKeepAlive() {
+	if (pdfKeepAliveIntervalId) return;
+	const tick = () => {
 		if (pdfUploadPort) {
 			try {
-				pdfUploadPort.postMessage({ type: "keepalive" });
+				pdfUploadPort.postMessage({ type: "ping" });
 			} catch (_) {}
 		}
-	}, PDF_KEEPALIVE_INTERVAL_MS);
+		pdfKeepAliveTouch();
+		chrome.runtime.getPlatformInfo?.().then(() => {}).catch(() => {});
+	};
+	tick();
+	pdfKeepAliveIntervalId = setInterval(tick, PDF_KEEPALIVE_INTERVAL_MS);
 }
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -202,17 +213,18 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 		);
 		return;
 	}
-	// Загрузка PDF на бэкенд: парсинг в DeepSeek, ответ доставляем во фрейм с формой (попап может быть в iframe; отправитель — мост в main frame).
-	// Поддержка пошаговых статусов: бэкенд может вернуть NDJSON (каждая строка — JSON с { step, status } или { done, data }).
+	// Загрузка PDF: fetch в service worker; keep-alive (порт + пинг каждую 1 с) не даёт SW уйти в неактивен.
 	if (message.type === "UPLOAD_PDF") {
 		const tabId = sender.tab?.id;
-		startPdfUploadKeepAlive();
+		const frameId = sender.frameId ?? 0;
+		startPdfKeepAlive();
 
 		const deliverPdfStepUpdate = (stepIndex: number, status: "done" | "pending" | "error") => {
 			if (tabId != null) {
 				chrome.scripting.executeScript(
 					{
-						target: { tabId, allFrames: true },
+						target: { tabId, frameIds: [frameId] },
+						world: "MAIN",
 						func: (step: number, st: string) => {
 							if (typeof (window as any).handlePdfStepUpdate === "function") {
 								(window as any).handlePdfStepUpdate(step, st);
@@ -231,10 +243,12 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 		};
 
 		const deliverPdfResult = (data: any, error: string | null) => {
-			const runInAllFrames = () => {
+			stopPdfKeepAlive();
+			const runInFrame = () => {
 				chrome.scripting.executeScript(
 					{
-						target: { tabId: tabId!, allFrames: true },
+						target: { tabId: tabId!, frameIds: [frameId] },
+						world: "MAIN",
 						func: (payload: any, err: string | null) => {
 							if (err) {
 								if (typeof (window as any).handlePdfFailed === "function") {
@@ -252,34 +266,32 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 						if (chrome.runtime.lastError) {
 							console.warn("[MJI] executeScript handleParsedPdfResult:", chrome.runtime.lastError.message);
 						}
-						closePdfUploadPort();
 					}
 				);
 			};
 			if (tabId != null) {
-				runInAllFrames();
-			} else {
-				closePdfUploadPort();
+				runInFrame();
 			}
 			chrome.runtime.sendMessage({ type: "UPLOAD_COMPLETE", data, error }).catch(() => {});
 		};
 
 		try {
 			const apiBase = await getBaseUrl();
+			pdfKeepAliveTouch();
 			console.log(`PDF для анализа в DeepSeek: ${message.fileName} → ${apiBase}`);
 			if (message.useAI) {
 				console.log("Включено перефразирование дефектов через AI");
 			}
-			const fileBase64 = message.fileData;
 			const payload = {
 				fileName: message.fileName,
-				fileData: fileBase64,
+				fileData: message.fileData,
 				useAI: message.useAI,
 				address: message.address || "",
 				registrationNumber: message.registrationNumber || "",
 			};
 
-			const response = await fetch(`${apiBase}${apiConfig.routes.api.uploadPDF}`, {
+			pdfKeepAliveTouch();
+			const response = await fetch(`${apiBase.replace(/\/$/, "")}${apiConfig.routes.api.uploadPDF}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(payload),
@@ -297,9 +309,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 				return;
 			}
 
-			// Читаем ответ построчно: бэкенд может слать один JSON или NDJSON (каждая строка — { step, status } или в конце { done, data } / { data }).
 			const body = response.body;
 			if (body) {
+				pdfKeepAliveTouch();
 				const reader = body.getReader();
 				const decoder = new TextDecoder();
 				let buffer = "";
@@ -307,15 +319,17 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 					while (true) {
 						const { done, value } = await reader.read();
 						if (done) break;
+						pdfKeepAliveTouch();
 						buffer += decoder.decode(value, { stream: true });
 						const lines = buffer.split("\n");
 						buffer = lines.pop() || "";
 						for (const line of lines) {
 							const trimmed = line.trim();
 							if (!trimmed) continue;
+							pdfKeepAliveTouch();
 							try {
 								const obj = JSON.parse(trimmed);
-								if (obj.keepalive === true) continue; // пакет keep-alive от бэкенда — только чтобы соединение не засыпало
+								if (obj.keepalive === true) continue;
 								if (obj.step !== undefined && obj.status) {
 									deliverPdfStepUpdate(Number(obj.step), obj.status);
 								} else if (obj.done && obj.data !== undefined) {
@@ -325,16 +339,13 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 									deliverPdfResult(obj.data ?? null, obj.error ?? null);
 									return;
 								}
-							} catch (_) {
-								// не JSON — пропускаем строку
-							}
+							} catch (_) {}
 						}
 					}
 					if (buffer.trim()) {
 						try {
 							const obj = JSON.parse(buffer.trim());
 							if (obj.keepalive === true) {
-								// только keepalive в остатке — ничего не делаем
 							} else if (obj.done && obj.data !== undefined) {
 								deliverPdfResult(obj.data, obj.error ?? null);
 								return;
@@ -350,7 +361,6 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 				return;
 			}
 
-			// Обычный JSON (один объект)
 			const text = await response.text();
 			console.log(`[MJI] PDF ответ получен: status=${response.status}, длина=${text?.length ?? 0}`);
 			let result: any;
@@ -366,7 +376,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 		} catch (error: any) {
 			console.error("Ошибка загрузки PDF:", error);
 			deliverPdfResult(null, error?.message ?? "Ошибка загрузки");
-			chrome.runtime.sendMessage({ type: "UPLOAD_FAILED", error: error.message }).catch(() => {});
+			chrome.runtime.sendMessage({ type: "UPLOAD_FAILED", error: error?.message }).catch(() => {});
 		}
 	}
 });

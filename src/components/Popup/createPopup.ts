@@ -195,11 +195,7 @@ export const createPopup = (currentPage: string) => {
 	};
 
 	// Ответы от background: перефразирование (AI), PDF и пошаговые статусы PDF. Связь через chrome.runtime или через мост (postMessage).
-	onBackgroundResponse((message: any) => {
-		if (message.type === "REPHRASE_DEFECTS_BLOCK_RESPONSE") {
-			(window as any).handleRephraseResponse?.(message.data, message.error ?? null);
-			return;
-		}
+	const handlePdfMessage = (message: any) => {
 		if (message.type === "PDF_STEP_UPDATE" && message.step !== undefined && message.status) {
 			updatePdfStep(Number(message.step), message.status);
 			return;
@@ -210,13 +206,30 @@ export const createPopup = (currentPage: string) => {
 				hidePdfSteps(window.appVariables.loaderPDF, "Ошибка: " + (message.error || "загрузка не удалась"));
 			} else if (message.data && typeof (window as any).handleParsedPdfResult === "function") {
 				(window as any).handleParsedPdfResult(message.data);
+			} else if (!message.error && !message.data && window.appVariables?.loaderPDF) {
+				hidePdfSteps(window.appVariables.loaderPDF, "Нет данных в ответе.");
 			}
 		}
 		if (message.type === "UPLOAD_FAILED" && window.appVariables?.loaderPDF) {
 			updatePdfStep(1, "error");
 			hidePdfSteps(window.appVariables.loaderPDF, "Ошибка: " + (message.error || "загрузка не удалась"));
 		}
+	};
+
+	onBackgroundResponse((message: any) => {
+		if (message.type === "REPHRASE_DEFECTS_BLOCK_RESPONSE") {
+			(window as any).handleRephraseResponse?.(message.data, message.error ?? null);
+			return;
+		}
+		handlePdfMessage(message);
 	});
+
+	// Дублирование: мост шлёт CustomEvent MJI_PDF_UPDATE (доставка от offscreen при спящем SW)
+	window.addEventListener("MJI_PDF_UPDATE", ((ev: CustomEvent) => {
+		if (ev?.detail && (ev.detail.type === "PDF_STEP_UPDATE" || ev.detail.type === "UPLOAD_COMPLETE" || ev.detail.type === "UPLOAD_FAILED")) {
+			handlePdfMessage(ev.detail);
+		}
+	}) as EventListener);
 
 	// Пошаговые статусы PDF: бэкенд шлёт NDJSON с { step, status }, background вызывает через executeScript.
 	(window as any).handlePdfStepUpdate = function (stepIndex: number, status: "done" | "pending" | "error") {

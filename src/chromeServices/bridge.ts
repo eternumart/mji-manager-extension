@@ -1,10 +1,6 @@
 /**
- * Content script-мост между попапом (целевая страница) и background расширения.
- * Инжектируется во все фреймы (all_frames: true), чтобы работало и когда попап в iframe:
- * запрос от попапа приходит в window того же фрейма, ответ уходит в тот же window.
- * Попап может не иметь доступа к chrome.* (контекст страницы), с сайта нельзя делать fetch из-за CORS.
- * Запросы: попап -> window.postMessage -> bridge -> chrome.runtime.sendMessage -> background.
- * Ответы: background -> chrome.runtime.sendMessage -> bridge -> window.postMessage -> попап.
+ * Content script-мост между попапом и background.
+ * Для UPLOAD_PDF сначала открываем порт "pdf-upload" (keep-alive), затем шлём запрос в SW — SW не уходит в неактивен за счёт пинг/понг по порту каждую 1 с.
  */
 
 const MJI_EXTENSION_REQUEST = "MJI_EXTENSION_REQUEST";
@@ -18,18 +14,20 @@ function isFromPage(ev: MessageEvent): boolean {
 	}
 }
 
-// Запросы от страницы/попапа — пересылаем в background.
-// Для UPLOAD_PDF держим порт открытым, чтобы service worker не засыпал во время долгого запроса.
+// Запросы от страницы/попапа
 window.addEventListener("message", (ev: MessageEvent) => {
 	if (!isFromPage(ev)) return;
 	const payload = ev.data.payload;
 	const isPdfUpload = (payload as any)?.type === "UPLOAD_PDF";
-	let keepAlivePort: chrome.runtime.Port | null = null;
+	let pdfPort: chrome.runtime.Port | null = null;
 	if (isPdfUpload) {
-		keepAlivePort = chrome.runtime.connect({ name: "pdf-upload" });
+		pdfPort = chrome.runtime.connect({ name: "pdf-upload" });
+		pdfPort.onMessage.addListener((msg: { type?: string }) => {
+			if (msg?.type === "ping" && pdfPort) pdfPort.postMessage({ type: "pong" });
+		});
 	}
 	chrome.runtime.sendMessage(payload).catch((err) => {
-		if (keepAlivePort) keepAlivePort.disconnect();
+		if (pdfPort) pdfPort.disconnect();
 		console.warn("[MJI bridge] sendMessage error:", err);
 		window.postMessage(
 			{
@@ -39,10 +37,9 @@ window.addEventListener("message", (ev: MessageEvent) => {
 			"*"
 		);
 	});
-	// Порт закроет background после доставки результата (onConnect в DOMEvaluator).
 });
 
-// Ответы от background — пересылаем на страницу (попап без доступа к chrome получит через window message)
+// Ответы от background — пересылаем на страницу: postMessage + CustomEvent (попап может быть в iframe)
 chrome.runtime.onMessage.addListener((message: any) => {
 	const forwardTypes = [
 		"REPHRASE_DEFECTS_BLOCK_RESPONSE",
@@ -52,6 +49,9 @@ chrome.runtime.onMessage.addListener((message: any) => {
 	];
 	if (message && forwardTypes.includes(message.type)) {
 		window.postMessage({ type: MJI_EXTENSION_RESPONSE, payload: message }, "*");
+		try {
+			document.dispatchEvent(new CustomEvent("MJI_PDF_UPDATE", { detail: message }));
+		} catch (_) {}
 	}
 });
 

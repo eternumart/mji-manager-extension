@@ -17,15 +17,21 @@ function hasChromeRuntime(): boolean {
 
 /**
  * Отправить сообщение в background. Если есть chrome.runtime — напрямую, иначе через postMessage (подхватит мост).
+ * frameId из appVariables подмешивается, чтобы background доставлял ответы в правильный фрейм (попап может быть в iframe).
  */
 export function sendToBackground(message: object): void {
+	const payload = { ...message } as Record<string, unknown>;
+	const frameId = (window as any).appVariables?.frameId;
+	if (frameId !== undefined && frameId !== null) {
+		payload.frameId = frameId;
+	}
 	if (hasChromeRuntime()) {
-		(window as any).chrome.runtime.sendMessage(message).catch((err: unknown) => {
+		(window as any).chrome.runtime.sendMessage(payload).catch((err: unknown) => {
 			console.warn("[MJI] sendToBackground error:", err);
 		});
 		return;
 	}
-	window.postMessage({ type: MJI_EXTENSION_REQUEST, payload: message }, "*");
+	window.postMessage({ type: MJI_EXTENSION_REQUEST, payload }, "*");
 }
 
 /**

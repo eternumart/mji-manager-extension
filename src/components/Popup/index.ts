@@ -6,10 +6,10 @@ import { setRatings } from "./setRatings";
 // Лог в консоли целевой страницы — подтверждение, что скрипт инжектирован
 console.log("[MJI] popup.js загружен на страницу");
 
-export const runApp = (currentFioValue: string, login: string, loginIsPossible: Boolean, launchStatus: Boolean, appData: any) => {
-	console.log("[MJI] runApp вызван", { login, hasAppData: !!appData, hasAppLayout: !!appData?.appLayout });
+export const runApp = (currentFioValue: string, login: string, loginIsPossible: Boolean, launchStatus: Boolean, appData: any, frameId?: number) => {
+	console.log("[MJI] runApp вызван", { login, hasAppData: !!appData, hasAppLayout: !!appData?.appLayout, frameId });
 
-	const launchApp = (currentFioValue: string, login: string, loginIsPossible: Boolean, launchStatus: Boolean, appDataPayload: any) => {
+	const launchApp = (currentFioValue: string, login: string, loginIsPossible: Boolean, launchStatus: Boolean, appDataPayload: any, frameIdForPopup?: number) => {
 		console.log("[MJI] launchApp (внутренняя) старт");
 		interface IAppData {
 			[key: string]: any;
@@ -40,6 +40,7 @@ export const runApp = (currentFioValue: string, login: string, loginIsPossible: 
 
 		window.appData = appDataPayload as IAppData;
 		window.appVariables = appVariables;
+		appVariables.frameId = frameIdForPopup ?? 0;
 		window.resultsDefectsInputs = resultsDefectsInputs;
 		window.representativesInputs = representativesInputs;
 		window.allRatesPercentsInputs = allRatesPercentsInputs;
@@ -111,7 +112,7 @@ export const runApp = (currentFioValue: string, login: string, loginIsPossible: 
 			setRatings();
 		}
 	};
-	launchApp(currentFioValue, login, loginIsPossible, launchStatus, appData);
+	launchApp(currentFioValue, login, loginIsPossible, launchStatus, appData, frameId);
 };
 
 window.runApp = runApp;

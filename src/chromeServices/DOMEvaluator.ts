@@ -34,11 +34,63 @@ chrome.storage.local.get([STORAGE_KEY_API_BASE_URL], (result) => {
 
 pdfParserListener();
 
+// webNavigation будит SW при навигации на целевом домене (в отличие от webRequest). Регистрируем один раз при загрузке.
+const WEBNAV_TARGET_HOST = "185.173.2.132";
+if (typeof chrome !== "undefined" && chrome.webNavigation?.onBeforeNavigate) {
+	chrome.webNavigation.onBeforeNavigate.addListener(
+		() => {
+			// No-op: само событие будит service worker
+		},
+		{ url: [{ hostContains: WEBNAV_TARGET_HOST }] }
+	);
+}
+
 // Keep-alive для долгого PDF: частые события и вызовы API, чтобы SW не ушёл в сон (таймер 30s сбрасывается при событии/API).
 const PDF_KEEPALIVE_INTERVAL_MS = 300;
 const PDF_KEEPALIVE_STORAGE_KEY = "mjiPdfKeepAlive";
 let pdfUploadPort: chrome.runtime.Port | null = null;
 let pdfKeepAliveIntervalId: ReturnType<typeof setInterval> | null = null;
+
+// WebSocket keepalive (Chrome 116+): обмен сообщениями раз в 25 сек не даёт SW засыпать при долгих запросах (PDF, rephrase).
+const WS_KEEPALIVE_INTERVAL_MS = 25000;
+const WS_ECHO_URL = "wss://echo.websocket.org";
+let wsKeepaliveSocket: WebSocket | null = null;
+let wsKeepaliveIntervalId: ReturnType<typeof setInterval> | null = null;
+
+function startWsKeepalive() {
+	if (wsKeepaliveIntervalId != null) return;
+	try {
+		const ws = new WebSocket(WS_ECHO_URL);
+		wsKeepaliveSocket = ws;
+		ws.onopen = () => {
+			wsKeepaliveIntervalId = setInterval(() => {
+				if (ws.readyState === WebSocket.OPEN) {
+					try {
+						ws.send(JSON.stringify({ ping: Date.now() }));
+					} catch (_) {}
+				}
+			}, WS_KEEPALIVE_INTERVAL_MS);
+		};
+		ws.onerror = ws.onclose = () => {
+			stopWsKeepalive();
+		};
+	} catch (_) {
+		// Echo-сервер недоступен — продолжаем без WS, опираемся на порт + стрим
+	}
+}
+
+function stopWsKeepalive() {
+	if (wsKeepaliveIntervalId != null) {
+		clearInterval(wsKeepaliveIntervalId);
+		wsKeepaliveIntervalId = null;
+	}
+	if (wsKeepaliveSocket != null) {
+		try {
+			wsKeepaliveSocket.close();
+		} catch (_) {}
+		wsKeepaliveSocket = null;
+	}
+}
 
 chrome.runtime.onConnect.addListener((port) => {
 	if (port.name === "pdf-upload") {
@@ -91,11 +143,13 @@ function startPdfKeepAlive() {
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 	if (message.type === "REPHRASE_DEFECTS_BLOCK") {
-		const REPHRASE_TIMEOUT_MS = 120000; // 2 минуты — перефразирование может долго выполняться
+		const REPHRASE_TIMEOUT_MS = 600000; // 10 мин — запросы дипсика часто висят 5–7 мин
 		const tabId = sender.tab?.id;
-		const frameId = sender.frameId ?? 0;
+		const frameId = message.frameId ?? sender.frameId ?? 0;
 
+		startWsKeepalive();
 		const deliverRephraseResponse = (data: any, error: string | null) => {
+			stopWsKeepalive();
 			// Доставляем ответ в тот же таб/фрейм, откуда пришёл запрос (попап может быть в iframe — sendMessage туда не доходит)
 			if (tabId != null) {
 				chrome.scripting.executeScript(
@@ -143,6 +197,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 			const result = await response.json();
 			deliverRephraseResponse(result.success ? result.data : null, result.error ?? result.message ?? null);
 		} catch (error: any) {
+			stopWsKeepalive();
 			deliverRephraseResponse(null, error?.message || String(error));
 		}
 		return;
@@ -173,14 +228,14 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 						chrome.scripting.executeScript(
 							{
 								target: { tabId, frameIds: [frameId] },
-								func: (currentFio: string, login: string, loginIsPossible: boolean, launchStatus: boolean, appData: unknown) => {
+								func: (currentFio: string, login: string, loginIsPossible: boolean, launchStatus: boolean, appData: unknown, frameIdForPopup: number) => {
 									if (typeof (window as any).runApp === "function") {
-										(window as any).runApp(currentFio, login, loginIsPossible, launchStatus, appData);
+										(window as any).runApp(currentFio, login, loginIsPossible, launchStatus, appData, frameIdForPopup);
 									} else {
 										console.error("runApp не найден на странице");
 									}
 								},
-								args: [data.currentFio, data.currentLogin, data.loginIsPossible, false, data.appData],
+								args: [data.currentFio, data.currentLogin, data.loginIsPossible, false, data.appData, frameId],
 							},
 							() => {
 								if (chrome.runtime.lastError) {
@@ -213,18 +268,18 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 		);
 		return;
 	}
-	// Загрузка PDF: fetch в service worker; keep-alive (порт + пинг каждую 1 с) не даёт SW уйти в неактивен.
+	// Загрузка PDF: fetch в service worker; keep-alive (порт + пинг + WebSocket раз в 25 с) не даёт SW уйти в сон.
 	if (message.type === "UPLOAD_PDF") {
 		const tabId = sender.tab?.id;
-		const frameId = sender.frameId ?? 0;
+		const frameId = message.frameId ?? sender.frameId ?? 0;
 		startPdfKeepAlive();
+		startWsKeepalive();
 
 		const deliverPdfStepUpdate = (stepIndex: number, status: "done" | "pending" | "error") => {
 			if (tabId != null) {
 				chrome.scripting.executeScript(
 					{
 						target: { tabId, frameIds: [frameId] },
-						world: "MAIN",
 						func: (step: number, st: string) => {
 							if (typeof (window as any).handlePdfStepUpdate === "function") {
 								(window as any).handlePdfStepUpdate(step, st);
@@ -244,11 +299,11 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
 		const deliverPdfResult = (data: any, error: string | null) => {
 			stopPdfKeepAlive();
+			stopWsKeepalive();
 			const runInFrame = () => {
 				chrome.scripting.executeScript(
 					{
 						target: { tabId: tabId!, frameIds: [frameId] },
-						world: "MAIN",
 						func: (payload: any, err: string | null) => {
 							if (err) {
 								if (typeof (window as any).handlePdfFailed === "function") {
@@ -342,18 +397,23 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 							} catch (_) {}
 						}
 					}
+					// Остаток после последнего read: может быть несколько строк, если сервер отдал всё одним чанком
 					if (buffer.trim()) {
-						try {
-							const obj = JSON.parse(buffer.trim());
-							if (obj.keepalive === true) {
-							} else if (obj.done && obj.data !== undefined) {
-								deliverPdfResult(obj.data, obj.error ?? null);
-								return;
-							} else if (obj.data !== undefined || obj.error !== undefined) {
-								deliverPdfResult(obj.data ?? null, obj.error ?? null);
-								return;
-							}
-						} catch (_) {}
+						const lastLines = buffer.split("\n");
+						for (const line of lastLines) {
+							const trimmed = line.trim();
+							if (!trimmed) continue;
+							try {
+								const obj = JSON.parse(trimmed);
+								if (obj.keepalive === true) continue;
+								if (obj.step !== undefined && obj.status) {
+									deliverPdfStepUpdate(Number(obj.step), obj.status);
+								} else if (obj.done && obj.data !== undefined || obj.data !== undefined || obj.error !== undefined) {
+									deliverPdfResult(obj.data ?? null, obj.error ?? null);
+									return;
+								}
+							} catch (_) {}
+						}
 					}
 				} finally {
 					reader.releaseLock();
@@ -375,6 +435,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 			deliverPdfResult(parsedData, result?.error ?? null);
 		} catch (error: any) {
 			console.error("Ошибка загрузки PDF:", error);
+			stopWsKeepalive();
 			deliverPdfResult(null, error?.message ?? "Ошибка загрузки");
 			chrome.runtime.sendMessage({ type: "UPLOAD_FAILED", error: error?.message }).catch(() => {});
 		}

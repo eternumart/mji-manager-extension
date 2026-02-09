@@ -52,13 +52,15 @@ export const setRatings = () => {
     }
 
     function checkRatePercent(value: any, inputType: any, input: any, siblingInput: any) {
+        if (value == null || value === "-") return;
         let rowName, validPercent, conditions, rate, percentToValidRateIsEqual;
         const groupName = input.closest(".groupBorder").querySelector("legend").textContent;
 
         if (inputType === "Percent") {
             rowName = input.parentElement.parentElement.firstElementChild.nextElementSibling.querySelector("span").textContent;
             const valueToNumber = Number(value);
-            conditions = ratesData[groupName][rowName];
+            conditions = ratesData?.[groupName]?.[rowName];
+            if (!conditions) return;
 
             if (window.appData.availableFunctions.algorythms) {
                 for (let ocenka in conditions) {
@@ -101,7 +103,8 @@ export const setRatings = () => {
         }
         if (inputType === "Ocenka") {
             rowName = input.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstElementChild.nextElementSibling.querySelector("span").textContent;
-            conditions = ratesData[groupName][rowName];
+            conditions = ratesData?.[groupName]?.[rowName];
+            if (!conditions) return;
             const validRatesArr = conditions[value];
             if (typeof validRatesArr == "string") {
                 return;
